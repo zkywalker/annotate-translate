@@ -1,5 +1,21 @@
 # 🐛 快速调试参考
 
+## ⚠️ 最重要的提示
+
+**遇到 "Receiving end does not exist" 错误？**
+
+**解决方法（三步走）：**
+1. 🔄 重新加载插件：`chrome://extensions/` → 点击刷新图标
+2. 🔄 刷新测试页面：按 `F5` 或 `Ctrl+R`
+3. ✅ 再次测试功能
+
+**原因说明：**
+- Content Script 只会注入到**新打开或刷新后**的页面
+- 如果页面在插件加载前就打开了，必须刷新页面
+- 现在插件会自动检测并注入，但刷新页面是最可靠的方式
+
+---
+
 ## 问题：右键Annotate功能不添加标注
 
 ### ✅ 已修复的问题
@@ -104,7 +120,8 @@
 | 菜单点击无反应 | Service Worker休眠 | 查看Service Worker日志 |
 | 没有prompt对话框 | Content Script未接收消息 | 刷新测试页面 |
 | 标注没显示 | CSS未加载或DOM操作失败 | 检查Elements和Console |
-| "Receiving end does not exist" | Content Script未注入 | 刷新页面 |
+| **"Receiving end does not exist"** | **Content Script未注入** | **刷新页面（按F5）** |
+| Content Script未注入到已打开页面 | 页面在插件安装前已打开 | 必须刷新页面 |
 
 ---
 

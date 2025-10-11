@@ -16,27 +16,46 @@ chrome.runtime.onInstalled.addListener((details) => {
     createContextMenus();
   } else if (details.reason === 'update') {
     console.log('Annotate Translate extension updated');
+    createContextMenus();
   }
+});
+
+// Create context menus on startup as well
+chrome.runtime.onStartup.addListener(() => {
+  console.log('Annotate Translate extension started');
+  createContextMenus();
 });
 
 // Create context menu items
 function createContextMenus() {
-  chrome.contextMenus.create({
-    id: 'translate-text',
-    title: 'Translate "%s"',
-    contexts: ['selection']
-  });
+  // Remove existing menus first to avoid duplicates
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'translate-text',
+      title: 'Translate "%s"',
+      contexts: ['selection']
+    });
 
-  chrome.contextMenus.create({
-    id: 'annotate-text',
-    title: 'Annotate "%s"',
-    contexts: ['selection']
+    chrome.contextMenus.create({
+      id: 'annotate-text',
+      title: 'Annotate "%s"',
+      contexts: ['selection']
+    });
+    console.log('[Annotate-Translate BG] Context menus created');
   });
 }
 
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   console.log('[Annotate-Translate BG] Context menu clicked:', info.menuItemId, 'Text:', info.selectionText);
+  
+  // Ensure content script is injected before sending message
+  try {
+    await ensureContentScriptInjected(tab.id);
+  } catch (error) {
+    console.error('[Annotate-Translate BG] Failed to inject content script:', error);
+    return;
+  }
   
   if (info.menuItemId === 'translate-text') {
     chrome.tabs.sendMessage(tab.id, {
@@ -45,7 +64,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }, function(response) {
       // Handle potential errors when content script is not available
       if (chrome.runtime.lastError) {
-        console.log('Could not send translate message:', chrome.runtime.lastError.message);
+        console.error('[Annotate-Translate BG] Could not send translate message:', chrome.runtime.lastError.message);
       } else {
         console.log('[Annotate-Translate BG] Translate message sent successfully');
       }
@@ -57,13 +76,44 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }, function(response) {
       // Handle potential errors when content script is not available
       if (chrome.runtime.lastError) {
-        console.log('Could not send annotate message:', chrome.runtime.lastError.message);
+        console.error('[Annotate-Translate BG] Could not send annotate message:', chrome.runtime.lastError.message);
       } else {
         console.log('[Annotate-Translate BG] Annotate message sent successfully');
       }
     });
   }
 });
+
+// Ensure content script is injected into the tab
+async function ensureContentScriptInjected(tabId) {
+  try {
+    // Try to ping the content script
+    const response = await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+    if (response && response.pong) {
+      console.log('[Annotate-Translate BG] Content script already injected');
+      return;
+    }
+  } catch (error) {
+    // Content script not injected, inject it now
+    console.log('[Annotate-Translate BG] Injecting content script...');
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content.js']
+      });
+      await chrome.scripting.insertCSS({
+        target: { tabId: tabId },
+        files: ['content.css']
+      });
+      console.log('[Annotate-Translate BG] Content script injected successfully');
+      // Wait a bit for the script to initialize
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (injectError) {
+      console.error('[Annotate-Translate BG] Failed to inject content script:', injectError);
+      throw injectError;
+    }
+  }
+}
 
 // Handle messages from content scripts or popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

@@ -114,21 +114,75 @@
         </ul>
     </div>
 
-    <div class="test-section" style="background-color: #e8f5e9;">
-        <h2>✅ 预期效果</h2>
+        <div class="test-section" style="background-color: #e8f5e9;">
+        <h2>✅ 预期效果演示</h2>
         <p class="test-text">
             正常情况下，标注应该显示在文字上方，类似这样的效果：
         </p>
-        <p style="font-size: 24px; margin: 20px 0;">
-            <ruby>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>短标注（不改变原文宽度）：</h3>
+            <ruby style="ruby-align: center;">
                 世界
-                <rt style="color: #1a73e8;">shì jiè</rt>
+                <rt style="color: #1a73e8; font-size: 0.5em;">world</rt>
             </ruby>
-            <ruby style="margin-left: 20px;">
-                Hello
-                <rt style="color: #1a73e8;">你好</rt>
+            的力量是
+            <ruby style="ruby-align: center;">
+                强大
+                <rt style="color: #1a73e8; font-size: 0.5em;">big</rt>
             </ruby>
-        </p>
+            的。
+        </div>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>长标注（标注比原文长）：</h3>
+            This is a 
+            <ruby style="ruby-align: center;">
+                oauth
+                <rt style="color: #1a73e8; font-size: 0.5em;">一个特殊的 oauth</rt>
+            </ruby>
+            system.
+        </div>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>中文拼音标注：</h3>
+            <ruby style="ruby-align: center;">
+                验证
+                <rt style="color: #1a73e8; font-size: 0.5em;">yàn zhèng</rt>
+            </ruby>
+            这个
+            <ruby style="ruby-align: center;">
+                功能
+                <rt style="color: #1a73e8; font-size: 0.5em;">gōng néng</rt>
+            </ruby>
+            是否正常。
+        </div>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>英文翻译标注：</h3>
+            The 
+            <ruby style="ruby-align: center;">
+                authentication
+                <rt style="color: #1a73e8; font-size: 0.5em;">认证</rt>
+            </ruby>
+            process is 
+            <ruby style="ruby-align: center;">
+                secure
+                <rt style="color: #1a73e8; font-size: 0.5em;">安全的</rt>
+            </ruby>
+            .
+        </div>
+    </div>
+
+    <div class="instructions" style="background-color: #fff3e0; border-left-color: #ff9800;">
+        <h3>🔍 调试提示：</h3>
+        <ul>
+            <li>查看 Console 中的日志输出，日志前缀为 <code>[Annotate-Translate]</code></li>
+            <li>如果没有看到右键菜单，检查插件是否已加载</li>
+            <li>如果标注没有显示，打开 Elements 标签搜索 <code>ruby.annotate-translate-ruby</code></li>
+            <li>每次修改代码后记得重新加载插件并刷新此页面</li>
+            <li><strong>注意观察：</strong>标注应该居中对齐，短标注不应该改变原文宽度</li>
+        </ul>
     </div>
 
     <script>

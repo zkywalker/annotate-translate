@@ -12,6 +12,8 @@ let annotations = new Map();
 init();
 
 function init() {
+  console.log('[Annotate-Translate] Content script loaded on:', window.location.href);
+  
   // Load settings from storage
   chrome.storage.sync.get({
     enableTranslate: true,
@@ -19,6 +21,7 @@ function init() {
     targetLanguage: 'en'
   }, function(items) {
     settings = items;
+    console.log('[Annotate-Translate] Settings loaded:', settings);
   });
 
   // Listen for text selection
@@ -236,7 +239,10 @@ function saveAnnotation(baseText, annotationText) {
 function handleMessage(request, sender, sendResponse) {
   console.log('[Annotate-Translate] Received message:', request);
   
-  if (request.action === 'updateSettings') {
+  if (request.action === 'ping') {
+    // Respond to ping to confirm content script is loaded
+    sendResponse({pong: true});
+  } else if (request.action === 'updateSettings') {
     settings = request.settings;
     sendResponse({success: true});
   } else if (request.action === 'clearAnnotations') {

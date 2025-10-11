@@ -58,22 +58,38 @@
 
 /* Ruby annotation styles */
 ruby.annotate-translate-ruby {
+  /* 使用 ruby 显示模式，让浏览器原生处理对齐 */
+  ruby-align: center;
   cursor: pointer;
   position: relative;
-  display: inline-block;
+  /* 不使用 inline-block，使用默认的 ruby 显示方式 */
+  display: ruby;
+  /* 保持原文本的正常宽度，不被标注撑开 */
+  white-space: nowrap;
 }
 
 ruby.annotate-translate-ruby rt.annotate-translate-rt {
-  font-size: 0.6em;
+  /* 标注文本样式 */
+  font-size: 0.5em;
   color: #1a73e8;
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.2;
   user-select: none;
+  /* 使用 ruby-text 显示，确保居中对齐 */
+  display: ruby-text;
+  ruby-position: over;
+  /* 标注文本居中对齐 */
+  text-align: center;
+  /* 防止标注文本换行 */
+  white-space: nowrap;
+  /* 如果标注比原文长，允许溢出显示 */
+  overflow: visible;
 }
 
 ruby.annotate-translate-ruby:hover {
   background-color: #e3f2fd;
   border-radius: 2px;
+  padding: 0 2px;
 }
 
 ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
