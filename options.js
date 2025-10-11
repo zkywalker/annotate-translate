@@ -21,6 +21,9 @@ const DEFAULT_SETTINGS = {
   maxExamples: 3,
   autoCloseDelay: 10,
   
+  // Annotation settings
+  showPhoneticInAnnotation: true,
+  
   // Performance settings
   enableCache: true,
   cacheSize: 100,
@@ -41,6 +44,7 @@ const elements = {
   showExamples: document.getElementById('showExamples'),
   maxExamples: document.getElementById('maxExamples'),
   autoCloseDelay: document.getElementById('autoCloseDelay'),
+  showPhoneticInAnnotation: document.getElementById('showPhoneticInAnnotation'),
   enableCache: document.getElementById('enableCache'),
   cacheSize: document.getElementById('cacheSize'),
   enableDebugMode: document.getElementById('enableDebugMode'),
@@ -95,6 +99,9 @@ function loadSettings() {
     elements.maxExamples.value = settings.maxExamples;
     elements.autoCloseDelay.value = settings.autoCloseDelay;
     
+    // Annotation settings
+    elements.showPhoneticInAnnotation.checked = settings.showPhoneticInAnnotation;
+    
     // Performance settings
     elements.enableCache.checked = settings.enableCache;
     elements.cacheSize.value = settings.cacheSize;
@@ -125,6 +132,9 @@ function saveSettings() {
     showExamples: elements.showExamples.checked,
     maxExamples: parseInt(elements.maxExamples.value, 10),
     autoCloseDelay: parseInt(elements.autoCloseDelay.value, 10),
+    
+    // Annotation settings
+    showPhoneticInAnnotation: elements.showPhoneticInAnnotation.checked,
     
     // Performance settings
     enableCache: elements.enableCache.checked,

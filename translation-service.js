@@ -18,6 +18,7 @@
  * @property {PhoneticInfo[]} [phonetics] - 读音信息数组（可选）
  * @property {Definition[]} [definitions] - 词义解释数组（可选）
  * @property {Example[]} [examples] - 例句数组（可选）
+ * @property {string} [annotationText] - 用于标注的文本（可能包含读音+翻译）
  * @property {string} [provider] - 翻译服务提供商名称
  * @property {number} timestamp - 时间戳
  */
@@ -108,18 +109,20 @@ class GoogleTranslateProvider extends TranslationProvider {
       
       // 这里使用公共API端点（无需API密钥，但有限制）
       // 实际生产环境中应该使用官方API
-      const url = 'https://translate.googleapis.com/translate_a/single?' + new URLSearchParams({
-        client: 'gtx',
-        sl: sourceLang,
-        tl: targetLang,
-        dt: 't',    // 翻译
-        dt: 'at',   // 备选翻译
-        dt: 'bd',   // 词典
-        dt: 'ex',   // 例句
-        dt: 'md',   // 词义
-        dt: 'rw',   // 相关词
-        q: text
-      });
+      // 注意: URLSearchParams 不支持同名参数，需要手动构建URL
+      const params = [
+        'client=gtx',
+        `sl=${sourceLang}`,
+        `tl=${targetLang}`,
+        'dt=t',     // 翻译
+        'dt=at',    // 备选翻译
+        'dt=bd',    // 词典
+        'dt=ex',    // 例句
+        'dt=md',    // 词义
+        'dt=rw',    // 相关词
+        `q=${encodeURIComponent(text)}`
+      ];
+      const url = 'https://translate.googleapis.com/translate_a/single?' + params.join('&');
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -345,6 +348,7 @@ class DebugTranslateProvider extends TranslationProvider {
   constructor(config = {}) {
     super('Debug Provider', config);
     this.delay = config.delay || 500; // 模拟API延迟
+    this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false; // 默认在标注中显示读音
   }
 
   async translate(text, targetLang, sourceLang = 'auto') {
@@ -454,10 +458,10 @@ class DebugTranslateProvider extends TranslationProvider {
     // 查找测试数据
     let data = testData[textLower]?.[targetLang];
     
-    // 如果没有预定义数据，生成默认数据
+    // 如果没有预定义数据，生成简单占位数据
     if (!data) {
       data = {
-        translation: `[DEBUG] Translation of "${text}" to ${targetLang}`,
+        translation: `${text}_translated`,
         phonetics: [
           { text: '/debug/', type: 'debug' }
         ],
@@ -470,7 +474,7 @@ class DebugTranslateProvider extends TranslationProvider {
       };
     }
 
-    return {
+    const result = {
       originalText: text,
       translatedText: data.translation,
       sourceLang: sourceLang,
@@ -481,6 +485,16 @@ class DebugTranslateProvider extends TranslationProvider {
       provider: this.name,
       timestamp: Date.now()
     };
+
+    // 如果配置为在标注中显示读音，且有读音信息，将读音添加到翻译文本中
+    if (this.showPhoneticInAnnotation && result.phonetics.length > 0) {
+      const phoneticText = result.phonetics[0].text;
+      result.annotationText = `${phoneticText} ${result.translatedText}`;
+    } else {
+      result.annotationText = result.translatedText;
+    }
+
+    return result;
   }
 
   async detectLanguage(text) {

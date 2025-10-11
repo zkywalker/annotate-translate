@@ -46,6 +46,7 @@ function init() {
     showDefinitions: true,
     showExamples: true,
     maxExamples: 3,
+    showPhoneticInAnnotation: true,
     enableCache: true,
     cacheSize: 100,
     debugMode: false,
@@ -97,6 +98,15 @@ function applyTranslationSettings() {
   if (settings.translationProvider) {
     translationService.setActiveProvider(settings.translationProvider);
     console.log('[Annotate-Translate] Provider set to:', settings.translationProvider);
+    
+    // 如果是 Debug 提供商，更新其配置
+    if (settings.translationProvider === 'debug') {
+      const debugProvider = translationService.providers.get('debug');
+      if (debugProvider) {
+        debugProvider.showPhoneticInAnnotation = settings.showPhoneticInAnnotation !== false;
+        console.log('[Annotate-Translate] Debug provider configured - showPhoneticInAnnotation:', debugProvider.showPhoneticInAnnotation);
+      }
+    }
   }
   
   // 配置缓存
@@ -594,11 +604,14 @@ async function promptForBatchAnnotation(matches, text) {
           'auto'
         );
         
+        // 使用 annotationText（可能包含读音）或 translatedText 作为标注
+        const annotationText = result.annotationText || result.translatedText;
+        
         // 使用翻译结果标注所有匹配项
         dialog.remove();
-        annotateAllMatches(matches, text, result.translatedText);
+        annotateAllMatches(matches, text, annotationText);
         
-        console.log('[Annotate-Translate] Batch auto-annotated with:', result.translatedText);
+        console.log('[Annotate-Translate] Batch auto-annotated with:', annotationText);
         
       } catch (error) {
         console.error('[Annotate-Translate] Auto-translate failed:', error);
@@ -688,11 +701,13 @@ async function promptAndAnnotate(range, text, isBatch) {
           'auto'
         );
         
-        // 使用翻译结果作为标注
-        dialog.remove();
-        createRubyAnnotation(range, text, result.translatedText);
+        // 使用 annotationText（可能包含读音）或 translatedText 作为标注
+        const annotationText = result.annotationText || result.translatedText;
         
-        console.log('[Annotate-Translate] Auto-annotated with translation:', result.translatedText);
+        dialog.remove();
+        createRubyAnnotation(range, text, annotationText);
+        
+        console.log('[Annotate-Translate] Auto-annotated with:', annotationText);
         
       } catch (error) {
         console.error('[Annotate-Translate] Auto-translate failed:', error);
