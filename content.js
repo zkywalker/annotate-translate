@@ -352,21 +352,6 @@ async function translateText(text) {
 }
 
 // Annotate selected text
-function annotateText(text) {
-  hideContextMenu();
-  
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0);
-    
-    // Prompt user for annotation text
-    const annotation = prompt('Enter annotation text:', '');
-    if (annotation) {
-      createRubyAnnotation(range, text, annotation);
-    }
-  }
-}
-
 // Create ruby annotation for context menu action
 function annotateSelectedText(text) {
   console.log('[Annotate-Translate] Annotating selected text:', text);
@@ -378,7 +363,7 @@ function annotateSelectedText(text) {
       const selectedText = lastSelection.toString();
       if (selectedText === text) {
         console.log('[Annotate-Translate] Using saved range');
-        promptAndAnnotate(lastSelection, text, false);
+        promptAndAnnotate(lastSelection, text);
         return;
       } else {
         console.log('[Annotate-Translate] Saved range text mismatch:', selectedText, 'vs', text);
@@ -439,7 +424,7 @@ function findAndAnnotateText(text) {
     const range = document.createRange();
     range.setStart(match.node, match.index);
     range.setEnd(match.node, match.index + match.text.length);
-    promptAndAnnotate(range, text, false);
+    promptAndAnnotate(range, text);
   } else {
     // 多个匹配，询问用户
     promptForMultipleMatches(matches, text);
@@ -486,10 +471,9 @@ function promptForMultipleMatches(matches, text) {
       const range = document.createRange();
       range.setStart(match.node, match.index);
       range.setEnd(match.node, match.index + match.text.length);
-      promptAndAnnotate(range, text, false);
+      promptAndAnnotate(range, text);
     } else if (action === 'all') {
-      // 标注所有 - 提供自动翻译选项
-      dialog.remove();
+      // 标注所有
       promptForBatchAnnotation(matches, text);
     }
   });
@@ -538,196 +522,65 @@ function annotateAllMatches(matches, text, annotation) {
   }
 }
 
-// 批量标注提示（支持自动翻译）
+// 批量自动翻译标注
 async function promptForBatchAnnotation(matches, text) {
-  // 创建对话框
-  const dialog = document.createElement('div');
-  dialog.className = 'annotate-translate-dialog';
-  dialog.innerHTML = `
-    <div class="dialog-content">
-      <h3>Batch Annotate</h3>
-      <p>Annotate all <strong>${matches.length}</strong> occurrences of "<strong>${escapeHtml(text)}</strong>"</p>
-      <div class="dialog-buttons">
-        <button class="dialog-btn dialog-btn-primary" data-action="auto">
-          🤖 Auto Translate All
-        </button>
-        <button class="dialog-btn dialog-btn-secondary" data-action="manual">
-          ✏️ Enter Annotation Manually
-        </button>
-        <button class="dialog-btn dialog-btn-secondary" data-action="cancel">
-          Cancel
-        </button>
-      </div>
-    </div>
-    <div class="dialog-overlay"></div>
-  `;
-  
-  document.body.appendChild(dialog);
-  
-  // 处理按钮点击
-  dialog.addEventListener('click', async function(e) {
-    const btn = e.target.closest('.dialog-btn');
-    if (!btn) return;
-    
-    const action = btn.dataset.action;
-    
-    if (action === 'cancel') {
-      dialog.remove();
-      return;
+  try {
+    // 检查翻译服务
+    if (typeof translationService === 'undefined') {
+      throw new Error('Translation service not available');
     }
     
-    if (action === 'manual') {
-      // 手动输入
-      dialog.remove();
-      const annotation = prompt('Enter annotation for all ' + matches.length + ' occurrences of "' + text + '":', '');
-      if (annotation && annotation.trim()) {
-        annotateAllMatches(matches, text, annotation);
-      }
-      return;
-    }
+    console.log('[Annotate-Translate] Batch auto-annotating:', text, `(${matches.length} occurrences)`);
     
-    if (action === 'auto') {
-      // 自动翻译
-      btn.disabled = true;
-      btn.innerHTML = '<div class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></div> Translating...';
-      
-      try {
-        // 检查翻译服务
-        if (typeof translationService === 'undefined') {
-          throw new Error('Translation service not available');
-        }
-        
-        // 调用翻译服务
-        const result = await translationService.translate(
-          text,
-          settings.targetLanguage || 'zh-CN',
-          'auto'
-        );
-        
-        // 使用 annotationText（可能包含读音）或 translatedText 作为标注
-        const annotationText = result.annotationText || result.translatedText;
-        
-        // 使用翻译结果标注所有匹配项
-        dialog.remove();
-        annotateAllMatches(matches, text, annotationText);
-        
-        console.log('[Annotate-Translate] Batch auto-annotated with:', annotationText);
-        
-      } catch (error) {
-        console.error('[Annotate-Translate] Auto-translate failed:', error);
-        
-        // 显示错误并降级到手动输入
-        dialog.remove();
-        alert('Auto-translation failed: ' + error.message + '\n\nPlease enter annotation manually.');
-        
-        const annotation = prompt('Enter annotation for all ' + matches.length + ' occurrences of "' + text + '":', '');
-        if (annotation && annotation.trim()) {
-          annotateAllMatches(matches, text, annotation);
-        }
-      }
-    }
-  });
-  
-  // 点击遮罩层关闭
-  dialog.querySelector('.dialog-overlay').addEventListener('click', function() {
-    dialog.remove();
-  });
+    // 调用翻译服务
+    const result = await translationService.translate(
+      text,
+      settings.targetLanguage || 'zh-CN',
+      'auto'
+    );
+    
+    // 使用 annotationText（可能包含读音）或 translatedText 作为标注
+    const annotationText = result.annotationText || result.translatedText;
+    
+    // 使用翻译结果标注所有匹配项
+    annotateAllMatches(matches, text, annotationText);
+    
+    console.log('[Annotate-Translate] Batch auto-annotated with:', annotationText);
+    
+  } catch (error) {
+    console.error('[Annotate-Translate] Auto-translate failed:', error);
+    alert('Auto-translation failed: ' + error.message);
+  }
 }
 
-// 提示用户输入标注并执行（支持自动翻译）
-async function promptAndAnnotate(range, text, isBatch) {
-  // 创建一个自定义对话框，提供"自动翻译"和"手动输入"选项
-  const dialog = document.createElement('div');
-  dialog.className = 'annotate-translate-dialog';
-  dialog.innerHTML = `
-    <div class="dialog-content">
-      <h3>Annotate Text</h3>
-      <p>Text: <strong>${escapeHtml(text)}</strong></p>
-      <div class="dialog-buttons">
-        <button class="dialog-btn dialog-btn-primary" data-action="auto">
-          🤖 Auto Translate & Annotate
-        </button>
-        <button class="dialog-btn dialog-btn-secondary" data-action="manual">
-          ✏️ Enter Manually
-        </button>
-        <button class="dialog-btn dialog-btn-secondary" data-action="cancel">
-          Cancel
-        </button>
-      </div>
-    </div>
-    <div class="dialog-overlay"></div>
-  `;
-  
-  document.body.appendChild(dialog);
-  
-  // 处理按钮点击
-  dialog.addEventListener('click', async function(e) {
-    const btn = e.target.closest('.dialog-btn');
-    if (!btn) return;
-    
-    const action = btn.dataset.action;
-    
-    if (action === 'cancel') {
-      dialog.remove();
-      return;
+// 自动翻译并标注
+async function promptAndAnnotate(range, text) {
+  try {
+    // 检查翻译服务
+    if (typeof translationService === 'undefined') {
+      throw new Error('Translation service not available');
     }
     
-    if (action === 'manual') {
-      // 手动输入模式
-      dialog.remove();
-      const annotation = prompt('Enter annotation for "' + text + '":', '');
-      if (annotation && annotation.trim()) {
-        createRubyAnnotation(range, text, annotation);
-      }
-      return;
-    }
+    console.log('[Annotate-Translate] Auto-annotating:', text);
     
-    if (action === 'auto') {
-      // 自动翻译模式
-      // 显示加载状态
-      btn.disabled = true;
-      btn.innerHTML = '<div class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></div> Translating...';
-      
-      try {
-        // 检查翻译服务
-        if (typeof translationService === 'undefined') {
-          throw new Error('Translation service not available');
-        }
-        
-        // 调用翻译服务
-        const result = await translationService.translate(
-          text,
-          settings.targetLanguage || 'zh-CN',
-          'auto'
-        );
-        
-        // 使用 annotationText（可能包含读音）或 translatedText 作为标注
-        const annotationText = result.annotationText || result.translatedText;
-        
-        dialog.remove();
-        createRubyAnnotation(range, text, annotationText);
-        
-        console.log('[Annotate-Translate] Auto-annotated with:', annotationText);
-        
-      } catch (error) {
-        console.error('[Annotate-Translate] Auto-translate failed:', error);
-        
-        // 显示错误并降级到手动输入
-        dialog.remove();
-        alert('Auto-translation failed: ' + error.message + '\n\nPlease enter annotation manually.');
-        
-        const annotation = prompt('Enter annotation for "' + text + '":', '');
-        if (annotation && annotation.trim()) {
-          createRubyAnnotation(range, text, annotation);
-        }
-      }
-    }
-  });
-  
-  // 点击遮罩层关闭
-  dialog.querySelector('.dialog-overlay').addEventListener('click', function() {
-    dialog.remove();
-  });
+    // 调用翻译服务
+    const result = await translationService.translate(
+      text,
+      settings.targetLanguage || 'zh-CN',
+      'auto'
+    );
+    
+    // 使用 annotationText（可能包含读音）或 translatedText 作为标注
+    const annotationText = result.annotationText || result.translatedText;
+    
+    createRubyAnnotation(range, text, annotationText);
+    
+    console.log('[Annotate-Translate] Auto-annotated with:', annotationText);
+    
+  } catch (error) {
+    console.error('[Annotate-Translate] Auto-translate failed:', error);
+    alert('Auto-translation failed: ' + error.message);
+  }
 }
 
 // Create ruby tag annotation
