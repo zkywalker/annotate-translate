@@ -1,0 +1,57 @@
+/* Content Script Styles for Annotate Translate Extension */
+
+.annotate-translate-menu {
+  position: absolute;
+  z-index: 10000;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  display: flex;
+  gap: 4px;
+}
+
+.annotate-translate-menu .menu-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 3px;
+  background-color: #1a73e8;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.annotate-translate-menu .menu-button:hover {
+  background-color: #1557b0;
+}
+
+.annotate-translate-menu .menu-button:active {
+  transform: translateY(1px);
+}
+
+.annotate-translate-tooltip {
+  position: absolute;
+  z-index: 10001;
+  background-color: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  max-width: 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.annotate-translate-highlight {
+  background-color: #ffeb3b;
+  border-bottom: 2px solid #fbc02d;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.annotate-translate-highlight:hover {
+  background-color: #fdd835;
+}
