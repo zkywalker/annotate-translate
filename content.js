@@ -118,28 +118,75 @@ function annotateText(text) {
   const selection = window.getSelection();
   if (selection.rangeCount > 0) {
     const range = selection.getRangeAt(0);
-    const span = document.createElement('span');
-    span.className = 'annotate-translate-highlight';
-    span.setAttribute('data-annotation', text);
     
-    try {
-      range.surroundContents(span);
-      annotations.set(span, text);
-      
-      // Save annotation to storage
-      saveAnnotation(text);
-    } catch (e) {
-      console.error('Failed to annotate text:', e);
+    // Prompt user for annotation text
+    const annotation = prompt('Enter annotation text:', '');
+    if (annotation) {
+      createRubyAnnotation(range, text, annotation);
     }
   }
 }
 
+// Create ruby annotation for context menu action
+function annotateSelectedText(text) {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0 && selection.toString().trim() === text) {
+    const range = selection.getRangeAt(0);
+    
+    // Prompt user for annotation text
+    const annotation = prompt('Enter annotation for "' + text + '":', '');
+    if (annotation) {
+      createRubyAnnotation(range, text, annotation);
+    }
+  }
+}
+
+// Create ruby tag annotation
+function createRubyAnnotation(range, baseText, annotationText) {
+  try {
+    // Create ruby element structure
+    const ruby = document.createElement('ruby');
+    ruby.className = 'annotate-translate-ruby';
+    ruby.setAttribute('data-annotation', annotationText);
+    ruby.setAttribute('data-base-text', baseText);
+    
+    // Add base text
+    ruby.textContent = baseText;
+    
+    // Create rt (ruby text) element for annotation
+    const rt = document.createElement('rt');
+    rt.className = 'annotate-translate-rt';
+    rt.textContent = annotationText;
+    ruby.appendChild(rt);
+    
+    // Replace the selected text with the ruby element
+    range.deleteContents();
+    range.insertNode(ruby);
+    
+    // Store annotation
+    annotations.set(ruby, {
+      base: baseText,
+      annotation: annotationText
+    });
+    
+    // Save annotation to storage
+    saveAnnotation(baseText, annotationText);
+    
+    // Clear selection
+    window.getSelection().removeAllRanges();
+  } catch (e) {
+    console.error('Failed to create ruby annotation:', e);
+    alert('Failed to annotate text. Please try selecting the text again.');
+  }
+}
+
 // Save annotation to storage
-function saveAnnotation(text) {
+function saveAnnotation(baseText, annotationText) {
   chrome.storage.local.get({annotations: []}, function(result) {
     const annotations = result.annotations;
     annotations.push({
-      text: text,
+      baseText: baseText,
+      annotationText: annotationText || '',
       timestamp: Date.now(),
       url: window.location.href
     });
@@ -155,12 +202,21 @@ function handleMessage(request, sender, sendResponse) {
   } else if (request.action === 'clearAnnotations') {
     clearAllAnnotations();
     sendResponse({success: true});
+  } else if (request.action === 'annotate' && request.text) {
+    // Handle annotate action from context menu
+    annotateSelectedText(request.text);
+    sendResponse({success: true});
+  } else if (request.action === 'translate' && request.text) {
+    // Handle translate action from context menu
+    translateText(request.text);
+    sendResponse({success: true});
   }
   return true;
 }
 
 // Clear all annotations from the page
 function clearAllAnnotations() {
+  // Clear old style highlights
   const highlights = document.querySelectorAll('.annotate-translate-highlight');
   highlights.forEach(highlight => {
     const parent = highlight.parentNode;
@@ -169,6 +225,15 @@ function clearAllAnnotations() {
     }
     parent.removeChild(highlight);
   });
+  
+  // Clear ruby annotations
+  const rubyElements = document.querySelectorAll('ruby.annotate-translate-ruby');
+  rubyElements.forEach(ruby => {
+    const baseText = ruby.getAttribute('data-base-text') || ruby.textContent;
+    const textNode = document.createTextNode(baseText);
+    ruby.parentNode.replaceChild(textNode, ruby);
+  });
+  
   annotations.clear();
   
   // Clear from storage

@@ -55,3 +55,28 @@
 .annotate-translate-highlight:hover {
   background-color: #fdd835;
 }
+
+/* Ruby annotation styles */
+ruby.annotate-translate-ruby {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+ruby.annotate-translate-ruby rt.annotate-translate-rt {
+  font-size: 0.6em;
+  color: #1a73e8;
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+}
+
+ruby.annotate-translate-ruby:hover {
+  background-color: #e3f2fd;
+  border-radius: 2px;
+}
+
+ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
+  color: #1557b0;
+  font-weight: 600;
+}
