@@ -127,6 +127,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true; // Keep message channel open for async response
   }
+  
+  // Handle clear cache request from options page
+  if (request.action === 'clearCache') {
+    console.log('[Annotate-Translate BG] Clearing translation cache...');
+    
+    // Send message to all tabs to clear their caches
+    chrome.tabs.query({}, (tabs) => {
+      let clearedCount = 0;
+      tabs.forEach((tab) => {
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'clearCache'
+        }, (response) => {
+          if (!chrome.runtime.lastError && response && response.success) {
+            clearedCount++;
+          }
+        });
+      });
+      
+      // Wait a bit and respond
+      setTimeout(() => {
+        console.log(`[Annotate-Translate BG] Cache cleared in ${clearedCount} tabs`);
+        sendResponse({ success: true, count: clearedCount });
+      }, 100);
+    });
+    
+    return true; // Keep message channel open for async response
+  }
 });
 
 // Listen for tab updates to inject content script if needed
