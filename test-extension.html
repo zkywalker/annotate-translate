@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Translation Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: #1a73e8;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #5f6368;
+      margin-bottom: 30px;
+    }
+    
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #1a73e8;
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      color: #202124;
+      font-size: 18px;
+    }
+    
+    .test-text {
+      background-color: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      cursor: text;
+      user-select: text;
+    }
+    
+    .test-text:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .instructions {
+      background-color: #e8f0fe;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-left: 4px solid #1a73e8;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: #1a73e8;
+    }
+    
+    .instructions ol {
+      margin-bottom: 0;
+    }
+    
+    .instructions li {
+      margin-bottom: 8px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    
+    .badge-predefined {
+      background-color: #34a853;
+      color: white;
+    }
+    
+    .badge-auto {
+      background-color: #fbbc04;
+      color: #202124;
+    }
+    
+    .highlight {
+      background-color: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Translation Extension Test Page</h1>
+    <p class="subtitle">Select text below to test the translation feature</p>
+    
+    <div class="instructions">
+      <h3>📋 How to Test</h3>
+      <ol>
+        <li>Make sure the extension is loaded and translation is enabled</li>
+        <li>Select any text below (drag your mouse over it)</li>
+        <li>Click the <strong>"T"</strong> button that appears</li>
+        <li>See the translation card with phonetics, definitions, and examples</li>
+        <li>Click the 🔊 button to hear pronunciation (TTS)</li>
+      </ol>
+    </div>
+    
+    <div class="test-section">
+      <h2>
+        <span class="badge badge-predefined">✓ Predefined</span>
+        Test Word: "hello"
+      </h2>
+      <div class="test-text">
+        Select this word: <span class="highlight">hello</span>
+      </div>
+      <p><small>Expected: 你好, with US/UK phonetics, 3 definitions, 3 examples</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>
+        <span class="badge badge-predefined">✓ Predefined</span>
+        Test Word: "apple"
+      </h2>
+      <div class="test-text">
+        I like to eat a fresh <span class="highlight">apple</span> every day.
+      </div>
+      <p><small>Expected: 苹果, with phonetics, 3 definitions (fruit/tree/company), 2 examples</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>
+        <span class="badge badge-predefined">✓ Predefined</span>
+        Test Word: "world"
+      </h2>
+      <div class="test-text">
+        Welcome to the <span class="highlight">world</span> of programming!
+      </div>
+      <p><small>Expected: 世界, with phonetics, 2 definitions (earth/domain), 2 examples</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>
+        <span class="badge badge-auto">⚡ Auto-generated</span>
+        Test Word: "computer"
+      </h2>
+      <div class="test-text">
+        I use a <span class="highlight">computer</span> to write code.
+      </div>
+      <p><small>Expected: [DEBUG] Translation of "computer" to zh-CN (auto-generated structure)</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>
+        <span class="badge badge-auto">⚡ Auto-generated</span>
+        Test Word: "book"
+      </h2>
+      <div class="test-text">
+        Reading a good <span class="highlight">book</span> is always enjoyable.
+      </div>
+      <p><small>Expected: Auto-generated debug data with complete structure</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>Test Sentence (Long Text)</h2>
+      <div class="test-text">
+        <span class="highlight">The quick brown fox jumps over the lazy dog. This is a test sentence with more than 50 characters.</span>
+      </div>
+      <p><small>Expected: Simplified UI (translation + phonetics only)</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>Test Paragraph</h2>
+      <div class="test-text">
+        <span class="highlight">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</span>
+      </div>
+      <p><small>Expected: Simplified UI for long text</small></p>
+    </div>
+    
+    <div class="test-section">
+      <h2>Mixed Content Test</h2>
+      <div class="test-text">
+        <p>Hello everyone! Today we will learn about programming.</p>
+        <p>First, let's talk about the word "apple". An apple is a fruit.</p>
+        <p>The world is full of interesting things to discover.</p>
+        <p>Computers have changed the world dramatically.</p>
+      </div>
+      <p><small>Select individual words or phrases from the paragraphs above</small></p>
+    </div>
+    
+    <div class="instructions" style="background-color: #fef7f0; border-left-color: #fbbc04;">
+      <h3>🎯 What to Check</h3>
+      <ul style="list-style-type: none; padding-left: 0;">
+        <li>✅ Translation button ("T") appears after selection</li>
+        <li>✅ Loading spinner shows while translating</li>
+        <li>✅ Translation card displays after ~500ms</li>
+        <li>✅ Card shows: translation, phonetics, definitions, examples</li>
+        <li>✅ Audio button (🔊) is clickable</li>
+        <li>✅ Close button (×) works</li>
+        <li>✅ Click outside closes the card</li>
+        <li>✅ Cache works (second translation of same word is instant)</li>
+      </ul>
+    </div>
+    
+    <div class="instructions" style="background-color: #f0f4ff; border-left-color: #1a73e8;">
+      <h3>💡 Tips</h3>
+      <ul>
+        <li>Open DevTools (F12) to see console logs</li>
+        <li>Check settings page to configure provider and UI options</li>
+        <li>Try translating "hello" twice to test caching</li>
+        <li>Test both short words and long sentences</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script>
+    // Add some interactivity
+    document.querySelectorAll('.test-text').forEach(element => {
+      element.addEventListener('mouseenter', function() {
+        this.style.transition = 'all 0.2s';
+      });
+    });
+    
+    // Log page load
+    console.log('Translation test page loaded');
+    console.log('Ready to test! Select any text and click the T button.');
+  </script>
+</body>
+</html>

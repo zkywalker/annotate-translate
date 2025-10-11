@@ -478,11 +478,9 @@ function promptForMultipleMatches(matches, text) {
       range.setEnd(match.node, match.index + match.text.length);
       promptAndAnnotate(range, text, false);
     } else if (action === 'all') {
-      // 标注所有
-      const annotation = prompt('Enter annotation for all ' + matches.length + ' occurrences of "' + text + '":', '');
-      if (annotation && annotation.trim()) {
-        annotateAllMatches(matches, text, annotation);
-      }
+      // 标注所有 - 提供自动翻译选项
+      dialog.remove();
+      promptForBatchAnnotation(matches, text);
     }
   });
   
@@ -530,12 +528,191 @@ function annotateAllMatches(matches, text, annotation) {
   }
 }
 
-// 提示用户输入标注并执行
-function promptAndAnnotate(range, text, isBatch) {
-  const annotation = prompt('Enter annotation for "' + text + '":', '');
-  if (annotation && annotation.trim()) {
-    createRubyAnnotation(range, text, annotation);
-  }
+// 批量标注提示（支持自动翻译）
+async function promptForBatchAnnotation(matches, text) {
+  // 创建对话框
+  const dialog = document.createElement('div');
+  dialog.className = 'annotate-translate-dialog';
+  dialog.innerHTML = `
+    <div class="dialog-content">
+      <h3>Batch Annotate</h3>
+      <p>Annotate all <strong>${matches.length}</strong> occurrences of "<strong>${escapeHtml(text)}</strong>"</p>
+      <div class="dialog-buttons">
+        <button class="dialog-btn dialog-btn-primary" data-action="auto">
+          🤖 Auto Translate All
+        </button>
+        <button class="dialog-btn dialog-btn-secondary" data-action="manual">
+          ✏️ Enter Annotation Manually
+        </button>
+        <button class="dialog-btn dialog-btn-secondary" data-action="cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+    <div class="dialog-overlay"></div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  // 处理按钮点击
+  dialog.addEventListener('click', async function(e) {
+    const btn = e.target.closest('.dialog-btn');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    
+    if (action === 'cancel') {
+      dialog.remove();
+      return;
+    }
+    
+    if (action === 'manual') {
+      // 手动输入
+      dialog.remove();
+      const annotation = prompt('Enter annotation for all ' + matches.length + ' occurrences of "' + text + '":', '');
+      if (annotation && annotation.trim()) {
+        annotateAllMatches(matches, text, annotation);
+      }
+      return;
+    }
+    
+    if (action === 'auto') {
+      // 自动翻译
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></div> Translating...';
+      
+      try {
+        // 检查翻译服务
+        if (typeof translationService === 'undefined') {
+          throw new Error('Translation service not available');
+        }
+        
+        // 调用翻译服务
+        const result = await translationService.translate(
+          text,
+          settings.targetLanguage || 'zh-CN',
+          'auto'
+        );
+        
+        // 使用翻译结果标注所有匹配项
+        dialog.remove();
+        annotateAllMatches(matches, text, result.translatedText);
+        
+        console.log('[Annotate-Translate] Batch auto-annotated with:', result.translatedText);
+        
+      } catch (error) {
+        console.error('[Annotate-Translate] Auto-translate failed:', error);
+        
+        // 显示错误并降级到手动输入
+        dialog.remove();
+        alert('Auto-translation failed: ' + error.message + '\n\nPlease enter annotation manually.');
+        
+        const annotation = prompt('Enter annotation for all ' + matches.length + ' occurrences of "' + text + '":', '');
+        if (annotation && annotation.trim()) {
+          annotateAllMatches(matches, text, annotation);
+        }
+      }
+    }
+  });
+  
+  // 点击遮罩层关闭
+  dialog.querySelector('.dialog-overlay').addEventListener('click', function() {
+    dialog.remove();
+  });
+}
+
+// 提示用户输入标注并执行（支持自动翻译）
+async function promptAndAnnotate(range, text, isBatch) {
+  // 创建一个自定义对话框，提供"自动翻译"和"手动输入"选项
+  const dialog = document.createElement('div');
+  dialog.className = 'annotate-translate-dialog';
+  dialog.innerHTML = `
+    <div class="dialog-content">
+      <h3>Annotate Text</h3>
+      <p>Text: <strong>${escapeHtml(text)}</strong></p>
+      <div class="dialog-buttons">
+        <button class="dialog-btn dialog-btn-primary" data-action="auto">
+          🤖 Auto Translate & Annotate
+        </button>
+        <button class="dialog-btn dialog-btn-secondary" data-action="manual">
+          ✏️ Enter Manually
+        </button>
+        <button class="dialog-btn dialog-btn-secondary" data-action="cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+    <div class="dialog-overlay"></div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  // 处理按钮点击
+  dialog.addEventListener('click', async function(e) {
+    const btn = e.target.closest('.dialog-btn');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    
+    if (action === 'cancel') {
+      dialog.remove();
+      return;
+    }
+    
+    if (action === 'manual') {
+      // 手动输入模式
+      dialog.remove();
+      const annotation = prompt('Enter annotation for "' + text + '":', '');
+      if (annotation && annotation.trim()) {
+        createRubyAnnotation(range, text, annotation);
+      }
+      return;
+    }
+    
+    if (action === 'auto') {
+      // 自动翻译模式
+      // 显示加载状态
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></div> Translating...';
+      
+      try {
+        // 检查翻译服务
+        if (typeof translationService === 'undefined') {
+          throw new Error('Translation service not available');
+        }
+        
+        // 调用翻译服务
+        const result = await translationService.translate(
+          text,
+          settings.targetLanguage || 'zh-CN',
+          'auto'
+        );
+        
+        // 使用翻译结果作为标注
+        dialog.remove();
+        createRubyAnnotation(range, text, result.translatedText);
+        
+        console.log('[Annotate-Translate] Auto-annotated with translation:', result.translatedText);
+        
+      } catch (error) {
+        console.error('[Annotate-Translate] Auto-translate failed:', error);
+        
+        // 显示错误并降级到手动输入
+        dialog.remove();
+        alert('Auto-translation failed: ' + error.message + '\n\nPlease enter annotation manually.');
+        
+        const annotation = prompt('Enter annotation for "' + text + '":', '');
+        if (annotation && annotation.trim()) {
+          createRubyAnnotation(range, text, annotation);
+        }
+      }
+    }
+  });
+  
+  // 点击遮罩层关闭
+  dialog.querySelector('.dialog-overlay').addEventListener('click', function() {
+    dialog.remove();
+  });
 }
 
 // Create ruby tag annotation
