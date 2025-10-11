@@ -12,6 +12,10 @@
   gap: 2px;
   /* 添加淡入动画 */
   animation: menuFadeIn 0.15s ease-out;
+  /* 防止用户选中菜单内的文字 */
+  user-select: none;
+  /* 防止点击事件穿透 */
+  pointer-events: auto;
 }
 
 @keyframes menuFadeIn {

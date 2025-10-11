@@ -34,6 +34,11 @@ function init() {
 
 // Handle text selection events
 function handleTextSelection(event) {
+  // 如果点击在悬浮窗内，不处理
+  if (event.target.closest('.annotate-translate-menu')) {
+    return;
+  }
+  
   const selectedText = window.getSelection().toString().trim();
   
   if (selectedText && (settings.enableTranslate || settings.enableAnnotate)) {
@@ -64,7 +69,10 @@ function showContextMenu(x, y, text) {
     translateBtn.textContent = 'T';
     translateBtn.className = 'menu-button';
     translateBtn.title = 'Translate'; // 悬停提示
-    translateBtn.addEventListener('click', () => {
+    translateBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // 阻止事件冒泡
+      e.preventDefault();  // 阻止默认行为
+      console.log('[Annotate-Translate] Translate button clicked');
       hideContextMenu();
       translateText(text);
     });
@@ -76,7 +84,10 @@ function showContextMenu(x, y, text) {
     annotateBtn.textContent = 'A';
     annotateBtn.className = 'menu-button';
     annotateBtn.title = 'Annotate'; // 悬停提示
-    annotateBtn.addEventListener('click', () => {
+    annotateBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // 阻止事件冒泡
+      e.preventDefault();  // 阻止默认行为
+      console.log('[Annotate-Translate] Annotate button clicked');
       hideContextMenu();
       // 使用改进的标注方法（支持批量标注和精确定位）
       annotateSelectedText(text);
@@ -85,6 +96,11 @@ function showContextMenu(x, y, text) {
   }
 
   document.body.appendChild(menu);
+
+  // 阻止菜单本身的点击事件冒泡
+  menu.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
 
   // Hide menu when clicking outside
   setTimeout(() => {
