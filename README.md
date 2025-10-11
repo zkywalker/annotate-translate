@@ -2,40 +2,29 @@
 
 A Chrome extension for annotating and translating text on web pages.
 
-## ✨ v2.0 Major Update
-
-**New Features**:
-- 🎯 **Translation Service Abstraction**: Pluggable provider architecture
-- 🐛 **Debug Provider**: Test without real APIs, fixed test data
-- ⚙️ **Settings Page**: Unified configuration management
-- 🎨 **Rich UI**: Audio playback, phonetics, definitions, examples
-- 🚀 **Better Performance**: Smart caching, 500ms response time (Debug mode)
-
-**Quick Start**: Read [Debug Quick Start](DEBUG_QUICKSTART.md) for 3-minute tutorial!
-
-**Documentation**: See [Documentation Index](DOCS_INDEX.md) for all guides (20,000+ words)
-
----
 
 ## Features
 
 ### Core Features
 - **Text Translation**: Select any text on a webpage to translate it to your target language
 - **Text Annotation**: Highlight and annotate important text passages for later reference
-- **Multiple Providers**: Google Translate, Youdao, Local Dictionary, Debug (4 providers)
+- **Multiple Providers**: Google Translate, Youdao
 - **Rich Translation Results**: Audio playback, phonetics, definitions, examples
 - **Settings Page**: Centralized configuration for all features
 - **Context Menu Integration**: Right-click on selected text for quick access to features
 - **Persistent Storage**: Your annotations and settings are saved across browsing sessions
 
 ### Translation Features
-- 🌍 **4 Translation Providers**:
-  - Google Translate (production recommended)
-  - Youdao (Chinese optimized)
-  - Local Dictionary (offline)
-  - Debug (development/testing)
-- 🔊 **Audio Playback**: Three-tier audio strategy (ArrayBuffer → URL → TTS)
-- 📖 **Phonetics**: US/UK pronunciations with IPA notation
+- 🌍 **Translation Providers**:
+  - Google Translate (production recommended, no config needed)
+  - Youdao (Chinese optimized, **requires API key** - [Setup Guide](YOUDAO_SETUP_GUIDE.md))
+- 🔊 **Audio Playback**: 
+  - **In Translation Cards**: Three-tier audio strategy (ArrayBuffer → URL → TTS)
+  - **In Annotations**: Click speaker button 🔊 next to phonetics to play pronunciation ([Audio Feature Guide](AUDIO_FEATURE.md))
+  - **Smart Audio Source**: Automatically uses FreeDictionary API or Web Speech API fallback
+- 📖 **Phonetics**: 
+  - US/UK pronunciations with IPA notation
+  - FreeDictionary fallback for missing phonetics ([Phonetic Fallback Guide](PHONETIC_FALLBACK_FEATURE.md))
 - 📚 **Definitions**: Multiple meanings with part of speech
 - 📝 **Examples**: Real-world usage examples
 - 💾 **Smart Cache**: Reduce API calls, improve speed
@@ -63,17 +52,6 @@ A Chrome extension for annotating and translating text on web pages.
 
 ## Usage
 
-### Quick Start with Debug Mode 🚀
-
-**Try it immediately without any API configuration!**
-
-1. Open `translation-test.html` in your browser
-2. Type "hello" in the input box
-3. Click "Translate"
-4. See the translation with audio, phonetics, definitions, and examples!
-
-**Read**: [Debug Quick Start](DEBUG_QUICKSTART.md) for detailed tutorial.
-
 ### Translation
 
 #### Basic Translation
@@ -96,9 +74,12 @@ A Chrome extension for annotating and translating text on web pages.
 
 1. Select any text on a webpage
 2. Click the "Annotate" button that appears, or right-click and select "Annotate"
-3. Enter your annotation text in the prompt dialog
-4. The text will be wrapped in an HTML `<ruby>` tag with your annotation displayed above it
-5. Your annotations are automatically saved
+3. The text will be automatically annotated with translation and phonetics
+4. **🔊 Click the speaker button** next to the phonetics to hear pronunciation ([Guide](AUDIO_FEATURE.md))
+5. The text will be wrapped in an HTML `<ruby>` tag with your annotation displayed above it
+6. Your annotations are automatically saved
+
+**Example**: Select "hello" → Annotate → See `/həˈloʊ/ 你好 🔊` above the word → Click 🔊 to hear pronunciation
 
 **Ruby Tag Structure:**
 The extension creates standard HTML ruby annotations like this:
@@ -121,31 +102,14 @@ Access the settings page by:
 - Right-clicking the extension icon → "Options"
 - Or visit `chrome://extensions/` → Extension details → "Extension options"
 
-**6 Configuration Sections**:
+**Configuration Sections**:
 1. **Feature Toggles**: Enable/disable translation and annotation
-2. **Translation Provider**: Choose from Debug/Google/Youdao/Local
-3. **Language Settings**: Set source and target languages
-4. **UI Settings**: Configure audio, phonetics, definitions, examples display
-5. **Performance**: Cache settings and auto-close delay
-6. **Debug Settings**: Enable debug mode and console logs
-
-**Read**: [Settings Page Guide](DEBUG_QUICKSTART.md#方式3使用设置页面) for details.
-
-### Developer Testing 🧪
-
-**Use Debug Provider for Development**:
-```javascript
-// Switch to Debug provider
-translationService.setActiveProvider('debug');
-
-// Test with fixed data
-const result = await translationService.translate('hello', 'zh-CN');
-// Always returns: "你好" with full phonetics/definitions/examples
-
-// No API calls, no rate limits, instant response!
-```
-
-**Read**: [Test Checklist](TEST_CHECKLIST.md) for 40+ test cases.
+2. **Translation Provider**: Choose from Google/Youdao
+3. **Youdao API Configuration**: Set App Key and App Secret (when Youdao is selected) - [Setup Guide](YOUDAO_SETUP_GUIDE.md)
+4. **Language Settings**: Set source and target languages
+5. **UI Settings**: Configure audio, phonetics, definitions, examples display
+6. **Performance**: Cache settings and auto-close delay
+7. **Debug Settings**: Enable debug mode and console logs
 
 ## File Structure
 
@@ -158,65 +122,31 @@ annotate-translate/
 ├── content.js                         # Content script for page interaction
 ├── content.css                        # Content script styles
 ├── background.js                      # Background service worker
-├── options.html                       # Settings page HTML 🆕
-├── options.js                         # Settings page logic 🆕
-├── translation-service.js             # Translation service abstraction 🆕
-├── translation-ui.js                  # UI rendering component 🆕
-├── translation-ui.css                 # UI styles 🆕
-├── translation-integration.js         # Integration examples 🆕
-├── translation-test.html              # Browser test page 🆕
+├── options.html                       # Settings page HTML
+├── options.js                         # Settings page logic
+├── translation-service.js             # Translation service abstraction
+├── translation-ui.js                  # UI rendering component
+├── translation-ui.css                 # UI styles
+├── translation-integration.js         # Integration examples
+├── translation-test.html              # Browser test page
 ├── icons/                             # Extension icons
 │   ├── icon16.png
 │   ├── icon32.png
 │   ├── icon48.png
 │   └── icon128.png
-└── docs/                              # Documentation (10 files, 20,000+ words)
-    ├── DOCS_INDEX.md                  # Documentation index 🆕
-    ├── V2_UPDATE_SUMMARY.md           # v2.0 update summary 🆕
-    ├── DEBUG_QUICKSTART.md            # Debug quick start 🆕
-    ├── TEST_CHECKLIST.md              # Complete test checklist 🆕
-    ├── TRANSLATION_SERVICE_GUIDE.md   # User guide
-    ├── TRANSLATION_IMPLEMENTATION.md  # Architecture details
-    ├── TRANSLATION_VISUAL_GUIDE.md    # Visual guide
-    ├── QUICK_REFERENCE.md             # API reference
-    ├── DEBUG_PROVIDER_GUIDE.md        # Debug provider guide 🆕
-    └── TODO.md                        # Development roadmap
+└── docs/                              # Documentation files
+    ├── AUDIO_FEATURE.md               # Audio feature guide
+    ├── PHONETIC_FALLBACK_FEATURE.md   # Phonetic fallback guide
+    ├── YOUDAO_SETUP_GUIDE.md          # Youdao setup guide
+    └── ...                            # Other documentation files
 ```
 
 ## Documentation 📚
 
-**Total**: 10 documents, ~20,000 words, 150+ code examples
-
-### Quick Links
-- 🚀 **[Debug Quick Start](DEBUG_QUICKSTART.md)** - 3-minute tutorial
-- 📖 **[Documentation Index](DOCS_INDEX.md)** - Find all docs
-- ✅ **[Test Checklist](TEST_CHECKLIST.md)** - 40+ test cases
-- 📊 **[v2.0 Update Summary](V2_UPDATE_SUMMARY.md)** - What's new
-
-### Full Documentation
-- **User Guides** (3 docs, ~11,000 words)
-  - [Translation Service Guide](TRANSLATION_SERVICE_GUIDE.md)
-  - [Visual Guide](TRANSLATION_VISUAL_GUIDE.md)
-  - [Quick Reference](QUICK_REFERENCE.md)
-  
-- **Developer Docs** (3 docs, ~11,000 words)
-  - [Implementation Details](TRANSLATION_IMPLEMENTATION.md)
-  - [Debug Provider Guide](DEBUG_PROVIDER_GUIDE.md)
-  - [TODO](TODO.md)
-
-### Reading Path
-```
-New User (30 min):
-  V2_UPDATE_SUMMARY.md (10min)
-  → DEBUG_QUICKSTART.md (5min)
-  → Open translation-test.html (15min)
-
-Developer (2 hours):
-  TRANSLATION_SERVICE_GUIDE.md (40min)
-  → QUICK_REFERENCE.md (20min)
-  → TRANSLATION_IMPLEMENTATION.md (40min)
-  → Practice (20min)
-```
+### Available Guides
+- 📖 **[Youdao Setup Guide](YOUDAO_SETUP_GUIDE.md)** - How to configure Youdao translation
+- 🔊 **[Audio Feature Guide](AUDIO_FEATURE.md)** - Audio playback in annotations
+- 📢 **[Phonetic Fallback Guide](PHONETIC_FALLBACK_FEATURE.md)** - Phonetic fallback strategy
 
 ## Architecture 🏗️
 
@@ -247,10 +177,8 @@ Developer (2 hours):
 │  │  │ TranslationService│   │            │
 │  │  │  ┌──────────┐    │   │            │
 │  │  │  │Providers │    │   │            │
-│  │  │  │- Debug   │    │   │            │
 │  │  │  │- Google  │    │   │            │
 │  │  │  │- Youdao  │    │   │            │
-│  │  │  │- Local   │    │   │            │
 │  │  │  └──────────┘    │   │            │
 │  │  └─────────┬────────┘   │            │
 │  │            │            │            │
@@ -272,7 +200,7 @@ Content Script detects text
     ↓
 TranslationService.translate()
     ↓
-Active Provider (e.g., Debug)
+Active Provider (e.g., Google)
     ↓
 Cache Check
     ↓ (cache miss)
@@ -299,19 +227,7 @@ Display to User
 
 ### Development Workflow
 
-#### Phase 1: UI Development (Use Debug Provider)
-```javascript
-// Set Debug provider in settings page
-translationProvider: 'debug'
-
-// Focus on UI/UX
-// - Test different text lengths
-// - Test responsive layouts
-// - Test dark mode
-// - Test audio playback
-```
-
-#### Phase 2: Integration Testing (Use Debug Provider)
+#### Integration Testing
 ```javascript
 // Test integration points
 // - Content script injection
@@ -320,9 +236,9 @@ translationProvider: 'debug'
 // - Configuration updates
 ```
 
-#### Phase 3: Real API Testing
+#### API Testing
 ```javascript
-// Switch to real providers
+// Switch between providers
 translationProvider: 'google' // or 'youdao'
 
 // Test with real data
@@ -393,13 +309,13 @@ This extension requires the following permissions:
 
 ## Performance
 
-| Metric | Debug Mode | Production (Google) |
-|--------|------------|---------------------|
-| First Translation | ~500ms | 1-3s |
-| Cached Translation | <10ms | <10ms |
-| Memory Usage | <30MB | <50MB |
-| Cache Hit Rate | N/A | >90% |
-| API Rate Limit | None | Provider dependent |
+| Metric | Value |
+|--------|-------|
+| First Translation | 1-3s |
+| Cached Translation | <10ms |
+| Memory Usage | <50MB |
+| Cache Hit Rate | >90% |
+| API Rate Limit | Provider dependent |
 
 ## Known Limitations
 
@@ -424,41 +340,28 @@ This is normal browser behavior for security reasons. The extension will work no
 
 ### Translation Provider Limitations
 
-| Provider | Limitation |
-|----------|------------|
-| Debug | Only supports predefined words (hello, apple, world) + auto-generated data |
-| Google | May have CORS issues in local testing, rate limits in production |
-| Youdao | Requires API key, Chinese-optimized |
-| Local | Limited vocabulary, offline only |
+| Provider | Configuration | Limitation |
+|----------|---------------|------------|
+| Google | None required | May have CORS issues in local testing, rate limits in production |
+| Youdao | **Requires API key** | Must register at [Youdao AI Platform](https://ai.youdao.com/) - See [Setup Guide](YOUDAO_SETUP_GUIDE.md) |
 
 ### Audio Playback
 
 - **Web Audio API**: Requires audio data from provider (best quality)
 - **Audio Element**: Requires audio URL from provider (good quality)
 - **TTS Fallback**: Browser-dependent, may not support all languages
-- **Offline**: Only Local provider and TTS work offline
 
 ## Roadmap 🗺️
 
-### v2.1 (Next)
-- [ ] Integrate settings into content.js
-- [ ] Update popup.js with provider selection
-- [ ] Add more debug test data
-- [ ] Performance optimization
-
-### v2.2
+### Future Plans
 - [ ] Voice input support
 - [ ] OCR text recognition
 - [ ] Batch translation
 - [ ] Export/import settings
-
-### v2.3
 - [ ] Custom provider support
 - [ ] Offline dictionary expansion
 - [ ] Multi-language UI
 - [ ] Mobile optimization
-
-See [TODO.md](TODO.md) for detailed development plan.
 
 ## Contributing 🤝
 
@@ -473,7 +376,7 @@ Contributions are welcome! Here's how you can help:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Run tests (see [TEST_CHECKLIST.md](TEST_CHECKLIST.md))
+4. Test your changes
 5. Commit your changes (`git commit -m 'Add amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
@@ -483,57 +386,35 @@ Contributions are welcome! Here's how you can help:
 - Add JSDoc comments for public APIs
 - Include tests for new features
 - Update documentation
-- Use Debug provider for development
 
 ## Testing ✅
 
-### Quick Test
-```bash
-# Open test page
-open translation-test.html
-
-# Test basic translation
-1. Input "hello"
-2. Click "Translate"
-3. Verify result shows "你好" with phonetics/definitions/examples
-```
-
-### Complete Test
-See [TEST_CHECKLIST.md](TEST_CHECKLIST.md) for:
-- 40+ test cases
-- Browser testing
-- Extension testing
-- Performance testing
-- Edge case testing
-
-### Automated Testing (Future)
-```bash
-# Unit tests
-npm test
-
-# Integration tests
-npm run test:integration
-
-# E2E tests
-npm run test:e2e
-```
+### Manual Testing
+1. Load the extension in Chrome
+2. Visit any webpage
+3. Select some text
+4. Click "Translate" or "Annotate"
+5. Verify the results are displayed correctly
+6. Test audio playback if available
+7. Try different providers in settings
 
 ## FAQ ❓
 
-### Q: Why use Debug provider?
-**A**: Debug provider allows development and testing without real API calls, avoiding rate limits and providing consistent test data.
-
 ### Q: How to switch translation providers?
-**A**: Open Settings page (right-click extension icon → Options), select a provider, and save.
+**A**: Open Settings page (right-click extension icon → Options), select a provider, and save. For Youdao, you also need to configure API keys - see [Youdao Setup Guide](YOUDAO_SETUP_GUIDE.md).
 
 ### Q: Where is my data stored?
 **A**: Settings are stored in `chrome.storage.sync` (synced across devices), annotations are stored in `chrome.storage.local`.
 
 ### Q: Does it work offline?
-**A**: Partially. Local dictionary and TTS work offline, but Google/Youdao require internet connection.
+**A**: No. All translation providers require internet connection to work.
 
-### Q: How to add more test data to Debug provider?
-**A**: Edit `translation-service.js`, find `DebugTranslateProvider` class, add entries to `this.testData` object.
+### Q: How to configure Youdao translation?
+**A**: See the detailed [Youdao Setup Guide](YOUDAO_SETUP_GUIDE.md). You need to:
+1. Register at [Youdao AI Platform](https://ai.youdao.com/)
+2. Create an application and get App Key & App Secret
+3. Enter them in the Settings page when Youdao is selected
+4. Save settings and start translating!
 
 ### Q: Why isn't audio working?
 **A**: Check if:
@@ -547,27 +428,21 @@ npm run test:e2e
 
 ## Support 💬
 
-- **Documentation**: [DOCS_INDEX.md](DOCS_INDEX.md)
 - **Issues**: GitHub Issues
 - **Discussions**: GitHub Discussions
-- **Email**: (Add your email here)
 
 ## Changelog 📝
 
-### v2.0.0 (Current)
-- ✨ Added translation service abstraction layer
-- ✨ Added 4 translation providers (Debug, Google, Youdao, Local)
-- ✨ Added settings page with 6 configuration sections
-- ✨ Added rich UI with audio/phonetics/definitions/examples
-- ✨ Added smart caching system
-- ✨ Added 10 comprehensive documentation files (20,000+ words)
+### Current Version
+- ✨ Translation service abstraction layer
+- ✨ Multiple translation providers (Google, Youdao)
+- ✨ Settings page with configuration sections
+- ✨ Rich UI with audio/phonetics/definitions/examples
+- ✨ Smart caching system
+- ✨ Comprehensive documentation
 - 🐛 Fixed audio playback issues
 - 🎨 Improved UI responsiveness
-- ⚡ Performance improvements (6x faster with Debug mode)
-
-### v1.0.0
-- Initial release
-- Basic translation and annotation features
+- ⚡ Performance improvements
 
 ## License 📄
 
@@ -599,9 +474,3 @@ SOFTWARE.
 - Web Audio API specification
 - Speech Synthesis API
 - All contributors and users
-
----
-
-**Made with ❤️ by the community**
-
-**Start now**: [Debug Quick Start](DEBUG_QUICKSTART.md) → [Documentation](DOCS_INDEX.md) → [Test](TEST_CHECKLIST.md)

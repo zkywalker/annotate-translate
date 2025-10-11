@@ -56,50 +56,6 @@ async function switchProviderExample() {
 }
 
 // ============================================
-// 示例3: 使用本地词典
-// ============================================
-
-function localDictionaryExample() {
-  // 获取本地词典提供者
-  const localProvider = translationService.providers.get('local');
-  
-  // 添加词条
-  localProvider.addEntry('hello', {
-    translation: '你好',
-    sourceLang: 'en',
-    phonetics: [
-      {
-        text: '/həˈloʊ/',
-        type: 'us'
-      },
-      {
-        text: '/həˈləʊ/',
-        type: 'uk'
-      }
-    ],
-    definitions: [
-      {
-        partOfSpeech: 'int.',
-        text: '(用于问候)喂，你好'
-      },
-      {
-        partOfSpeech: 'n.',
-        text: '招呼，问候'
-      }
-    ],
-    examples: [
-      {
-        source: 'Hello, how are you?',
-        translation: '你好，你好吗？'
-      }
-    ]
-  });
-  
-  // 使用本地词典
-  translationService.setActiveProvider('local');
-}
-
-// ============================================
 // 示例4: 创建自定义翻译提供者
 // ============================================
 
@@ -436,7 +392,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     basicTranslationExample,
     switchProviderExample,
-    localDictionaryExample,
     registerCustomProvider,
     improvedTranslateText,
     batchTranslateExample,

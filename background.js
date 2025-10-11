@@ -154,7 +154,47 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     
     return true; // Keep message channel open for async response
   }
+  
+  // Handle Youdao translation request (to bypass CORS)
+  if (request.action === 'youdaoTranslate') {
+    console.log('[Annotate-Translate BG] Handling Youdao translation request...');
+    handleYoudaoTranslate(request.params)
+      .then(data => {
+        console.log('[Annotate-Translate BG] Youdao translation successful');
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[Annotate-Translate BG] Youdao translation failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep message channel open for async response
+  }
 });
+
+/**
+ * Handle Youdao translation API request in background script (bypasses CORS)
+ * @param {Object} params - Request parameters (url, method, headers, body)
+ * @returns {Promise<Object>} Response data
+ */
+async function handleYoudaoTranslate(params) {
+  try {
+    const response = await fetch(params.url, {
+      method: params.method || 'POST',
+      headers: params.headers || {},
+      body: params.body
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Annotate-Translate BG] Fetch error:', error);
+    throw error;
+  }
+}
 
 // Listen for tab updates to inject content script if needed
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

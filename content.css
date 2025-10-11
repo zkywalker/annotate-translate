@@ -13,6 +13,7 @@
   /* 添加淡入动画 */
   animation: menuFadeIn 0.15s ease-out;
   /* 防止用户选中菜单内的文字 */
+  -webkit-user-select: none;
   user-select: none;
   /* 防止点击事件穿透 */
   pointer-events: auto;
@@ -205,6 +206,7 @@ ruby.annotate-translate-ruby rt.annotate-translate-rt {
   color: #1a73e8;
   font-weight: 500;
   line-height: 1.2;
+  -webkit-user-select: none;
   user-select: none;
   /* 使用 ruby-text 显示，确保居中对齐 */
   display: ruby-text;
@@ -217,15 +219,14 @@ ruby.annotate-translate-ruby rt.annotate-translate-rt {
   overflow: visible;
 }
 
+/* 移除悬浮背景效果，避免挡住标注 */
 ruby.annotate-translate-ruby:hover {
-  background-color: #e3f2fd;
-  border-radius: 2px;
-  padding: 0 2px;
+  /* 不添加背景，保持标注清晰可见 */
 }
 
 ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
+  /* 可以稍微加深颜色，但不改变字重 */
   color: #1557b0;
-  font-weight: 600;
 }
 
 /* Dialog styles for multiple matches */
@@ -334,4 +335,49 @@ ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
 
 .annotate-translate-dialog .dialog-btn:active {
   transform: translateY(1px);
+}
+
+/* Audio button in ruby annotation */
+.annotate-audio-button {
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  line-height: 1;
+  vertical-align: middle;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1em;
+  opacity: 0.8;
+}
+
+.annotate-audio-button:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.annotate-audio-button:active {
+  transform: scale(0.9);
+}
+
+.annotate-audio-button.playing {
+  animation: audioPlaying 0.6s ease-in-out infinite;
+}
+
+@keyframes audioPlaying {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Ensure rt content is displayed inline */
+ruby.annotate-translate-ruby rt.annotate-translate-rt span {
+  display: inline;
 }

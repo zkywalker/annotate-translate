@@ -13,6 +13,11 @@ const DEFAULT_SETTINGS = {
   translationProvider: 'debug',
   targetLanguage: 'zh-CN',
   
+  // Youdao API settings
+  youdaoAppKey: '',
+  youdaoAppSecret: '',
+  enablePhoneticFallback: true, // 默认启用音标补充
+  
   // UI settings
   enableAudio: true,
   showPhonetics: true,
@@ -38,6 +43,10 @@ const elements = {
   enableTranslate: document.getElementById('enableTranslate'),
   enableAnnotate: document.getElementById('enableAnnotate'),
   targetLanguage: document.getElementById('targetLanguage'),
+  youdaoAppKey: document.getElementById('youdaoAppKey'),
+  youdaoAppSecret: document.getElementById('youdaoAppSecret'),
+  youdaoConfigSection: document.getElementById('youdaoConfigSection'),
+  enablePhoneticFallback: document.getElementById('enablePhoneticFallback'),
   enableAudio: document.getElementById('enableAudio'),
   showPhonetics: document.getElementById('showPhonetics'),
   showDefinitions: document.getElementById('showDefinitions'),
@@ -91,6 +100,11 @@ function loadSettings() {
     // Language settings
     elements.targetLanguage.value = settings.targetLanguage;
     
+    // Youdao API settings
+    elements.youdaoAppKey.value = settings.youdaoAppKey || '';
+    elements.youdaoAppSecret.value = settings.youdaoAppSecret || '';
+    elements.enablePhoneticFallback.checked = settings.enablePhoneticFallback !== false;
+    
     // UI settings
     elements.enableAudio.checked = settings.enableAudio;
     elements.showPhonetics.checked = settings.showPhonetics;
@@ -124,6 +138,11 @@ function saveSettings() {
     // Translation provider
     translationProvider: document.querySelector('input[name="provider"]:checked').value,
     targetLanguage: elements.targetLanguage.value,
+    
+    // Youdao API settings
+    youdaoAppKey: elements.youdaoAppKey.value.trim(),
+    youdaoAppSecret: elements.youdaoAppSecret.value.trim(),
+    enablePhoneticFallback: elements.enablePhoneticFallback.checked,
     
     // UI settings
     enableAudio: elements.enableAudio.checked,
@@ -238,6 +257,13 @@ function updateProviderSelection(provider) {
   const selectedItem = document.querySelector(`input[name="provider"][value="${provider}"]`);
   if (selectedItem) {
     selectedItem.closest('.radio-item').classList.add('selected');
+  }
+  
+  // Show/hide Youdao config section
+  if (provider === 'youdao') {
+    elements.youdaoConfigSection.style.display = 'block';
+  } else {
+    elements.youdaoConfigSection.style.display = 'none';
   }
 }
 

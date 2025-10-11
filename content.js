@@ -5,6 +5,9 @@ let settings = {
   enableAnnotate: true,
   targetLanguage: 'zh-CN',
   translationProvider: 'debug',
+  youdaoAppKey: '',
+  youdaoAppSecret: '',
+  enablePhoneticFallback: true,
   enableAudio: true,
   showPhonetics: true,
   showDefinitions: true,
@@ -41,6 +44,9 @@ function init() {
     enableAnnotate: true,
     targetLanguage: 'zh-CN',
     translationProvider: 'debug',
+    youdaoAppKey: '',
+    youdaoAppSecret: '',
+    enablePhoneticFallback: true,
     enableAudio: true,
     showPhonetics: true,
     showDefinitions: true,
@@ -105,6 +111,21 @@ function applyTranslationSettings() {
       if (debugProvider) {
         debugProvider.showPhoneticInAnnotation = settings.showPhoneticInAnnotation !== false;
         console.log('[Annotate-Translate] Debug provider configured - showPhoneticInAnnotation:', debugProvider.showPhoneticInAnnotation);
+      }
+    }
+    
+    // 如果是 Youdao 提供商，更新其 API 配置
+    if (settings.translationProvider === 'youdao') {
+      const youdaoProvider = translationService.providers.get('youdao');
+      if (youdaoProvider) {
+        youdaoProvider.updateConfig(
+          settings.youdaoAppKey, 
+          settings.youdaoAppSecret,
+          settings.enablePhoneticFallback
+        );
+        console.log('[Annotate-Translate] Youdao provider configured:');
+        console.log('  - AppKey:', settings.youdaoAppKey ? 'Set' : 'Not set');
+        console.log('  - Phonetic Fallback:', settings.enablePhoneticFallback ? 'Enabled' : 'Disabled');
       }
     }
   }
@@ -573,7 +594,7 @@ async function promptAndAnnotate(range, text) {
     // 使用 annotationText（可能包含读音）或 translatedText 作为标注
     const annotationText = result.annotationText || result.translatedText;
     
-    createRubyAnnotation(range, text, annotationText);
+    createRubyAnnotation(range, text, annotationText, result);
     
     console.log('[Annotate-Translate] Auto-annotated with:', annotationText);
     
@@ -584,7 +605,7 @@ async function promptAndAnnotate(range, text) {
 }
 
 // Create ruby tag annotation
-function createRubyAnnotation(range, baseText, annotationText) {
+function createRubyAnnotation(range, baseText, annotationText, result = null) {
   try {
     console.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
     
@@ -600,7 +621,18 @@ function createRubyAnnotation(range, baseText, annotationText) {
     // Create rt (ruby text) element for annotation
     const rt = document.createElement('rt');
     rt.className = 'annotate-translate-rt';
-    rt.textContent = annotationText;
+    
+    // Add annotation text
+    const textSpan = document.createElement('span');
+    textSpan.textContent = annotationText;
+    rt.appendChild(textSpan);
+    
+    // Add audio button if phonetics available
+    if (result && result.phonetics && result.phonetics.length > 0 && settings.enableAudio) {
+      const audioButton = createAudioButton(result.phonetics, baseText);
+      rt.appendChild(audioButton);
+    }
+    
     ruby.appendChild(rt);
     
     // Replace the selected text with the ruby element
@@ -610,7 +642,8 @@ function createRubyAnnotation(range, baseText, annotationText) {
     // Store annotation
     annotations.set(ruby, {
       base: baseText,
-      annotation: annotationText
+      annotation: annotationText,
+      phonetics: result ? result.phonetics : null
     });
     
     // Save annotation to storage
@@ -624,6 +657,153 @@ function createRubyAnnotation(range, baseText, annotationText) {
     console.error('[Annotate-Translate] Failed to create ruby annotation:', e);
     alert('Failed to annotate text. Please try selecting the text again.');
   }
+}
+
+// Audio cache for better performance
+const audioCache = new Map(); // Cache Audio objects
+const audioCacheMaxSize = 50; // Max cached audio files
+
+// Create audio playback button
+function createAudioButton(phonetics, text) {
+  const button = document.createElement('button');
+  button.className = 'annotate-audio-button';
+  button.innerHTML = '🔊';
+  button.title = 'Play pronunciation';
+  button.setAttribute('aria-label', 'Play pronunciation');
+  
+  // Prevent button click from triggering parent events
+  button.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    try {
+      button.classList.add('playing');
+      await playPhoneticAudio(phonetics, text);
+    } catch (error) {
+      console.error('[Annotate-Translate] Audio playback error:', error);
+      // Visual feedback for error
+      button.innerHTML = '❌';
+      setTimeout(() => {
+        button.innerHTML = '🔊';
+      }, 1000);
+    } finally {
+      button.classList.remove('playing');
+    }
+  });
+  
+  return button;
+}
+
+// Play phonetic audio
+async function playPhoneticAudio(phonetics, text) {
+  console.log('[Annotate-Translate] Playing audio for:', text, phonetics);
+  
+  // Priority:
+  // 1. audioUrl from phonetics
+  // 2. Web Speech API (TTS)
+  
+  // Try to find phonetic with audioUrl
+  const phoneticWithAudio = phonetics.find(p => p.audioUrl);
+  
+  if (phoneticWithAudio && phoneticWithAudio.audioUrl) {
+    console.log('[Annotate-Translate] Playing from URL:', phoneticWithAudio.audioUrl);
+    return playAudioFromUrl(phoneticWithAudio.audioUrl);
+  }
+  
+  // Fallback to Web Speech API
+  console.log('[Annotate-Translate] Using Web Speech API for:', text);
+  return playTextToSpeech(text);
+}
+
+// Play audio from URL with caching
+function playAudioFromUrl(url) {
+  return new Promise((resolve, reject) => {
+    let audio;
+    
+    // Check if audio is cached
+    if (audioCache.has(url)) {
+      console.log('[Annotate-Translate] Using cached audio for:', url);
+      audio = audioCache.get(url);
+      // Reset audio to beginning
+      audio.currentTime = 0;
+    } else {
+      console.log('[Annotate-Translate] Loading new audio for:', url);
+      audio = new Audio(url);
+      
+      // Cache the audio object
+      audioCache.set(url, audio);
+      
+      // Implement LRU cache - remove oldest if cache is full
+      if (audioCache.size > audioCacheMaxSize) {
+        const firstKey = audioCache.keys().next().value;
+        console.log('[Annotate-Translate] Cache full, removing:', firstKey);
+        audioCache.delete(firstKey);
+      }
+    }
+    
+    // Set up event listeners
+    const onEnded = () => {
+      console.log('[Annotate-Translate] Audio playback completed');
+      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('error', onError);
+      resolve();
+    };
+    
+    const onError = (e) => {
+      console.error('[Annotate-Translate] Audio playback error:', e);
+      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('error', onError);
+      reject(new Error('Failed to load audio'));
+    };
+    
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
+    
+    // Play the audio
+    audio.play().catch(reject);
+  });
+}
+
+// Play text using Web Speech API
+// Note: TTS doesn't use cache as it's already fast and memory-efficient
+function playTextToSpeech(text) {
+  return new Promise((resolve, reject) => {
+    if (!window.speechSynthesis) {
+      reject(new Error('Speech synthesis not supported'));
+      return;
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US'; // Default to English
+    utterance.rate = 0.9; // Slightly slower for clarity
+    
+    utterance.onend = () => {
+      console.log('[Annotate-Translate] TTS playback completed');
+      resolve();
+    };
+    
+    utterance.onerror = (e) => {
+      console.error('[Annotate-Translate] TTS error:', e);
+      reject(new Error('Text-to-speech failed'));
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+// Clear audio cache (useful for memory management)
+function clearAudioCache() {
+  console.log(`[Annotate-Translate] Clearing audio cache (${audioCache.size} items)`);
+  audioCache.clear();
+}
+
+// Get audio cache stats
+function getAudioCacheStats() {
+  return {
+    size: audioCache.size,
+    maxSize: audioCacheMaxSize,
+    urls: Array.from(audioCache.keys())
+  };
 }
 
 // Save annotation to storage

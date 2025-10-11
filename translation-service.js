@@ -247,37 +247,222 @@ class GoogleTranslateProvider extends TranslationProvider {
 }
 
 /**
- * 有道翻译提供者（示例实现）
+ * 有道翻译提供者（使用官方 API）
+ * 需要在有道智云 AI 开放平台注册获取 appKey 和 appSecret
+ * API 文档: https://ai.youdao.com/DOCSIRMA/html/trans/api/wbfy/index.html
  */
 class YoudaoTranslateProvider extends TranslationProvider {
   constructor(config = {}) {
     super('Youdao Translate', config);
-    this.appKey = config.appKey || null;
-    this.appSecret = config.appSecret || null;
+    this.appKey = config.appKey || '';
+    this.appSecret = config.appSecret || '';
+    this.apiUrl = 'https://openapi.youdao.com/api';
+    this.enablePhoneticFallback = config.enablePhoneticFallback !== false; // 默认启用音标补充
+  }
+
+  /**
+   * 更新 API 密钥配置
+   * @param {string} appKey - 应用 ID
+   * @param {string} appSecret - 应用密钥
+   * @param {boolean} enablePhoneticFallback - 是否启用音标补充
+   */
+  updateConfig(appKey, appSecret, enablePhoneticFallback = true) {
+    this.appKey = appKey || '';
+    this.appSecret = appSecret || '';
+    this.enablePhoneticFallback = enablePhoneticFallback;
+    console.log(`[YoudaoTranslate] Config updated. AppKey: ${this.appKey ? 'Set' : 'Not set'}, Phonetic fallback: ${this.enablePhoneticFallback}`);
+  }
+
+  /**
+   * 检查配置是否完整
+   * @returns {boolean}
+   */
+  isConfigured() {
+    return !!(this.appKey && this.appSecret);
+  }
+
+  /**
+   * 生成签名
+   * @param {string} query - 待翻译文本
+   * @param {string} salt - 随机数
+   * @param {string} curtime - 当前时间戳
+   * @returns {string} 签名
+   */
+  async generateSign(query, salt, curtime) {
+    // 根据有道 API 文档，input 的计算规则：
+    // 如果 query 长度 <= 20，input = query
+    // 如果 query 长度 > 20，input = query前10个字符 + query长度 + query后10个字符
+    let input;
+    if (query.length <= 20) {
+      input = query;
+    } else {
+      input = query.substring(0, 10) + query.length + query.substring(query.length - 10);
+    }
+
+    // 生成签名: SHA256(appKey + input + salt + curtime + appSecret)
+    const signStr = this.appKey + input + salt + curtime + this.appSecret;
+    
+    // 使用 Web Crypto API 生成 SHA256 签名
+    const encoder = new TextEncoder();
+    const data = encoder.encode(signStr);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return hashHex;
+  }
+
+  /**
+   * 将语言代码转换为有道 API 支持的格式
+   * @param {string} langCode - 通用语言代码
+   * @returns {string} 有道 API 语言代码
+   */
+  convertLangCode(langCode) {
+    const langMap = {
+      'auto': 'auto',
+      'zh-CN': 'zh-CHS',
+      'zh-TW': 'zh-CHT',
+      'en': 'en',
+      'ja': 'ja',
+      'ko': 'ko',
+      'fr': 'fr',
+      'es': 'es',
+      'ru': 'ru',
+      'de': 'de',
+      'ar': 'ar'
+    };
+    return langMap[langCode] || langCode;
+  }
+
+  /**
+   * 通过 background script 发送请求（绕过 CORS）
+   * @param {string} url - API URL
+   * @param {URLSearchParams} params - 请求参数
+   * @returns {Promise<Object>} API 响应数据
+   */
+  async sendRequestViaBackground(url, params) {
+    return new Promise((resolve, reject) => {
+      // 检查是否在扩展环境中
+      if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+        reject(new Error('Chrome extension API not available'));
+        return;
+      }
+
+      chrome.runtime.sendMessage({
+        action: 'youdaoTranslate',
+        params: {
+          url: url,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: params.toString()
+        }
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(`Background script error: ${chrome.runtime.lastError.message}`));
+          return;
+        }
+
+        if (!response) {
+          reject(new Error('No response from background script'));
+          return;
+        }
+
+        if (response.success) {
+          resolve(response.data);
+        } else {
+          reject(new Error(response.error || 'Unknown error from background script'));
+        }
+      });
+    });
   }
 
   async translate(text, targetLang, sourceLang = 'auto') {
+    // 检查配置
+    if (!this.isConfigured()) {
+      throw new Error('Youdao API not configured. Please set appKey and appSecret in settings.');
+    }
+
     try {
       console.log(`[YoudaoTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
       
-      // 有道翻译公共API
-      const url = `https://dict.youdao.com/suggest?q=${encodeURIComponent(text)}&le=en&doctype=json`;
+      // 生成请求参数
+      const salt = Date.now().toString();
+      const curtime = Math.floor(Date.now() / 1000).toString();
+      const sign = await this.generateSign(text, salt, curtime);
       
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // 转换语言代码
+      const from = this.convertLangCode(sourceLang);
+      const to = this.convertLangCode(targetLang);
 
-      const data = await response.json();
+      // 构建请求参数
+      const params = new URLSearchParams({
+        q: text,
+        from: from,
+        to: to,
+        appKey: this.appKey,
+        salt: salt,
+        sign: sign,
+        signType: 'v3',
+        curtime: curtime
+      });
+
+      console.log(`[YoudaoTranslate] Request params:`, {
+        q: text,
+        from: from,
+        to: to,
+        appKey: this.appKey.substring(0, 8) + '...',
+        salt: salt,
+        curtime: curtime,
+        sign: sign.substring(0, 16) + '...'
+      });
+
+      // 通过 background script 发送请求（绕过 CORS）
+      const data = await this.sendRequestViaBackground(this.apiUrl, params);
       
-      return this.parseYoudaoResponse(data, text, sourceLang, targetLang);
+      console.log(`[YoudaoTranslate] ========== API Response START ==========`);
+      console.log(`[YoudaoTranslate] Full response:`, JSON.stringify(data, null, 2));
+      console.log(`[YoudaoTranslate] Has basic?`, !!data.basic);
+      if (data.basic) {
+        console.log(`[YoudaoTranslate] Basic fields:`, Object.keys(data.basic));
+        console.log(`[YoudaoTranslate] Basic content:`, data.basic);
+      }
+      console.log(`[YoudaoTranslate] ========== API Response END ==========`);
+
+      // 检查错误码
+      if (data.errorCode !== '0') {
+        const errorMessages = {
+          '101': 'Missing required parameters',
+          '102': 'Unsupported language',
+          '103': 'Text too long',
+          '104': 'Unsupported API type',
+          '105': 'Unsupported signature type',
+          '106': 'Unsupported response type',
+          '107': 'Unsupported encoding type',
+          '108': 'Invalid appKey',
+          '109': 'Invalid batchLog format',
+          '110': 'Invalid client IP',
+          '111': 'Invalid account',
+          '113': 'Access frequency limited',
+          '202': 'Invalid signature',
+          '206': 'Request timeout',
+          '207': 'Service unavailable'
+        };
+        const errorMsg = errorMessages[data.errorCode] || `Unknown error: ${data.errorCode}`;
+        throw new Error(`Youdao API Error [${data.errorCode}]: ${errorMsg}`);
+      }
+      
+      return await this.parseYoudaoResponse(data, text, from, to);
     } catch (error) {
       console.error('[YoudaoTranslate] Translation error:', error);
       throw error;
     }
   }
 
-  parseYoudaoResponse(data, originalText, sourceLang, targetLang) {
+  async parseYoudaoResponse(data, originalText, sourceLang, targetLang) {
+    console.log('[YoudaoTranslate] Parsing response data...');
+    
     const result = {
       originalText: originalText,
       translatedText: '',
@@ -290,20 +475,209 @@ class YoudaoTranslateProvider extends TranslationProvider {
       timestamp: Date.now()
     };
 
-    // 解析有道返回的数据
-    if (data.result && data.result.entries && data.result.entries.length > 0) {
-      const entry = data.result.entries[0];
-      result.translatedText = entry.explain || entry.entry;
+    // 主要翻译结果
+    if (data.translation && data.translation.length > 0) {
+      result.translatedText = data.translation.join('\n');
+      console.log('[YoudaoTranslate] ✓ Translation:', result.translatedText);
+    }
+
+    // 音标信息（基本释义中可能包含）
+    if (data.basic) {
+      console.log('[YoudaoTranslate] Processing basic dictionary data...');
+      console.log('[YoudaoTranslate] Available fields in basic:', Object.keys(data.basic).join(', '));
       
-      if (entry.phonetic) {
+      let foundPhonetic = false;
+      
+      // 处理音标 - 有道API可能返回三种音标格式
+      // 注意：有道翻译API可能不包含音标，只有词典API才有
+      
+      // 1. phonetic - 通用音标（通常是美音）
+      if (data.basic.phonetic) {
+        const phoneticText = this.formatPhonetic(data.basic.phonetic);
         result.phonetics.push({
-          text: `/${entry.phonetic}/`,
-          type: 'us'
+          text: phoneticText,
+          type: 'default',
+          audioUrl: data.basic['phonetic-audio'] || null
         });
+        console.log('[YoudaoTranslate] ✓ Default phonetic:', phoneticText);
+        foundPhonetic = true;
+      }
+      
+      // 2. us-phonetic - 美式音标
+      if (data.basic['us-phonetic']) {
+        const usPhonetic = this.formatPhonetic(data.basic['us-phonetic']);
+        result.phonetics.push({
+          text: usPhonetic,
+          type: 'us',
+          audioUrl: data.basic['us-speech'] || null
+        });
+        console.log('[YoudaoTranslate] ✓ US phonetic:', usPhonetic);
+        foundPhonetic = true;
+      }
+      
+      // 3. uk-phonetic - 英式音标
+      if (data.basic['uk-phonetic']) {
+        const ukPhonetic = this.formatPhonetic(data.basic['uk-phonetic']);
+        result.phonetics.push({
+          text: ukPhonetic,
+          type: 'uk',
+          audioUrl: data.basic['uk-speech'] || null
+        });
+        console.log('[YoudaoTranslate] ✓ UK phonetic:', ukPhonetic);
+        foundPhonetic = true;
+      }
+      
+      if (!foundPhonetic) {
+        console.warn('[YoudaoTranslate] ⚠️ No phonetic data found in API response');
+        console.warn('[YoudaoTranslate] ⚠️ Note: Youdao Translation API may not include phonetics');
+        console.warn('[YoudaoTranslate] ⚠️ Consider using a dictionary API for phonetic information');
+      }
+
+      // 词义解释
+      if (data.basic.explains && data.basic.explains.length > 0) {
+        console.log('[YoudaoTranslate] Processing definitions...');
+        data.basic.explains.forEach((explain, index) => {
+          // 尝试解析词性和释义（格式：n. 名词释义）
+          const match = explain.match(/^([a-z]+\.)\s*(.+)$/i);
+          if (match) {
+            result.definitions.push({
+              partOfSpeech: match[1],
+              text: match[2],
+              synonyms: []
+            });
+          } else {
+            result.definitions.push({
+              partOfSpeech: '',
+              text: explain,
+              synonyms: []
+            });
+          }
+        });
+        console.log(`[YoudaoTranslate] ✓ Definitions: ${result.definitions.length} entries`);
       }
     }
 
+    // 网络释义（作为例句的补充）
+    if (data.web && data.web.length > 0) {
+      console.log('[YoudaoTranslate] Processing web translations...');
+      data.web.slice(0, 3).forEach(item => {
+        if (item.key && item.value && item.value.length > 0) {
+          result.examples.push({
+            source: item.key,
+            translation: item.value.join('; ')
+          });
+        }
+      });
+      console.log(`[YoudaoTranslate] ✓ Examples: ${result.examples.length} entries`);
+    }
+
+    // 如果没有翻译结果，使用原文
+    if (!result.translatedText) {
+      result.translatedText = originalText;
+      console.log('[YoudaoTranslate] ⚠ No translation, using original text');
+    }
+
+    // 如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
+    if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
+      console.log('[YoudaoTranslate] No phonetics found, trying FreeDictionary fallback...');
+      await this.supplementPhoneticsFromFreeDictionary(result, originalText);
+    }
+
+    // 生成标注文本（用于 Ruby 标注）
+    result.annotationText = this.generateAnnotationText(result);
+    console.log('[YoudaoTranslate] ✓ Annotation text:', result.annotationText);
+
+    console.log('[YoudaoTranslate] ========== Parsing Summary ==========');
+    console.log('[YoudaoTranslate] Phonetics found:', result.phonetics.length);
+    console.log('[YoudaoTranslate] Definitions found:', result.definitions.length);
+    console.log('[YoudaoTranslate] Examples found:', result.examples.length);
+    console.log('[YoudaoTranslate] Annotation text:', result.annotationText);
+    console.log('[YoudaoTranslate] =====================================');
+
     return result;
+  }
+
+  /**
+   * 从 FreeDictionary 补充音标
+   * @param {Object} result - 翻译结果对象
+   * @param {string} originalText - 原始文本
+   */
+  async supplementPhoneticsFromFreeDictionary(result, originalText) {
+    try {
+      // 只为单个英文单词补充音标
+      const words = originalText.trim().split(/\s+/);
+      if (words.length !== 1) {
+        console.log('[YoudaoTranslate] Skipping phonetic fallback for non-single-word');
+        return;
+      }
+
+      // 检查是否是英文（简单判断）
+      if (!/^[a-zA-Z]+$/.test(originalText.trim())) {
+        console.log('[YoudaoTranslate] Skipping phonetic fallback for non-English text');
+        return;
+      }
+
+      // 使用全局的 translationService 获取 FreeDictionary 提供者
+      if (typeof translationService !== 'undefined') {
+        const freeDictProvider = translationService.providers.get('freedict');
+        if (freeDictProvider) {
+          const phoneticData = await freeDictProvider.fetchPhonetics(originalText);
+          if (phoneticData && phoneticData.phonetics.length > 0) {
+            result.phonetics = phoneticData.phonetics;
+            console.log(`[YoudaoTranslate] ✓ Supplemented ${phoneticData.phonetics.length} phonetics from FreeDictionary`);
+          } else {
+            console.log('[YoudaoTranslate] ⚠️ FreeDictionary did not return phonetics');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[YoudaoTranslate] Error supplementing phonetics:', error);
+    }
+  }
+
+  /**
+   * 格式化音标文本，确保有斜杠包裹
+   * @param {string} phonetic - 原始音标文本
+   * @returns {string} 格式化后的音标
+   */
+  formatPhonetic(phonetic) {
+    if (!phonetic) return '';
+    
+    // 移除可能已存在的斜杠
+    phonetic = phonetic.trim().replace(/^\/|\/$/g, '');
+    
+    // 添加标准的斜杠
+    return `/${phonetic}/`;
+  }
+
+  /**
+   * 生成用于标注的文本
+   * 优先使用：音标 + 翻译
+   * @param {Object} result - 翻译结果对象
+   * @returns {string} 标注文本
+   */
+  generateAnnotationText(result) {
+    const parts = [];
+    
+    // 如果有音标，优先使用美式音标，其次是默认音标
+    const usPhonetic = result.phonetics.find(p => p.type === 'us');
+    const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
+    const phonetic = usPhonetic || defaultPhonetic;
+    
+    if (phonetic) {
+      parts.push(phonetic.text);
+    }
+    
+    // 添加翻译（如果是单词，使用第一个词义；如果是句子，使用完整翻译）
+    if (result.definitions.length > 0 && result.originalText.split(' ').length === 1) {
+      // 单词：使用第一个词义
+      parts.push(result.definitions[0].text);
+    } else if (result.translatedText) {
+      // 句子或短语：使用完整翻译
+      parts.push(result.translatedText);
+    }
+    
+    return parts.join(' ');
   }
 
   async detectLanguage(text) {
@@ -313,67 +687,17 @@ class YoudaoTranslateProvider extends TranslationProvider {
   async getSupportedLanguages() {
     return [
       { code: 'auto', name: 'Auto Detect' },
-      { code: 'zh-CHS', name: 'Chinese (Simplified)' },
+      { code: 'zh-CN', name: 'Chinese (Simplified)' },
+      { code: 'zh-TW', name: 'Chinese (Traditional)' },
       { code: 'en', name: 'English' },
       { code: 'ja', name: 'Japanese' },
       { code: 'ko', name: 'Korean' },
       { code: 'fr', name: 'French' },
       { code: 'es', name: 'Spanish' },
-      { code: 'ru', name: 'Russian' }
+      { code: 'ru', name: 'Russian' },
+      { code: 'de', name: 'German' },
+      { code: 'ar', name: 'Arabic' }
     ];
-  }
-}
-
-/**
- * 本地词典提供者（用于离线场景）
- */
-class LocalDictionaryProvider extends TranslationProvider {
-  constructor(config = {}) {
-    super('Local Dictionary', config);
-    this.dictionary = config.dictionary || new Map();
-  }
-
-  async translate(text, targetLang, sourceLang = 'auto') {
-    console.log(`[LocalDictionary] Looking up: "${text}"`);
-    
-    const key = text.toLowerCase().trim();
-    const entry = this.dictionary.get(key);
-    
-    if (!entry) {
-      throw new Error(`No translation found for "${text}"`);
-    }
-
-    return {
-      originalText: text,
-      translatedText: entry.translation || '',
-      sourceLang: entry.sourceLang || sourceLang,
-      targetLang: targetLang,
-      phonetics: entry.phonetics || [],
-      definitions: entry.definitions || [],
-      examples: entry.examples || [],
-      provider: this.name,
-      timestamp: Date.now()
-    };
-  }
-
-  async detectLanguage(text) {
-    return 'en'; // 简单实现
-  }
-
-  async getSupportedLanguages() {
-    return [
-      { code: 'en', name: 'English' },
-      { code: 'zh-CN', name: 'Chinese (Simplified)' }
-    ];
-  }
-
-  /**
-   * 添加词条到本地词典
-   * @param {string} word - 单词
-   * @param {Object} entry - 词条数据
-   */
-  addEntry(word, entry) {
-    this.dictionary.set(word.toLowerCase().trim(), entry);
   }
 }
 
@@ -564,6 +888,114 @@ class DebugTranslateProvider extends TranslationProvider {
 }
 
 /**
+ * FreeDictionary API 提供者（用于补充音标）
+ * API: https://dictionaryapi.dev/
+ * 完全免费，无需注册，支持英语单词音标查询
+ */
+class FreeDictionaryProvider extends TranslationProvider {
+  constructor(config = {}) {
+    super('Free Dictionary', config);
+    this.apiUrl = 'https://api.dictionaryapi.dev/api/v2/entries/en';
+  }
+
+  async translate(text, targetLang, sourceLang = 'auto') {
+    // FreeDictionary 只支持英语单词查询
+    throw new Error('FreeDictionary is for phonetic lookup only, not translation');
+  }
+
+  /**
+   * 获取单词的音标信息
+   * @param {string} word - 英语单词
+   * @returns {Promise<Object>} 包含音标的结果对象
+   */
+  async fetchPhonetics(word) {
+    try {
+      // 只查询单个单词
+      const cleanWord = word.trim().toLowerCase();
+      if (cleanWord.split(/\s+/).length > 1) {
+        console.log('[FreeDictionary] Skipping phrase (only supports single words):', word);
+        return null;
+      }
+
+      console.log(`[FreeDictionary] Fetching phonetics for: "${cleanWord}"`);
+      
+      const url = `${this.apiUrl}/${encodeURIComponent(cleanWord)}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log(`[FreeDictionary] Word not found: ${cleanWord}`);
+          return null;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[FreeDictionary] API response:', data);
+
+      return this.parseFreeDictionaryResponse(data, cleanWord);
+    } catch (error) {
+      console.error('[FreeDictionary] Error fetching phonetics:', error);
+      return null;
+    }
+  }
+
+  parseFreeDictionaryResponse(data, word) {
+    if (!Array.isArray(data) || data.length === 0) {
+      return null;
+    }
+
+    const result = {
+      phonetics: [],
+      audioUrls: []
+    };
+
+    // FreeDictionary 返回数组，通常第一个元素包含主要信息
+    const entry = data[0];
+    
+    if (entry.phonetics && Array.isArray(entry.phonetics)) {
+      entry.phonetics.forEach(phonetic => {
+        if (phonetic.text) {
+          // 判断音标类型（美音/英音）
+          let type = 'default';
+          if (phonetic.audio) {
+            if (phonetic.audio.includes('-us.mp3') || phonetic.audio.includes('_us.mp3')) {
+              type = 'us';
+            } else if (phonetic.audio.includes('-uk.mp3') || phonetic.audio.includes('_uk.mp3')) {
+              type = 'uk';
+            }
+          }
+
+          result.phonetics.push({
+            text: phonetic.text.startsWith('/') ? phonetic.text : `/${phonetic.text}/`,
+            type: type,
+            audioUrl: phonetic.audio || null
+          });
+
+          if (phonetic.audio) {
+            result.audioUrls.push(phonetic.audio);
+          }
+        }
+      });
+    }
+
+    console.log(`[FreeDictionary] Found ${result.phonetics.length} phonetics for "${word}"`);
+    
+    return result.phonetics.length > 0 ? result : null;
+  }
+
+  async detectLanguage(text) {
+    return 'en';
+  }
+
+  async getSupportedLanguages() {
+    return [
+      { code: 'en', name: 'English' }
+    ];
+  }
+}
+
+/**
  * 翻译服务管理器
  * 管理多个翻译提供者，提供统一的翻译接口
  */
@@ -622,8 +1054,8 @@ class TranslationService {
   async translate(text, targetLang, sourceLang = 'auto', options = {}) {
     const cacheKey = `${text}:${sourceLang}:${targetLang}:${this.activeProvider}`;
     
-    // 检查缓存
-    if (!options.noCache && this.cache.has(cacheKey)) {
+    // 检查缓存（仅在缓存启用且未指定 noCache 时）
+    if (!options.noCache && this.maxCacheSize > 0 && this.cache.has(cacheKey)) {
       console.log('[TranslationService] Using cached result');
       return this.cache.get(cacheKey);
     }
@@ -632,8 +1064,10 @@ class TranslationService {
       const provider = this.getActiveProvider();
       const result = await provider.translate(text, targetLang, sourceLang);
       
-      // 缓存结果
-      this.addToCache(cacheKey, result);
+      // 缓存结果（仅在缓存启用时）
+      if (this.maxCacheSize > 0) {
+        this.addToCache(cacheKey, result);
+      }
       
       return result;
     } catch (error) {
@@ -662,6 +1096,24 @@ class TranslationService {
   clearCache() {
     this.cache.clear();
     console.log('[TranslationService] Cache cleared');
+  }
+
+  /**
+   * 启用缓存
+   * @param {number} [size=100] - 缓存大小
+   */
+  enableCache(size = 100) {
+    this.maxCacheSize = Math.max(10, Math.min(size, 1000)); // 限制在 10-1000 之间
+    console.log(`[TranslationService] Cache enabled with size: ${this.maxCacheSize}`);
+  }
+
+  /**
+   * 禁用缓存
+   */
+  disableCache() {
+    this.maxCacheSize = 0;
+    this.clearCache();
+    console.log('[TranslationService] Cache disabled');
   }
 
   /**
@@ -709,7 +1161,7 @@ const translationService = new TranslationService();
 translationService.registerProvider('debug', new DebugTranslateProvider());
 translationService.registerProvider('google', new GoogleTranslateProvider());
 translationService.registerProvider('youdao', new YoudaoTranslateProvider());
-translationService.registerProvider('local', new LocalDictionaryProvider());
+translationService.registerProvider('freedict', new FreeDictionaryProvider());
 
 // 设置默认提供者为Debug（便于开发调试）
 translationService.setActiveProvider('debug');
@@ -722,7 +1174,7 @@ if (typeof module !== 'undefined' && module.exports) {
     DebugTranslateProvider,
     GoogleTranslateProvider,
     YoudaoTranslateProvider,
-    LocalDictionaryProvider,
+    FreeDictionaryProvider,
     TranslationService,
     translationService
   };

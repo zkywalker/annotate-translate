@@ -348,13 +348,54 @@
               <input type="radio" name="provider" value="youdao">
               <span>📖 Youdao</span>
             </label>
-            <label class="radio-item">
-              <input type="radio" name="provider" value="local">
-              <span>💾 Local Dictionary</span>
-            </label>
           </div>
           <div class="description">
             <strong>Debug Provider:</strong> Returns fixed test data for development and debugging. No API calls required.
+          </div>
+        </div>
+
+        <!-- Youdao API 配置 -->
+        <div class="setting-item" id="youdaoConfigSection" style="display: none;">
+          <label>📖 Youdao API Configuration</label>
+          
+          <div style="margin-top: 15px;">
+            <label for="youdaoAppKey" style="font-size: 13px;">App Key</label>
+            <input type="text" id="youdaoAppKey" placeholder="Enter your Youdao App Key">
+            <div class="description">Get your App Key from <a href="https://ai.youdao.com/" target="_blank" style="color: #667eea;">Youdao AI Open Platform</a></div>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <label for="youdaoAppSecret" style="font-size: 13px;">App Secret</label>
+            <input type="password" id="youdaoAppSecret" placeholder="Enter your Youdao App Secret">
+            <div class="description">Keep your App Secret secure. It will be stored locally.</div>
+          </div>
+
+          <div class="info-box" style="margin-top: 15px;">
+            <strong>🔑 How to get Youdao API credentials:</strong><br>
+            1. Visit <a href="https://ai.youdao.com/" target="_blank" style="color: #004085; text-decoration: underline;">Youdao AI Open Platform</a><br>
+            2. Register/Login to your account<br>
+            3. Create a new application<br>
+            4. Get your App Key and App Secret<br>
+            5. Copy them to the fields above and save
+          </div>
+
+          <!-- 音标补充选项 -->
+          <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+            <div class="checkbox-item">
+              <input type="checkbox" id="enablePhoneticFallback" checked>
+              <label for="enablePhoneticFallback">📖 Enable Phonetic Fallback (FreeDictionary)</label>
+            </div>
+            <div class="description" style="margin-top: 8px; margin-left: 12px;">
+              When Youdao API doesn't return phonetics, automatically fetch them from FreeDictionary API (free, no registration required). Only works for English single words.
+            </div>
+            <div class="info-box" style="margin-top: 12px;">
+              <strong>💡 How it works:</strong><br>
+              1. Youdao translates the word → Gets translation and definitions<br>
+              2. If no phonetics → Automatically queries FreeDictionary → Gets /phonetics/<br>
+              3. Result: Translation + Definitions (Youdao) + Phonetics (FreeDictionary)<br>
+              <br>
+              <strong>✅ Benefits:</strong> Best of both worlds - quality translation + reliable phonetics!
+            </div>
           </div>
         </div>
       </div>
