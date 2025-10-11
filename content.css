@@ -96,3 +96,111 @@ ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
   color: #1557b0;
   font-weight: 600;
 }
+
+/* Dialog styles for multiple matches */
+.annotate-translate-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.annotate-translate-dialog .dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+.annotate-translate-dialog .dialog-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  min-width: 350px;
+  animation: dialogSlideIn 0.2s ease-out;
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.annotate-translate-dialog h3 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #202124;
+}
+
+.annotate-translate-dialog p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+.annotate-translate-dialog .dialog-buttons {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.annotate-translate-dialog .dialog-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.annotate-translate-dialog .dialog-btn-primary {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.annotate-translate-dialog .dialog-btn-primary:hover {
+  background-color: #1557b0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.annotate-translate-dialog .dialog-btn-success {
+  background-color: #34a853;
+  color: white;
+}
+
+.annotate-translate-dialog .dialog-btn-success:hover {
+  background-color: #2d8e47;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.annotate-translate-dialog .dialog-btn-secondary {
+  background-color: #f1f3f4;
+  color: #5f6368;
+}
+
+.annotate-translate-dialog .dialog-btn-secondary:hover {
+  background-color: #e8eaed;
+}
+
+.annotate-translate-dialog .dialog-btn:active {
+  transform: translateY(1px);
+}
