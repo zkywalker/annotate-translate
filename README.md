@@ -42,8 +42,24 @@ A Chrome extension for annotating and translating text on web pages.
 
 1. Select any text on a webpage
 2. Click the "Annotate" button that appears, or right-click and select "Annotate"
-3. The text will be highlighted in yellow
-4. Your annotations are automatically saved
+3. Enter your annotation text in the prompt dialog
+4. The text will be wrapped in an HTML `<ruby>` tag with your annotation displayed above it
+5. Your annotations are automatically saved
+
+**Ruby Tag Structure:**
+The extension creates standard HTML ruby annotations like this:
+```html
+<ruby class="annotate-translate-ruby">
+  selected text
+  <rt class="annotate-translate-rt">your annotation</rt>
+</ruby>
+```
+
+This allows the annotation text to appear directly above the base text, which is especially useful for:
+- Adding pronunciation guides
+- Providing translations
+- Adding contextual notes
+- Creating reading aids for language learning
 
 ### Settings
 
