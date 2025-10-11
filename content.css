@@ -5,31 +5,50 @@
   z-index: 10000;
   background-color: white;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: 4px;
+  padding: 2px;
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  /* 添加淡入动画 */
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .annotate-translate-menu .menu-button {
-  padding: 6px 12px;
+  padding: 4px 8px;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
   background-color: #1a73e8;
   color: white;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .annotate-translate-menu .menu-button:hover {
   background-color: #1557b0;
+  transform: scale(1.1);
 }
 
 .annotate-translate-menu .menu-button:active {
-  transform: translateY(1px);
+  transform: scale(0.95);
 }
 
 .annotate-translate-tooltip {

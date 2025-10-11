@@ -1,7 +1,7 @@
 // Content Script for Annotate Translate Extension
 
 let settings = {
-  enableTranslate: true,
+  enableTranslate: false,
   enableAnnotate: true,
   targetLanguage: 'en'
 };
@@ -17,7 +17,7 @@ function init() {
   
   // Load settings from storage
   chrome.storage.sync.get({
-    enableTranslate: true,
+    enableTranslate: false,
     enableAnnotate: true,
     targetLanguage: 'en'
   }, function(items) {
@@ -61,17 +61,26 @@ function showContextMenu(x, y, text) {
 
   if (settings.enableTranslate) {
     const translateBtn = document.createElement('button');
-    translateBtn.textContent = 'Translate';
+    translateBtn.textContent = 'T';
     translateBtn.className = 'menu-button';
-    translateBtn.addEventListener('click', () => translateText(text));
+    translateBtn.title = 'Translate'; // 悬停提示
+    translateBtn.addEventListener('click', () => {
+      hideContextMenu();
+      translateText(text);
+    });
     menu.appendChild(translateBtn);
   }
 
   if (settings.enableAnnotate) {
     const annotateBtn = document.createElement('button');
-    annotateBtn.textContent = 'Annotate';
+    annotateBtn.textContent = 'A';
     annotateBtn.className = 'menu-button';
-    annotateBtn.addEventListener('click', () => annotateText(text));
+    annotateBtn.title = 'Annotate'; // 悬停提示
+    annotateBtn.addEventListener('click', () => {
+      hideContextMenu();
+      // 使用改进的标注方法（支持批量标注和精确定位）
+      annotateSelectedText(text);
+    });
     menu.appendChild(annotateBtn);
   }
 
