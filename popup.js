@@ -33,7 +33,7 @@ function isValidTabUrl(url) {
 // Load settings from storage
 function loadSettings() {
   chrome.storage.sync.get({
-    enableTranslate: true,
+    enableTranslate: false,  // 默认关闭翻译功能
     enableAnnotate: true,
     targetLanguage: 'en'
   }, function(items) {

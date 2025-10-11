@@ -7,7 +7,7 @@ chrome.runtime.onInstalled.addListener((details) => {
     
     // Set default settings
     chrome.storage.sync.set({
-      enableTranslate: true,
+      enableTranslate: false,  // 默认关闭翻译功能
       enableAnnotate: true,
       targetLanguage: 'en'
     });
@@ -119,7 +119,7 @@ async function ensureContentScriptInjected(tabId) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'getSettings') {
     chrome.storage.sync.get({
-      enableTranslate: true,
+      enableTranslate: false,  // 默认关闭翻译功能
       enableAnnotate: true,
       targetLanguage: 'en'
     }, (settings) => {
