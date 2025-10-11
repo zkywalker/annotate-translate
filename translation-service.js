@@ -123,6 +123,9 @@ class GoogleTranslateProvider extends TranslationProvider {
         `q=${encodeURIComponent(text)}`
       ];
       const url = 'https://translate.googleapis.com/translate_a/single?' + params.join('&');
+      
+      // 🐛 DEBUG: 打印请求URL
+      console.log('[GoogleTranslate] Request URL:', url);
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -131,8 +134,24 @@ class GoogleTranslateProvider extends TranslationProvider {
 
       const data = await response.json();
       
+      // 🐛 DEBUG: 打印完整的响应数据
+      console.log('[GoogleTranslate] Raw Response Data:', JSON.stringify(data, null, 2));
+      console.log('[GoogleTranslate] Response Structure:');
+      console.log('  - data[0] (翻译文本):', data[0]);
+      console.log('  - data[1] (词义):', data[1]);
+      console.log('  - data[2] (检测语言):', data[2]);
+      console.log('  - data[13] (例句):', data[13]);
+      
       // 解析Google Translate API返回的数据
-      return this.parseGoogleResponse(data, text, sourceLang, targetLang);
+      const result = this.parseGoogleResponse(data, text, sourceLang, targetLang);
+      
+      // 🐛 DEBUG: 打印解析后的结果
+      console.log('[GoogleTranslate] Parsed Result:', JSON.stringify(result, null, 2));
+      console.log('[GoogleTranslate] Has Phonetics:', result.phonetics.length > 0);
+      console.log('[GoogleTranslate] Has Definitions:', result.definitions.length > 0);
+      console.log('[GoogleTranslate] Has Examples:', result.examples.length > 0);
+      
+      return result;
     } catch (error) {
       console.error('[GoogleTranslate] Translation error:', error);
       throw error;
@@ -140,6 +159,8 @@ class GoogleTranslateProvider extends TranslationProvider {
   }
 
   parseGoogleResponse(data, originalText, sourceLang, targetLang) {
+    console.log('[GoogleTranslate] Parsing response for:', originalText);
+    
     const result = {
       originalText: originalText,
       translatedText: '',
@@ -155,14 +176,24 @@ class GoogleTranslateProvider extends TranslationProvider {
     // 主要翻译文本
     if (data[0]) {
       result.translatedText = data[0].map(item => item[0]).filter(Boolean).join('');
+      console.log('[GoogleTranslate] ✓ Extracted translation:', result.translatedText);
+    } else {
+      console.log('[GoogleTranslate] ✗ No translation data in data[0]');
     }
 
     // 音标信息（如果有）
+    console.log('[GoogleTranslate] Checking for phonetics in data[0][1][3]...');
     if (data[0] && data[0][1] && data[0][1][3]) {
       result.phonetics.push({
         text: data[0][1][3],
         type: 'us'
       });
+      console.log('[GoogleTranslate] ✓ Found phonetic:', data[0][1][3]);
+    } else {
+      console.log('[GoogleTranslate] ✗ No phonetic data found');
+      console.log('[GoogleTranslate]   data[0]?', !!data[0]);
+      console.log('[GoogleTranslate]   data[0][1]?', data[0] ? !!data[0][1] : 'N/A');
+      console.log('[GoogleTranslate]   data[0][1][3]?', (data[0] && data[0][1]) ? data[0][1][3] : 'N/A');
     }
 
     // 词义解释
@@ -172,6 +203,9 @@ class GoogleTranslateProvider extends TranslationProvider {
         text: item[1]?.[0]?.[0] || '',
         synonyms: item[1]?.[0]?.[1] || []
       }));
+      console.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions`);
+    } else {
+      console.log('[GoogleTranslate] ✗ No definitions in data[1]');
     }
 
     // 例句
@@ -180,6 +214,9 @@ class GoogleTranslateProvider extends TranslationProvider {
         source: item[0],
         translation: ''
       })) || [];
+      console.log(`[GoogleTranslate] ✓ Found ${result.examples.length} examples`);
+    } else {
+      console.log('[GoogleTranslate] ✗ No examples in data[13]');
     }
 
     return result;
