@@ -3,11 +3,23 @@
 let settings = {
   enableTranslate: false,
   enableAnnotate: true,
-  targetLanguage: 'en'
+  targetLanguage: 'zh-CN',
+  translationProvider: 'debug',
+  enableAudio: true,
+  showPhonetics: true,
+  showDefinitions: true,
+  showExamples: true,
+  maxExamples: 3,
+  enableCache: true,
+  cacheSize: 100,
+  debugMode: false,
+  showConsoleLogs: false
 };
 
 let annotations = new Map();
 let lastSelection = null; // 保存最后一次选择的Range
+let translationUI = null; // TranslationUI实例
+let currentTooltip = null; // 当前显示的翻译卡片
 
 // Initialize the extension
 init();
@@ -15,21 +27,95 @@ init();
 function init() {
   console.log('[Annotate-Translate] Content script loaded on:', window.location.href);
   
+  // 检查翻译服务是否可用
+  if (typeof translationService === 'undefined') {
+    console.error('[Annotate-Translate] Translation service not loaded!');
+    return;
+  }
+  
+  console.log('[Annotate-Translate] Translation service available:', translationService);
+  
   // Load settings from storage
   chrome.storage.sync.get({
     enableTranslate: false,
     enableAnnotate: true,
-    targetLanguage: 'en'
+    targetLanguage: 'zh-CN',
+    translationProvider: 'debug',
+    enableAudio: true,
+    showPhonetics: true,
+    showDefinitions: true,
+    showExamples: true,
+    maxExamples: 3,
+    enableCache: true,
+    cacheSize: 100,
+    debugMode: false,
+    showConsoleLogs: false
   }, function(items) {
     settings = items;
     console.log('[Annotate-Translate] Settings loaded:', settings);
+    
+    // 应用设置到翻译服务
+    applyTranslationSettings();
   });
+
+  // 初始化TranslationUI
+  initializeTranslationUI();
 
   // Listen for text selection
   document.addEventListener('mouseup', handleTextSelection);
 
   // Listen for messages from popup
   chrome.runtime.onMessage.addListener(handleMessage);
+}
+
+// 初始化TranslationUI
+function initializeTranslationUI() {
+  if (typeof TranslationUI === 'undefined') {
+    console.error('[Annotate-Translate] TranslationUI not loaded!');
+    return;
+  }
+  
+  translationUI = new TranslationUI({
+    showPhonetics: settings.showPhonetics,
+    showDefinitions: settings.showDefinitions,
+    showExamples: settings.showExamples,
+    maxExamples: settings.maxExamples,
+    enableAudio: settings.enableAudio
+  });
+  
+  console.log('[Annotate-Translate] TranslationUI initialized');
+}
+
+// 应用翻译设置
+function applyTranslationSettings() {
+  if (typeof translationService === 'undefined') {
+    console.error('[Annotate-Translate] Translation service not available');
+    return;
+  }
+  
+  // 设置活跃的翻译提供商
+  if (settings.translationProvider) {
+    translationService.setActiveProvider(settings.translationProvider);
+    console.log('[Annotate-Translate] Provider set to:', settings.translationProvider);
+  }
+  
+  // 配置缓存
+  if (settings.enableCache) {
+    translationService.enableCache(settings.cacheSize || 100);
+  } else {
+    translationService.disableCache();
+  }
+  
+  // 重新初始化UI（如果设置改变）
+  if (translationUI) {
+    translationUI = new TranslationUI({
+      showPhonetics: settings.showPhonetics,
+      showDefinitions: settings.showDefinitions,
+      showExamples: settings.showExamples,
+      maxExamples: settings.maxExamples,
+      enableAudio: settings.enableAudio
+    });
+  }
 }
 
 // Handle text selection events
@@ -117,33 +203,142 @@ function hideContextMenu() {
 }
 
 // Translate selected text
-function translateText(text) {
+async function translateText(text) {
   hideContextMenu();
   
-  // Create translation tooltip
-  const tooltip = document.createElement('div');
-  tooltip.className = 'annotate-translate-tooltip';
-  tooltip.textContent = 'Translating...';
+  // 移除之前的翻译卡片
+  if (currentTooltip) {
+    currentTooltip.remove();
+    currentTooltip = null;
+  }
+  
+  // 创建加载提示
+  const loadingTooltip = document.createElement('div');
+  loadingTooltip.className = 'annotate-translate-tooltip loading';
+  loadingTooltip.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <span>Translating...</span>
+    </div>
+  `;
   
   const selection = window.getSelection();
   if (selection.rangeCount > 0) {
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
-    tooltip.style.left = (rect.left + window.scrollX) + 'px';
-    tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+    loadingTooltip.style.left = (rect.left + window.scrollX) + 'px';
+    loadingTooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
   }
   
-  document.body.appendChild(tooltip);
+  document.body.appendChild(loadingTooltip);
+  currentTooltip = loadingTooltip;
 
-  // Simulate translation (in real implementation, call translation API)
-  setTimeout(() => {
-    tooltip.textContent = `Translation: [${text}]`;
+  try {
+    // 使用翻译服务
+    if (typeof translationService === 'undefined') {
+      throw new Error('Translation service not available');
+    }
     
-    // Auto-hide after 5 seconds
+    if (settings.debugMode && settings.showConsoleLogs) {
+      console.log('[Annotate-Translate] Translating:', text, 'to', settings.targetLanguage);
+    }
+    
+    // 调用翻译服务
+    const result = await translationService.translate(
+      text,
+      settings.targetLanguage || 'zh-CN',
+      'auto'
+    );
+    
+    if (settings.debugMode && settings.showConsoleLogs) {
+      console.log('[Annotate-Translate] Translation result:', result);
+    }
+    
+    // 移除加载提示
+    loadingTooltip.remove();
+    
+    // 使用TranslationUI渲染结果
+    if (!translationUI) {
+      initializeTranslationUI();
+    }
+    
+    // 根据文本长度选择UI模式
+    const element = text.length > 50 
+      ? translationUI.renderSimple(result)
+      : translationUI.render(result);
+    
+    // 定位翻译卡片
+    element.className += ' annotate-translate-tooltip';
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      element.style.left = (rect.left + window.scrollX) + 'px';
+      element.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+    }
+    
+    document.body.appendChild(element);
+    currentTooltip = element;
+    
+    // 添加关闭按钮
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'translation-close-btn';
+    closeBtn.innerHTML = '×';
+    closeBtn.title = 'Close';
+    closeBtn.addEventListener('click', () => {
+      element.remove();
+      currentTooltip = null;
+    });
+    element.appendChild(closeBtn);
+    
+    // 自动关闭（如果配置了）
+    if (settings.autoCloseDelay && settings.autoCloseDelay > 0) {
+      setTimeout(() => {
+        if (element.parentElement) {
+          element.remove();
+          if (currentTooltip === element) {
+            currentTooltip = null;
+          }
+        }
+      }, settings.autoCloseDelay * 1000);
+    }
+    
+    // 点击外部关闭
     setTimeout(() => {
-      tooltip.remove();
-    }, 5000);
-  }, 500);
+      const closeHandler = (e) => {
+        if (!element.contains(e.target)) {
+          element.remove();
+          currentTooltip = null;
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      document.addEventListener('click', closeHandler);
+    }, 100);
+    
+  } catch (error) {
+    console.error('[Annotate-Translate] Translation failed:', error);
+    
+    // 显示错误消息
+    loadingTooltip.className = 'annotate-translate-tooltip error';
+    loadingTooltip.innerHTML = `
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <div class="error-message">
+          <strong>Translation failed</strong>
+          <p>${error.message}</p>
+        </div>
+      </div>
+    `;
+    
+    // 3秒后自动关闭错误提示
+    setTimeout(() => {
+      if (loadingTooltip.parentElement) {
+        loadingTooltip.remove();
+      }
+      if (currentTooltip === loadingTooltip) {
+        currentTooltip = null;
+      }
+    }, 3000);
+  }
 }
 
 // Annotate selected text
@@ -408,8 +603,23 @@ function handleMessage(request, sender, sendResponse) {
     // Respond to ping to confirm content script is loaded
     sendResponse({pong: true});
   } else if (request.action === 'updateSettings') {
-    settings = request.settings;
+    // 更新设置
+    settings = request.settings || settings;
+    console.log('[Annotate-Translate] Settings updated:', settings);
+    
+    // 重新应用翻译设置
+    applyTranslationSettings();
+    
     sendResponse({success: true});
+  } else if (request.action === 'clearCache') {
+    // 清除翻译缓存
+    if (typeof translationService !== 'undefined') {
+      translationService.clearCache();
+      console.log('[Annotate-Translate] Translation cache cleared');
+      sendResponse({success: true});
+    } else {
+      sendResponse({success: false, error: 'Translation service not available'});
+    }
   } else if (request.action === 'clearAnnotations') {
     clearAllAnnotations();
     sendResponse({success: true});
