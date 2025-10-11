@@ -129,14 +129,48 @@ function annotateText(text) {
 
 // Create ruby annotation for context menu action
 function annotateSelectedText(text) {
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0 && selection.toString().trim() === text) {
-    const range = selection.getRangeAt(0);
+  // Prompt user for annotation text
+  const annotation = prompt('Enter annotation for "' + text + '":', '');
+  if (annotation && annotation.trim()) {
+    // Find and annotate all exact matches of the text on the page
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function(node) {
+          // Skip script and style elements
+          if (node.parentElement.tagName === 'SCRIPT' || 
+              node.parentElement.tagName === 'STYLE' ||
+              node.parentElement.closest('ruby.annotate-translate-ruby')) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return node.nodeValue.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      }
+    );
     
-    // Prompt user for annotation text
-    const annotation = prompt('Enter annotation for "' + text + '":', '');
-    if (annotation) {
-      createRubyAnnotation(range, text, annotation);
+    const textNodes = [];
+    let node;
+    while (node = walker.nextNode()) {
+      textNodes.push(node);
+    }
+    
+    // Annotate the first occurrence found
+    for (let textNode of textNodes) {
+      const nodeText = textNode.nodeValue;
+      const index = nodeText.indexOf(text);
+      if (index !== -1) {
+        try {
+          const range = document.createRange();
+          range.setStart(textNode, index);
+          range.setEnd(textNode, index + text.length);
+          createRubyAnnotation(range, text, annotation);
+          break; // Only annotate the first match
+        } catch (e) {
+          console.error('Failed to create range:', e);
+          continue;
+        }
+      }
     }
   }
 }
@@ -144,6 +178,8 @@ function annotateSelectedText(text) {
 // Create ruby tag annotation
 function createRubyAnnotation(range, baseText, annotationText) {
   try {
+    console.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
+    
     // Create ruby element structure
     const ruby = document.createElement('ruby');
     ruby.className = 'annotate-translate-ruby';
@@ -174,8 +210,10 @@ function createRubyAnnotation(range, baseText, annotationText) {
     
     // Clear selection
     window.getSelection().removeAllRanges();
+    
+    console.log('[Annotate-Translate] Ruby annotation created successfully');
   } catch (e) {
-    console.error('Failed to create ruby annotation:', e);
+    console.error('[Annotate-Translate] Failed to create ruby annotation:', e);
     alert('Failed to annotate text. Please try selecting the text again.');
   }
 }
@@ -196,6 +234,8 @@ function saveAnnotation(baseText, annotationText) {
 
 // Handle messages from popup or background
 function handleMessage(request, sender, sendResponse) {
+  console.log('[Annotate-Translate] Received message:', request);
+  
   if (request.action === 'updateSettings') {
     settings = request.settings;
     sendResponse({success: true});
@@ -204,10 +244,12 @@ function handleMessage(request, sender, sendResponse) {
     sendResponse({success: true});
   } else if (request.action === 'annotate' && request.text) {
     // Handle annotate action from context menu
+    console.log('[Annotate-Translate] Annotating text:', request.text);
     annotateSelectedText(request.text);
     sendResponse({success: true});
   } else if (request.action === 'translate' && request.text) {
     // Handle translate action from context menu
+    console.log('[Annotate-Translate] Translating text:', request.text);
     translateText(request.text);
     sendResponse({success: true});
   }

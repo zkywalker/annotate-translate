@@ -36,6 +36,8 @@ function createContextMenus() {
 
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
+  console.log('[Annotate-Translate BG] Context menu clicked:', info.menuItemId, 'Text:', info.selectionText);
+  
   if (info.menuItemId === 'translate-text') {
     chrome.tabs.sendMessage(tab.id, {
       action: 'translate',
@@ -44,6 +46,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       // Handle potential errors when content script is not available
       if (chrome.runtime.lastError) {
         console.log('Could not send translate message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Translate message sent successfully');
       }
     });
   } else if (info.menuItemId === 'annotate-text') {
@@ -54,6 +58,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       // Handle potential errors when content script is not available
       if (chrome.runtime.lastError) {
         console.log('Could not send annotate message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Annotate message sent successfully');
       }
     });
   }
