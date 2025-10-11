@@ -103,6 +103,27 @@ This extension requires the following permissions:
 - `contextMenus`: To add right-click menu options
 - `<all_urls>`: To work on all websites
 
+## Known Limitations
+
+### Content Script Restrictions
+
+Content scripts cannot run on certain browser pages and URLs. The extension will gracefully handle these cases:
+
+**Unsupported pages include:**
+- Browser internal pages (chrome://, edge://, about:, etc.)
+- Chrome Web Store pages
+- View source pages (view-source://)
+- Browser extension pages (chrome-extension://)
+- Data URLs (data:)
+- JavaScript URLs (javascript:)
+- Local file URLs (file://) - unless specifically enabled in extension settings
+
+When attempting to use features on these pages, you may see error messages like:
+- "Cannot clear annotations on this page."
+- "Content script not available on this page."
+
+This is normal browser behavior for security reasons. The extension will work normally on regular web pages (http:// and https:// URLs).
+
 ## License
 
 MIT License
