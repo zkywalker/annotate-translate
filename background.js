@@ -40,11 +40,21 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.sendMessage(tab.id, {
       action: 'translate',
       text: info.selectionText
+    }, function(response) {
+      // Handle potential errors when content script is not available
+      if (chrome.runtime.lastError) {
+        console.log('Could not send translate message:', chrome.runtime.lastError.message);
+      }
     });
   } else if (info.menuItemId === 'annotate-text') {
     chrome.tabs.sendMessage(tab.id, {
       action: 'annotate',
       text: info.selectionText
+    }, function(response) {
+      // Handle potential errors when content script is not available
+      if (chrome.runtime.lastError) {
+        console.log('Could not send annotate message:', chrome.runtime.lastError.message);
+      }
     });
   }
 });

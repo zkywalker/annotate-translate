@@ -11,6 +11,25 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('clear-annotations').addEventListener('click', clearAnnotations);
 });
 
+// Check if the tab URL is valid for content scripts
+function isValidTabUrl(url) {
+  if (!url) return false;
+  
+  // List of URL schemes that don't support content scripts
+  const invalidSchemes = [
+    'chrome://',
+    'chrome-extension://',
+    'edge://',
+    'about:',
+    'view-source:',
+    'data:',
+    'javascript:',
+    'file://'
+  ];
+  
+  return !invalidSchemes.some(scheme => url.startsWith(scheme));
+}
+
 // Load settings from storage
 function loadSettings() {
   chrome.storage.sync.get({
@@ -40,10 +59,15 @@ function saveSettings() {
     
     // Send message to content script to apply new settings
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      if (tabs[0]) {
+      if (tabs[0] && isValidTabUrl(tabs[0].url)) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'updateSettings',
           settings: settings
+        }, function(response) {
+          // Handle potential errors when content script is not available
+          if (chrome.runtime.lastError) {
+            console.log('Could not update content script settings:', chrome.runtime.lastError.message);
+          }
         });
       }
     });
@@ -59,11 +83,30 @@ function saveSettings() {
 function clearAnnotations() {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     if (tabs[0]) {
+      // Check if the tab URL is valid for content scripts
+      if (!isValidTabUrl(tabs[0].url)) {
+        const status = document.getElementById('status');
+        status.textContent = 'Cannot clear annotations on this page.';
+        status.className = 'status error';
+        
+        setTimeout(function() {
+          status.textContent = '';
+          status.className = 'status';
+        }, 3000);
+        return;
+      }
+      
       chrome.tabs.sendMessage(tabs[0].id, {
         action: 'clearAnnotations'
       }, function(response) {
         const status = document.getElementById('status');
-        if (response && response.success) {
+        
+        // Check for connection errors
+        if (chrome.runtime.lastError) {
+          console.log('Could not send message to content script:', chrome.runtime.lastError.message);
+          status.textContent = 'Content script not available on this page.';
+          status.className = 'status error';
+        } else if (response && response.success) {
           status.textContent = 'All annotations cleared!';
           status.className = 'status success';
         } else {
