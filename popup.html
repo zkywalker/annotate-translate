@@ -3,46 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annotate Translate</title>
+    <title data-i18n="extName">Annotate Translate</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Annotate Translate</h1>
+        <div class="header">
+            <h1 data-i18n="extName">Annotate Translate</h1>
+            <button id="open-settings" class="settings-icon-button" data-i18n-title="openSettings" aria-label="Open Settings">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 6.5C8.067 6.5 6.5 8.067 6.5 10C6.5 11.933 8.067 13.5 10 13.5C11.933 13.5 13.5 11.933 13.5 10C13.5 8.067 11.933 6.5 10 6.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16.434 12.5L15.4 13.2C15.3 13.9 15.1 14.6 14.8 15.2L15.1 16.5L13.5 17.5L12.2 17.2C11.6 17.6 10.9 17.9 10.2 18L9.5 19.2H7.5L6.8 18C6.1 17.9 5.4 17.7 4.8 17.4L3.5 17.7L2.5 16.1L2.8 14.8C2.4 14.2 2.1 13.5 2 12.8L0.8 12.1V10.1L2 9.4C2.1 8.7 2.3 8 2.6 7.4L2.3 6.1L3.9 5.1L5.2 5.4C5.8 5 6.5 4.7 7.2 4.6L7.9 3.4H9.9L10.6 4.6C11.3 4.7 12 4.9 12.6 5.2L13.9 4.9L14.9 6.5L14.6 7.8C15 8.4 15.3 9.1 15.4 9.8L16.6 10.5V12.5H16.434Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
         <div class="settings">
-            <h2>Settings</h2>
+            <h2 data-i18n="settings">Settings</h2>
             <div class="setting-item">
                 <label for="enable-translate">
                     <input type="checkbox" id="enable-translate" checked>
-                    Enable Translation
+                    <span data-i18n="enableTranslation">Enable Translation</span>
                 </label>
             </div>
             <div class="setting-item">
                 <label for="enable-annotate">
                     <input type="checkbox" id="enable-annotate" checked>
-                    Enable Annotation
+                    <span data-i18n="enableAnnotation">Enable Annotation</span>
                 </label>
             </div>
             <div class="setting-item">
-                <label for="target-language">Target Language:</label>
+                <label for="target-language" data-i18n="defaultTargetLanguage">Target Language:</label>
                 <select id="target-language">
-                    <option value="en">English</option>
-                    <option value="zh-CN">Chinese (Simplified)</option>
-                    <option value="zh-TW">Chinese (Traditional)</option>
-                    <option value="ja">Japanese</option>
-                    <option value="ko">Korean</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
+                    <!-- Options will be populated by JavaScript with i18n -->
                 </select>
             </div>
         </div>
         <div class="actions">
-            <button id="save-settings">Save Settings</button>
-            <button id="clear-annotations">Clear All Annotations</button>
+            <button id="save-settings" data-i18n="saveSettings">Save Settings</button>
+            <button id="clear-annotations" data-i18n="clearAllAnnotations">Clear All Annotations</button>
         </div>
         <div id="status" class="status"></div>
     </div>
+    <script src="i18n-helper.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>

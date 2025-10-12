@@ -138,8 +138,9 @@ class GoogleTranslateProvider extends TranslationProvider {
       console.log('[GoogleTranslate] Raw Response Data:', JSON.stringify(data, null, 2));
       console.log('[GoogleTranslate] Response Structure:');
       console.log('  - data[0] (翻译文本):', data[0]);
-      console.log('  - data[1] (词义):', data[1]);
+      console.log('  - data[1] (反向翻译):', data[1]);
       console.log('  - data[2] (检测语言):', data[2]);
+      console.log('  - data[12] (英文定义):', data[12]);
       console.log('  - data[13] (例句):', data[13]);
       
       // 解析Google Translate API返回的数据
@@ -196,16 +197,41 @@ class GoogleTranslateProvider extends TranslationProvider {
       console.log('[GoogleTranslate]   data[0][1][3]?', (data[0] && data[0][1]) ? data[0][1][3] : 'N/A');
     }
 
-    // 词义解释
-    if (data[1]) {
-      result.definitions = data[1].map(item => ({
-        partOfSpeech: item[0] || '',
-        text: item[1]?.[0]?.[0] || '',
-        synonyms: item[1]?.[0]?.[1] || []
-      }));
-      console.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions`);
+    // 词义解释 - 优先使用 data[12]（英文定义），否则使用 data[1]（反向翻译）
+    if (data[12] && Array.isArray(data[12])) {
+      // data[12] 包含英文定义
+      result.definitions = data[12].map(item => {
+        const definitions = item[1]; // 定义数组
+        if (Array.isArray(definitions) && definitions.length > 0) {
+          // 合并所有定义
+          return definitions.map(def => ({
+            partOfSpeech: item[0] || '',
+            text: def[0] || '',
+            synonyms: []
+          }));
+        }
+        return null;
+      }).flat().filter(Boolean);
+      console.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions from data[12]`);
+    } else if (data[1]) {
+      // 回退到 data[1]（反向翻译）
+      result.definitions = data[1].map(item => {
+        // data[1] 结构: ["名词", ["发音", "读音", "读法"], ...]
+        const translations = item[1]; // 翻译数组
+        if (Array.isArray(translations) && translations.length > 0) {
+          // 显示所有翻译，用顿号分隔
+          const translationText = translations.filter(t => typeof t === 'string').join('、');
+          return {
+            partOfSpeech: item[0] || '',
+            text: translationText || translations[0],
+            synonyms: []
+          };
+        }
+        return null;
+      }).filter(Boolean);
+      console.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions from data[1]`);
     } else {
-      console.log('[GoogleTranslate] ✗ No definitions in data[1]');
+      console.log('[GoogleTranslate] ✗ No definitions in data[12] or data[1]');
     }
 
     // 例句
@@ -257,14 +283,14 @@ class YoudaoTranslateProvider extends TranslationProvider {
     this.appKey = config.appKey || '';
     this.appSecret = config.appSecret || '';
     this.apiUrl = 'https://openapi.youdao.com/api';
-    this.enablePhoneticFallback = config.enablePhoneticFallback !== false; // 默认启用音标补充
+    this.enablePhoneticFallback = config.enablePhoneticFallback !== false; // 默认启用音标补充（通用设置，各提供商可自行实现）
   }
 
   /**
    * 更新 API 密钥配置
    * @param {string} appKey - 应用 ID
    * @param {string} appSecret - 应用密钥
-   * @param {boolean} enablePhoneticFallback - 是否启用音标补充
+   * @param {boolean} enablePhoneticFallback - 是否启用音标补充（通用功能设置）
    */
   updateConfig(appKey, appSecret, enablePhoneticFallback = true) {
     this.appKey = appKey || '';
@@ -577,9 +603,10 @@ class YoudaoTranslateProvider extends TranslationProvider {
       console.log('[YoudaoTranslate] ⚠ No translation, using original text');
     }
 
-    // 如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
+    // 如果没有音标且启用了补充功能，尝试从外部 API 获取
+    // 这是一个通用功能，当前支持英文音标，未来可扩展支持汉语拼音等
     if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
-      console.log('[YoudaoTranslate] No phonetics found, trying FreeDictionary fallback...');
+      console.log('[YoudaoTranslate] No phonetics found, trying external phonetic supplement...');
       await this.supplementPhoneticsFromFreeDictionary(result, originalText);
     }
 
@@ -598,22 +625,26 @@ class YoudaoTranslateProvider extends TranslationProvider {
   }
 
   /**
-   * 从 FreeDictionary 补充音标
+   * 从外部 API 补充音标/注音（通用音标补充功能）
+   * 当前实现：使用 FreeDictionary API 为英文单词补充音标
+   * 未来扩展：可添加汉语拼音、日语假名等其他语言的注音支持
    * @param {Object} result - 翻译结果对象
    * @param {string} originalText - 原始文本
    */
   async supplementPhoneticsFromFreeDictionary(result, originalText) {
     try {
-      // 只为单个英文单词补充音标
+      // 当前版本：只为单个英文单词补充音标
+      // TODO: 未来可扩展支持汉语拼音（通过拼音 API）
       const words = originalText.trim().split(/\s+/);
       if (words.length !== 1) {
-        console.log('[YoudaoTranslate] Skipping phonetic fallback for non-single-word');
+        console.log('[PhoneticSupplement] Skipping for non-single-word text');
         return;
       }
 
       // 检查是否是英文（简单判断）
+      // TODO: 未来添加汉字检测，使用拼音 API
       if (!/^[a-zA-Z]+$/.test(originalText.trim())) {
-        console.log('[YoudaoTranslate] Skipping phonetic fallback for non-English text');
+        console.log('[PhoneticSupplement] Skipping for non-English text (future: support Chinese)');
         return;
       }
 
@@ -766,9 +797,9 @@ class DebugTranslateProvider extends TranslationProvider {
             { partOfSpeech: 'v.', text: '打招呼', synonyms: ['greet'] }
           ],
           examples: [
-            { source: 'Hello! How are you?', translation: '你好！你好吗？' },
-            { source: 'Say hello to your parents.', translation: '向你的父母问好。' },
-            { source: 'He said hello and left.', translation: '他打了个招呼就离开了。' }
+            { source: 'Hello! <b>How are you?</b>', translation: '你好！<b>你好吗？</b>' },
+            { source: 'Say <i>hello</i> to your parents.', translation: '向你的父母<i>问好</i>。' },
+            { source: 'He said hello and <u>left</u>.', translation: '他打了个招呼就<u>离开</u>了。' }
           ]
         },
         'ja': {
@@ -778,7 +809,7 @@ class DebugTranslateProvider extends TranslationProvider {
             { partOfSpeech: 'int.', text: '挨拶の言葉', synonyms: [] }
           ],
           examples: [
-            { source: 'Hello! How are you?', translation: 'こんにちは！元気ですか？' }
+            { source: '<b>Hello!</b> How are you?', translation: '<b>こんにちは！</b>元気ですか？' }
           ]
         }
       },
@@ -795,8 +826,8 @@ class DebugTranslateProvider extends TranslationProvider {
             { partOfSpeech: 'n.', text: '苹果公司', synonyms: [] }
           ],
           examples: [
-            { source: 'An apple a day keeps the doctor away.', translation: '一天一苹果，医生远离我。' },
-            { source: 'I like red apples.', translation: '我喜欢红苹果。' }
+            { source: 'An <b>apple</b> a day keeps the doctor away.', translation: '一天一<b>苹果</b>，医生远离我。' },
+            { source: 'I like <mark>red apples</mark>.', translation: '我喜欢<mark>红苹果</mark>。' }
           ]
         }
       },
@@ -809,8 +840,8 @@ class DebugTranslateProvider extends TranslationProvider {
             { partOfSpeech: 'n.', text: '领域；界', synonyms: ['realm', 'sphere'] }
           ],
           examples: [
-            { source: 'Hello world!', translation: '你好，世界！' },
-            { source: 'The world is changing.', translation: '世界正在改变。' }
+            { source: '<strong>Hello world!</strong>', translation: '<strong>你好，世界！</strong>' },
+            { source: 'The <u>world</u> is changing.', translation: '<u>世界</u>正在改变。' }
           ]
         }
       }
@@ -830,7 +861,8 @@ class DebugTranslateProvider extends TranslationProvider {
           { partOfSpeech: 'n.', text: `[DEBUG] 这是 "${text}" 的调试翻译`, synonyms: [] }
         ],
         examples: [
-          { source: `Example with ${text}`, translation: `包含 ${text} 的例句` }
+          { source: `Example with <b>${text}</b>`, translation: `包含 <b>${text}</b> 的例句` },
+          { source: `No code can be <b>completely</b> secure`, translation: `没有代码可以<b>完全</b>安全` }
         ]
       };
     }
@@ -1163,8 +1195,8 @@ translationService.registerProvider('google', new GoogleTranslateProvider());
 translationService.registerProvider('youdao', new YoudaoTranslateProvider());
 translationService.registerProvider('freedict', new FreeDictionaryProvider());
 
-// 设置默认提供者为Debug（便于开发调试）
-translationService.setActiveProvider('debug');
+// 设置默认提供者为 Google Translate
+translationService.setActiveProvider('google');
 
 // 导出
 if (typeof module !== 'undefined' && module.exports) {

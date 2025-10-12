@@ -1,0 +1,180 @@
+{
+  "extName": {
+    "message": "주석 번역",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "웹 페이지에서 텍스트에 주석을 달고 번역하는 Chrome 확장 프로그램",
+    "description": "Extension description"
+  },
+  "settings": {
+    "message": "설정",
+    "description": "Settings title"
+  },
+  "configureExtension": {
+    "message": "주석 번역 확장 프로그램 구성",
+    "description": "Settings subtitle"
+  },
+  "featureToggles": {
+    "message": "기능 전환",
+    "description": "Feature toggles section title"
+  },
+  "enableTranslation": {
+    "message": "번역 기능 활성화",
+    "description": "Enable translation checkbox label"
+  },
+  "enableAnnotation": {
+    "message": "주석 기능 활성화",
+    "description": "Enable annotation checkbox label"
+  },
+  "translationProvider": {
+    "message": "번역 제공자",
+    "description": "Translation provider section title"
+  },
+  "selectTranslationService": {
+    "message": "번역 서비스 선택",
+    "description": "Select translation service label"
+  },
+  "debugProvider": {
+    "message": "디버그",
+    "description": "Debug provider name"
+  },
+  "googleTranslate": {
+    "message": "Google 번역",
+    "description": "Google Translate provider name"
+  },
+  "languageSettings": {
+    "message": "언어 설정",
+    "description": "Language settings section title"
+  },
+  "defaultTargetLanguage": {
+    "message": "기본 대상 언어",
+    "description": "Default target language label"
+  },
+  "langChineseSimplified": {
+    "message": "중국어(간체)",
+    "description": "Chinese Simplified language name"
+  },
+  "langChineseTraditional": {
+    "message": "중국어(번체)",
+    "description": "Chinese Traditional language name"
+  },
+  "langEnglish": {
+    "message": "영어",
+    "description": "English language name"
+  },
+  "langJapanese": {
+    "message": "일본어",
+    "description": "Japanese language name"
+  },
+  "langKorean": {
+    "message": "한국어",
+    "description": "Korean language name"
+  },
+  "saveSettings": {
+    "message": "설정 저장",
+    "description": "Save settings button"
+  },
+  "translate": {
+    "message": "번역",
+    "description": "Translate button tooltip"
+  },
+  "annotate": {
+    "message": "주석",
+    "description": "Annotate button tooltip"
+  },
+  "openSettings": {
+    "message": "설정 열기",
+    "description": "Open settings button tooltip"
+  },
+  "translating": {
+    "message": "번역 중...",
+    "description": "Translating loading message"
+  },
+  "close": {
+    "message": "닫기",
+    "description": "Close button tooltip"
+  },
+  "cancel": {
+    "message": "취소",
+    "description": "Cancel button"
+  },
+  "phoneticSettings": {
+    "message": "음성 기호 및 발음 설정",
+    "description": "Phonetic settings section title"
+  },
+  "enablePhoneticFallback": {
+    "message": "음성 기호 보완 활성화",
+    "description": "Enable phonetic supplement label"
+  },
+  "phoneticFallbackDesc": {
+    "message": "번역 제공자가 음성 기호 정보를 반환하지 않으면 외부 소스에서 자동으로 가져옵니다. 현재 영어 음성 기호를 지원합니다(FreeDictionary API를 통해). 중국어 병음 및 기타 언어 지원이 계획되어 있습니다.",
+    "description": "Phonetic supplement description"
+  },
+  "phoneticFallbackHow": {
+    "message": "작동 방식:",
+    "description": "How it works title"
+  },
+  "phoneticFallbackStep1": {
+    "message": "번역 제공자가 단어 처리 → 번역 및 정의 반환",
+    "description": "Phonetic supplement step 1"
+  },
+  "phoneticFallbackStep2": {
+    "message": "음성 기호가 반환되지 않으면 → 자동으로 외부 API 쿼리 → 음성 기호 가져오기",
+    "description": "Phonetic supplement step 2"
+  },
+  "phoneticFallbackStep3": {
+    "message": "결과: 번역 + 정의 + 음성 기호가 포함된 완전한 정보",
+    "description": "Phonetic supplement step 3"
+  },
+  "phoneticFallbackCurrentSupport": {
+    "message": "현재 지원: 영어 음성 기호(단일 단어, FreeDictionary API를 통해 - 무료, 등록 불필요)",
+    "description": "Phonetic supplement current support"
+  },
+  "phoneticFallbackFutureSupport": {
+    "message": "계획됨: 중국어 병음 및 더 많은 언어",
+    "description": "Phonetic supplement future support"
+  },
+  
+  "original": {
+    "message": "원문",
+    "description": "Original text label"
+  },
+  "translation": {
+    "message": "번역",
+    "description": "Translation label"
+  },
+  "pronunciation": {
+    "message": "발음",
+    "description": "Pronunciation label"
+  },
+  "definitions": {
+    "message": "정의",
+    "description": "Definitions label"
+  },
+  "examples": {
+    "message": "예문",
+    "description": "Examples label"
+  },
+  "synonyms": {
+    "message": "동의어",
+    "description": "Synonyms label"
+  },
+  "playPronunciation": {
+    "message": "발음 재생",
+    "description": "Play pronunciation button tooltip"
+  },
+  "poweredBy": {
+    "message": "제공:",
+    "description": "Powered by label"
+  },
+  "translationFailed": {
+    "message": "번역 실패",
+    "description": "Translation failed error title"
+  },
+  "clickToViewDetails": {
+    "message": "자세한 번역을 보려면 클릭하세요",
+    "description": "Tooltip for clickable annotations"
+  }
+}
+

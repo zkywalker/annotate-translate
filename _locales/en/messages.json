@@ -1,0 +1,487 @@
+{
+  "extName": {
+    "message": "Annotate Translate",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "A Chrome extension for annotating and translating text on web pages",
+    "description": "Extension description"
+  },
+  
+  "settings": {
+    "message": "Settings",
+    "description": "Settings title"
+  },
+  "configureExtension": {
+    "message": "Configure your Annotate Translate extension",
+    "description": "Settings subtitle"
+  },
+  
+  "featureToggles": {
+    "message": "Feature Toggles",
+    "description": "Feature toggles section title"
+  },
+  "enableTranslation": {
+    "message": "Enable Translation Feature",
+    "description": "Enable translation checkbox label"
+  },
+  "enableAnnotation": {
+    "message": "Enable Annotation Feature",
+    "description": "Enable annotation checkbox label"
+  },
+  
+  "translationProvider": {
+    "message": "Translation Provider",
+    "description": "Translation provider section title"
+  },
+  "selectTranslationService": {
+    "message": "Select Translation Service",
+    "description": "Select translation service label"
+  },
+  "debugProvider": {
+    "message": "Debug",
+    "description": "Debug provider name"
+  },
+  "googleTranslate": {
+    "message": "Google Translate",
+    "description": "Google Translate provider name"
+  },
+  "youdaoTranslate": {
+    "message": "Youdao",
+    "description": "Youdao provider name"
+  },
+  "debugProviderDesc": {
+    "message": "Returns fixed test data for development and debugging. No API calls required.",
+    "description": "Debug provider description"
+  },
+  
+  "youdaoConfig": {
+    "message": "Youdao API Configuration",
+    "description": "Youdao API configuration section title"
+  },
+  "appKey": {
+    "message": "App Key",
+    "description": "App Key label"
+  },
+  "appSecret": {
+    "message": "App Secret",
+    "description": "App Secret label"
+  },
+  "enterAppKey": {
+    "message": "Enter your Youdao App Key",
+    "description": "App Key placeholder"
+  },
+  "enterAppSecret": {
+    "message": "Enter your Youdao App Secret",
+    "description": "App Secret placeholder"
+  },
+  "getAppKeyFrom": {
+    "message": "Get your App Key from",
+    "description": "Get App Key instruction"
+  },
+  "youdaoOpenPlatform": {
+    "message": "Youdao AI Open Platform",
+    "description": "Youdao platform name"
+  },
+  "keepSecretSecure": {
+    "message": "Keep your App Secret secure. It will be stored locally.",
+    "description": "Security warning for App Secret"
+  },
+  "howToGetCredentials": {
+    "message": "How to get Youdao API credentials:",
+    "description": "How to get credentials title"
+  },
+  "credentialsStep1": {
+    "message": "Visit Youdao AI Open Platform",
+    "description": "Credentials step 1"
+  },
+  "credentialsStep2": {
+    "message": "Register/Login to your account",
+    "description": "Credentials step 2"
+  },
+  "credentialsStep3": {
+    "message": "Create a new application",
+    "description": "Credentials step 3"
+  },
+  "credentialsStep4": {
+    "message": "Get your App Key and App Secret",
+    "description": "Credentials step 4"
+  },
+  "credentialsStep5": {
+    "message": "Copy them to the fields above and save",
+    "description": "Credentials step 5"
+  },
+  
+  "phoneticSettings": {
+    "message": "Phonetic & Pronunciation Settings",
+    "description": "Phonetic settings section title"
+  },
+  "enablePhoneticFallback": {
+    "message": "Enable Phonetic Supplement",
+    "description": "Enable phonetic supplement label"
+  },
+  "phoneticFallbackDesc": {
+    "message": "When translation provider doesn't return phonetic information, automatically fetch it from external sources. Currently supports English phonetics (via FreeDictionary API). Future support planned for Chinese Pinyin and other languages.",
+    "description": "Phonetic supplement description"
+  },
+  "phoneticFallbackHow": {
+    "message": "How it works:",
+    "description": "How it works title"
+  },
+  "phoneticFallbackStep1": {
+    "message": "Translation provider processes the word → Returns translation and definitions",
+    "description": "Phonetic supplement step 1"
+  },
+  "phoneticFallbackStep2": {
+    "message": "If no phonetics returned → Automatically queries external API → Gets phonetics",
+    "description": "Phonetic supplement step 2"
+  },
+  "phoneticFallbackStep3": {
+    "message": "Result: Complete information with translation + definitions + phonetics",
+    "description": "Phonetic supplement step 3"
+  },
+  "phoneticFallbackCurrentSupport": {
+    "message": "Current support: English phonetics (single words, via FreeDictionary API - free, no registration)",
+    "description": "Phonetic supplement current support"
+  },
+  "phoneticFallbackFutureSupport": {
+    "message": "Planned: Chinese Pinyin, and more languages",
+    "description": "Phonetic supplement future support"
+  },
+  
+  "languageSettings": {
+    "message": "Language Settings",
+    "description": "Language settings section title"
+  },
+  "defaultTargetLanguage": {
+    "message": "Default Target Language",
+    "description": "Default target language label"
+  },
+  "targetLanguageDesc": {
+    "message": "The default language to translate text into",
+    "description": "Target language description"
+  },
+  
+  "langChineseSimplified": {
+    "message": "Chinese (Simplified)",
+    "description": "Chinese Simplified language name"
+  },
+  "langChineseTraditional": {
+    "message": "Chinese (Traditional)",
+    "description": "Chinese Traditional language name"
+  },
+  "langEnglish": {
+    "message": "English",
+    "description": "English language name"
+  },
+  "langJapanese": {
+    "message": "Japanese",
+    "description": "Japanese language name"
+  },
+  "langKorean": {
+    "message": "Korean",
+    "description": "Korean language name"
+  },
+  "langSpanish": {
+    "message": "Spanish",
+    "description": "Spanish language name"
+  },
+  "langFrench": {
+    "message": "French",
+    "description": "French language name"
+  },
+  "langGerman": {
+    "message": "German",
+    "description": "German language name"
+  },
+  "langRussian": {
+    "message": "Russian",
+    "description": "Russian language name"
+  },
+  
+  "uiSettings": {
+    "message": "UI Settings",
+    "description": "UI settings section title"
+  },
+  "enableAudio": {
+    "message": "Enable Audio Pronunciation",
+    "description": "Enable audio label"
+  },
+  "showPhonetics": {
+    "message": "Show Phonetic Symbols",
+    "description": "Show phonetics label"
+  },
+  "showDefinitions": {
+    "message": "Show Word Definitions",
+    "description": "Show definitions label"
+  },
+  "showExamples": {
+    "message": "Show Example Sentences",
+    "description": "Show examples label"
+  },
+  "maxExamples": {
+    "message": "Maximum Number of Examples",
+    "description": "Max examples label"
+  },
+  "maxExamplesDesc": {
+    "message": "How many example sentences to display (1-10)",
+    "description": "Max examples description"
+  },
+  "autoCloseDelay": {
+    "message": "Auto-close Delay (seconds)",
+    "description": "Auto-close delay label"
+  },
+  "autoCloseDelayDesc": {
+    "message": "Automatically close translation popup after this many seconds (0 = never)",
+    "description": "Auto-close delay description"
+  },
+  
+  "annotationSettings": {
+    "message": "Annotation Settings",
+    "description": "Annotation settings section title"
+  },
+  "showPhoneticInAnnotation": {
+    "message": "Show Phonetic + Translation in Annotation",
+    "description": "Show phonetic in annotation label"
+  },
+  "showPhoneticInAnnotationDesc": {
+    "message": "When enabled, annotations will show both phonetic symbols and translation (e.g., \"/həˈloʊ/ 你好\"). When disabled, annotations will only show the translation (e.g., \"你好\").",
+    "description": "Show phonetic in annotation description"
+  },
+  "annotationTip": {
+    "message": "Tip: This setting affects the auto-translate feature in annotation mode. You can still manually enter any text you want for annotations.",
+    "description": "Annotation tip"
+  },
+  
+  "performanceSettings": {
+    "message": "Performance Settings",
+    "description": "Performance settings section title"
+  },
+  "enableCache": {
+    "message": "Enable Translation Cache",
+    "description": "Enable cache label"
+  },
+  "cacheSize": {
+    "message": "Cache Size",
+    "description": "Cache size label"
+  },
+  "cacheSizeDesc": {
+    "message": "Maximum number of cached translations (10-500)",
+    "description": "Cache size description"
+  },
+  "cacheTip": {
+    "message": "Tip: Caching improves performance by storing recent translations locally. Larger cache size uses more memory but reduces API calls.",
+    "description": "Cache tip"
+  },
+  
+  "debugSettings": {
+    "message": "Debug Settings",
+    "description": "Debug settings section title"
+  },
+  "enableDebugMode": {
+    "message": "Enable Debug Mode",
+    "description": "Enable debug mode label"
+  },
+  "showConsoleLog": {
+    "message": "Show Console Logs",
+    "description": "Show console log label"
+  },
+  "debugTip": {
+    "message": "Debug Mode: When enabled, detailed logs will be printed to the browser console. Use Debug provider for testing without API calls.",
+    "description": "Debug tip"
+  },
+  
+  "saveSettings": {
+    "message": "Save Settings",
+    "description": "Save settings button"
+  },
+  "resetToDefaults": {
+    "message": "Reset to Defaults",
+    "description": "Reset to defaults button"
+  },
+  "clearCache": {
+    "message": "Clear Cache",
+    "description": "Clear cache button"
+  },
+  
+  "settingsSaved": {
+    "message": "Settings saved successfully!",
+    "description": "Settings saved message"
+  },
+  "settingsReset": {
+    "message": "Settings reset to defaults!",
+    "description": "Settings reset message"
+  },
+  "cacheCleared": {
+    "message": "Translation cache cleared successfully!",
+    "description": "Cache cleared message"
+  },
+  
+  "translate": {
+    "message": "Translate",
+    "description": "Translate button tooltip"
+  },
+  "annotate": {
+    "message": "Annotate",
+    "description": "Annotate button tooltip"
+  },
+  "clearAllAnnotations": {
+    "message": "Clear All Annotations",
+    "description": "Clear all annotations button"
+  },
+  "allAnnotationsCleared": {
+    "message": "All annotations cleared!",
+    "description": "All annotations cleared message"
+  },
+  "openSettings": {
+    "message": "Open Settings",
+    "description": "Open settings button tooltip"
+  },
+  
+  "translating": {
+    "message": "Translating...",
+    "description": "Translating loading message"
+  },
+  "translationFailed": {
+    "message": "Translation failed",
+    "description": "Translation failed error title"
+  },
+  "cannotClearOnThisPage": {
+    "message": "Cannot clear annotations on this page.",
+    "description": "Cannot clear annotations error"
+  },
+  "contentScriptNotAvailable": {
+    "message": "Content script not available on this page.",
+    "description": "Content script not available error"
+  },
+  "failedToClear": {
+    "message": "Failed to clear annotations.",
+    "description": "Failed to clear error"
+  },
+  
+  "original": {
+    "message": "Original",
+    "description": "Original text label"
+  },
+  "translation": {
+    "message": "Translation",
+    "description": "Translation label"
+  },
+  "pronunciation": {
+    "message": "Pronunciation",
+    "description": "Pronunciation label"
+  },
+  "definitions": {
+    "message": "Definitions",
+    "description": "Definitions label"
+  },
+  "examples": {
+    "message": "Examples",
+    "description": "Examples label"
+  },
+  "synonyms": {
+    "message": "Synonyms",
+    "description": "Synonyms label"
+  },
+  "playPronunciation": {
+    "message": "Play pronunciation",
+    "description": "Play pronunciation button tooltip"
+  },
+  "close": {
+    "message": "Close",
+    "description": "Close button tooltip"
+  },
+  "poweredBy": {
+    "message": "Powered by",
+    "description": "Powered by label"
+  },
+  "clickToViewDetails": {
+    "message": "Click to view detailed translation",
+    "description": "Tooltip for clickable annotations"
+  },
+  
+  "multipleMatchesFound": {
+    "message": "Multiple matches found",
+    "description": "Multiple matches dialog title"
+  },
+  "foundOccurrences": {
+    "message": "Found $COUNT$ occurrences of \"$TEXT$\"",
+    "description": "Found occurrences message",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      },
+      "text": {
+        "content": "$2",
+        "example": "hello"
+      }
+    }
+  },
+  "annotateFirstOnly": {
+    "message": "Annotate First Only",
+    "description": "Annotate first only button"
+  },
+  "annotateAll": {
+    "message": "Annotate All ($COUNT$)",
+    "description": "Annotate all button",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  
+  "badgeNew": {
+    "message": "New",
+    "description": "New badge"
+  },
+  "badgeBeta": {
+    "message": "Beta",
+    "description": "Beta badge"
+  },
+  "badgeDebug": {
+    "message": "Debug",
+    "description": "Debug badge"
+  },
+  "badgeAdvanced": {
+    "message": "Advanced",
+    "description": "Advanced badge"
+  },
+  
+  "confirmReset": {
+    "message": "Are you sure you want to reset all settings to defaults?",
+    "description": "Confirmation message for resetting settings"
+  },
+  "confirmClearCache": {
+    "message": "Are you sure you want to clear the translation cache?",
+    "description": "Confirmation message for clearing cache"
+  },
+  "failedToClearCache": {
+    "message": "Failed to clear cache",
+    "description": "Error message when cache clearing fails"
+  },
+  
+  "uiLanguage": {
+    "message": "Interface Language",
+    "description": "UI language setting label"
+  },
+  "uiLanguageDesc": {
+    "message": "The language for the extension interface (requires page reload)",
+    "description": "UI language setting description"
+  },
+  "autoDetect": {
+    "message": "🌐 Auto Detect",
+    "description": "Auto detect language option"
+  },
+  "languageChangedReload": {
+    "message": "Language changed! Reloading page...",
+    "description": "Message shown when language is changed"
+  }
+}
+

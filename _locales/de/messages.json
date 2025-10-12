@@ -1,0 +1,132 @@
+{
+  "extName": {
+    "message": "Annotieren und Übersetzen",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Eine Chrome-Erweiterung zum Annotieren und Übersetzen von Text auf Webseiten",
+    "description": "Extension description"
+  },
+  "settings": {
+    "message": "Einstellungen",
+    "description": "Settings title"
+  },
+  "featureToggles": {
+    "message": "Funktionen umschalten",
+    "description": "Feature toggles section title"
+  },
+  "enableTranslation": {
+    "message": "Übersetzungsfunktion aktivieren",
+    "description": "Enable translation checkbox label"
+  },
+  "enableAnnotation": {
+    "message": "Annotationsfunktion aktivieren",
+    "description": "Enable annotation checkbox label"
+  },
+  "languageSettings": {
+    "message": "Spracheinstellungen",
+    "description": "Language settings section title"
+  },
+  "saveSettings": {
+    "message": "Einstellungen speichern",
+    "description": "Save settings button"
+  },
+  "translate": {
+    "message": "Übersetzen",
+    "description": "Translate button tooltip"
+  },
+  "annotate": {
+    "message": "Annotieren",
+    "description": "Annotate button tooltip"
+  },
+  "close": {
+    "message": "Schließen",
+    "description": "Close button tooltip"
+  },
+  "cancel": {
+    "message": "Abbrechen",
+    "description": "Cancel button"
+  },
+  "phoneticSettings": {
+    "message": "Phonetik & Aussprache Einstellungen",
+    "description": "Phonetic settings section title"
+  },
+  "enablePhoneticFallback": {
+    "message": "Phonetische Ergänzung aktivieren",
+    "description": "Enable phonetic supplement label"
+  },
+  "phoneticFallbackDesc": {
+    "message": "Wenn der Übersetzungsanbieter keine phonetischen Informationen zurückgibt, werden diese automatisch aus externen Quellen abgerufen. Derzeit werden englische Phonetik unterstützt (über FreeDictionary API). Zukünftige Unterstützung für Chinesisch Pinyin und andere Sprachen geplant.",
+    "description": "Phonetic supplement description"
+  },
+  "phoneticFallbackHow": {
+    "message": "Wie es funktioniert:",
+    "description": "How it works title"
+  },
+  "phoneticFallbackStep1": {
+    "message": "Übersetzungsanbieter verarbeitet das Wort → Gibt Übersetzung und Definitionen zurück",
+    "description": "Phonetic supplement step 1"
+  },
+  "phoneticFallbackStep2": {
+    "message": "Wenn keine Phonetik zurückgegeben wird → Fragt automatisch externe API ab → Erhält Phonetik",
+    "description": "Phonetic supplement step 2"
+  },
+  "phoneticFallbackStep3": {
+    "message": "Ergebnis: Vollständige Informationen mit Übersetzung + Definitionen + Phonetik",
+    "description": "Phonetic supplement step 3"
+  },
+  "phoneticFallbackCurrentSupport": {
+    "message": "Aktuelle Unterstützung: Englische Phonetik (einzelne Wörter, über FreeDictionary API - kostenlos, keine Registrierung)",
+    "description": "Phonetic supplement current support"
+  },
+  "phoneticFallbackFutureSupport": {
+    "message": "Geplant: Chinesisch Pinyin und weitere Sprachen",
+    "description": "Phonetic supplement future support"
+  },
+  
+  "original": {
+    "message": "Original",
+    "description": "Original text label"
+  },
+  "translation": {
+    "message": "Übersetzung",
+    "description": "Translation label"
+  },
+  "pronunciation": {
+    "message": "Aussprache",
+    "description": "Pronunciation label"
+  },
+  "definitions": {
+    "message": "Definitionen",
+    "description": "Definitions label"
+  },
+  "examples": {
+    "message": "Beispiele",
+    "description": "Examples label"
+  },
+  "synonyms": {
+    "message": "Synonyme",
+    "description": "Synonyms label"
+  },
+  "playPronunciation": {
+    "message": "Aussprache abspielen",
+    "description": "Play pronunciation button tooltip"
+  },
+  "poweredBy": {
+    "message": "Betrieben von",
+    "description": "Powered by label"
+  },
+  "translationFailed": {
+    "message": "Übersetzung fehlgeschlagen",
+    "description": "Translation failed error title"
+  },
+  "translating": {
+    "message": "Übersetzen...",
+    "description": "Translating loading message"
+  },
+  "clickToViewDetails": {
+    "message": "Klicken Sie, um die detaillierte Übersetzung anzuzeigen",
+    "description": "Tooltip for clickable annotations"
+  }
+}
+

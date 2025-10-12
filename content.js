@@ -185,7 +185,7 @@ function showContextMenu(x, y, text) {
     const translateBtn = document.createElement('button');
     translateBtn.textContent = 'T';
     translateBtn.className = 'menu-button';
-    translateBtn.title = 'Translate'; // 悬停提示
+    translateBtn.title = chrome.i18n.getMessage('translate') || 'Translate'; // 悬停提示
     translateBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // 阻止事件冒泡
       e.preventDefault();  // 阻止默认行为
@@ -200,7 +200,7 @@ function showContextMenu(x, y, text) {
     const annotateBtn = document.createElement('button');
     annotateBtn.textContent = 'A';
     annotateBtn.className = 'menu-button';
-    annotateBtn.title = 'Annotate'; // 悬停提示
+    annotateBtn.title = chrome.i18n.getMessage('annotate') || 'Annotate'; // 悬停提示
     annotateBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // 阻止事件冒泡
       e.preventDefault();  // 阻止默认行为
@@ -249,7 +249,7 @@ async function translateText(text) {
   loadingTooltip.innerHTML = `
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <span>Translating...</span>
+      <span>${chrome.i18n.getMessage('translating') || 'Translating...'}</span>
     </div>
   `;
   
@@ -314,7 +314,7 @@ async function translateText(text) {
     const closeBtn = document.createElement('button');
     closeBtn.className = 'translation-close-btn';
     closeBtn.innerHTML = '×';
-    closeBtn.title = 'Close';
+    closeBtn.title = chrome.i18n.getMessage('close') || 'Close';
     closeBtn.addEventListener('click', () => {
       element.remove();
       currentTooltip = null;
@@ -354,7 +354,7 @@ async function translateText(text) {
       <div class="error-content">
         <span class="error-icon">⚠️</span>
         <div class="error-message">
-          <strong>Translation failed</strong>
+          <strong>${chrome.i18n.getMessage('translationFailed') || 'Translation failed'}</strong>
           <p>${error.message}</p>
         </div>
       </div>
@@ -457,19 +457,26 @@ function promptForMultipleMatches(matches, text) {
   // 创建一个更友好的对话框
   const dialog = document.createElement('div');
   dialog.className = 'annotate-translate-dialog';
+  const multipleMatchesText = chrome.i18n.getMessage('multipleMatchesFound') || 'Multiple matches found';
+  const foundOccurrencesText = chrome.i18n.getMessage('foundOccurrences', [matches.length.toString(), escapeHtml(text)]) || 
+    `Found <strong>${matches.length}</strong> occurrences of "<strong>${escapeHtml(text)}</strong>"`;
+  const annotateFirstText = chrome.i18n.getMessage('annotateFirstOnly') || 'Annotate First Only';
+  const annotateAllText = chrome.i18n.getMessage('annotateAll', [matches.length.toString()]) || `Annotate All (${matches.length})`;
+  const cancelText = chrome.i18n.getMessage('cancel') || 'Cancel';
+  
   dialog.innerHTML = `
     <div class="dialog-content">
-      <h3>Multiple matches found</h3>
-      <p>Found <strong>${matches.length}</strong> occurrences of "<strong>${escapeHtml(text)}</strong>"</p>
+      <h3>${multipleMatchesText}</h3>
+      <p>${foundOccurrencesText}</p>
       <div class="dialog-buttons">
         <button class="dialog-btn dialog-btn-primary" data-action="first">
-          Annotate First Only
+          ${annotateFirstText}
         </button>
         <button class="dialog-btn dialog-btn-success" data-action="all">
-          Annotate All (${matches.length})
+          ${annotateAllText}
         </button>
         <button class="dialog-btn dialog-btn-secondary" data-action="cancel">
-          Cancel
+          ${cancelText}
         </button>
       </div>
     </div>
@@ -639,12 +646,29 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
     range.deleteContents();
     range.insertNode(ruby);
     
-    // Store annotation
+    // Store annotation with full result data
     annotations.set(ruby, {
       base: baseText,
       annotation: annotationText,
-      phonetics: result ? result.phonetics : null
+      phonetics: result ? result.phonetics : null,
+      fullResult: result  // 保存完整的翻译结果
     });
+    
+    // Add click event to show detailed translation
+    if (result && (result.definitions || result.examples)) {
+      ruby.style.cursor = 'pointer';
+      ruby.setAttribute('title', chrome.i18n.getMessage('clickToViewDetails') || 'Click to view detailed translation');
+      
+      ruby.addEventListener('click', (e) => {
+        // 如果点击的是音频按钮，不显示详细弹窗
+        if (e.target.closest('.annotate-audio-button')) {
+          return;
+        }
+        
+        e.stopPropagation();
+        showDetailedTranslation(ruby, result);
+      });
+    }
     
     // Save annotation to storage
     saveAnnotation(baseText, annotationText);
@@ -860,6 +884,62 @@ function handleMessage(request, sender, sendResponse) {
     sendResponse({success: true});
   }
   return true;
+}
+
+// Show detailed translation popup for annotation
+function showDetailedTranslation(rubyElement, result) {
+  console.log('[Annotate-Translate] Showing detailed translation for:', result.originalText);
+  
+  // 移除之前的翻译卡片
+  if (currentTooltip) {
+    currentTooltip.remove();
+    currentTooltip = null;
+  }
+  
+  // 初始化 TranslationUI（如果还没有）
+  if (!translationUI) {
+    initializeTranslationUI();
+  }
+  
+  // 根据文本长度选择UI模式
+  const element = result.originalText.length > 50 
+    ? translationUI.renderSimple(result)
+    : translationUI.render(result);
+  
+  // 定位翻译卡片到 ruby 元素下方
+  element.className += ' annotate-translate-tooltip annotation-detail-popup';
+  const rect = rubyElement.getBoundingClientRect();
+  element.style.left = (rect.left + window.scrollX) + 'px';
+  element.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+  
+  document.body.appendChild(element);
+  currentTooltip = element;
+  
+  // 添加关闭按钮
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'translation-close-btn';
+  closeBtn.innerHTML = '×';
+  closeBtn.title = chrome.i18n.getMessage('close') || 'Close';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    element.remove();
+    currentTooltip = null;
+  });
+  element.appendChild(closeBtn);
+  
+  // 点击外部关闭
+  setTimeout(() => {
+    const closeHandler = (e) => {
+      if (!element.contains(e.target) && !rubyElement.contains(e.target)) {
+        element.remove();
+        currentTooltip = null;
+        document.removeEventListener('click', closeHandler);
+      }
+    };
+    document.addEventListener('click', closeHandler);
+  }, 100);
+  
+  console.log('[Annotate-Translate] Detailed translation popup shown');
 }
 
 // Clear all annotations from the page

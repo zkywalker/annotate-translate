@@ -309,213 +309,211 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>⚙️ Settings</h1>
-      <p>Configure your Annotate Translate extension</p>
+      <h1>⚙️ <span data-i18n="settings">Settings</span></h1>
+      <p data-i18n="configureExtension">Configure your Annotate Translate extension</p>
     </div>
 
     <div class="content">
       <!-- 功能开关 -->
       <div class="section">
-        <div class="section-title">Feature Toggles</div>
+        <div class="section-title" data-i18n="featureToggles">Feature Toggles</div>
         
         <div class="checkbox-item">
           <input type="checkbox" id="enableTranslate" checked>
-          <label for="enableTranslate">Enable Translation Feature</label>
+          <label for="enableTranslate" data-i18n="enableTranslation">Enable Translation Feature</label>
         </div>
 
         <div class="checkbox-item">
           <input type="checkbox" id="enableAnnotate" checked>
-          <label for="enableAnnotate">Enable Annotation Feature</label>
+          <label for="enableAnnotate" data-i18n="enableAnnotation">Enable Annotation Feature</label>
         </div>
       </div>
 
       <!-- 翻译提供商 -->
       <div class="section">
-        <div class="section-title">Translation Provider</div>
+        <div class="section-title" data-i18n="translationProvider">Translation Provider</div>
         
         <div class="setting-item">
-          <label>Select Translation Service</label>
+          <label data-i18n="selectTranslationService">Select Translation Service</label>
           <div class="radio-group">
-            <label class="radio-item selected">
-              <input type="radio" name="provider" value="debug" checked>
-              <span>🐛 Debug <span class="badge badge-debug">Debug</span></span>
+            <label class="radio-item" id="debugProviderOption" style="display: none;">
+              <input type="radio" name="provider" value="debug">
+              <span>🐛 <span data-i18n="debugProvider">Debug</span> <span class="badge badge-debug" data-i18n="badgeDebug">Debug</span></span>
             </label>
-            <label class="radio-item">
-              <input type="radio" name="provider" value="google">
-              <span>🌐 Google Translate</span>
+            <label class="radio-item selected">
+              <input type="radio" name="provider" value="google" checked>
+              <span>🌐 <span data-i18n="googleTranslate">Google Translate</span></span>
             </label>
             <label class="radio-item">
               <input type="radio" name="provider" value="youdao">
-              <span>📖 Youdao</span>
+              <span>📖 <span data-i18n="youdaoTranslate">Youdao</span></span>
             </label>
           </div>
-          <div class="description">
-            <strong>Debug Provider:</strong> Returns fixed test data for development and debugging. No API calls required.
+          <div class="description" id="debugProviderDesc" style="display: none;">
+            <strong data-i18n="debugProvider">Debug Provider:</strong> <span data-i18n="debugProviderDesc">Returns fixed test data for development and debugging. No API calls required.</span>
           </div>
         </div>
 
         <!-- Youdao API 配置 -->
         <div class="setting-item" id="youdaoConfigSection" style="display: none;">
-          <label>📖 Youdao API Configuration</label>
+          <label>📖 <span data-i18n="youdaoConfig">Youdao API Configuration</span></label>
           
           <div style="margin-top: 15px;">
-            <label for="youdaoAppKey" style="font-size: 13px;">App Key</label>
-            <input type="text" id="youdaoAppKey" placeholder="Enter your Youdao App Key">
-            <div class="description">Get your App Key from <a href="https://ai.youdao.com/" target="_blank" style="color: #667eea;">Youdao AI Open Platform</a></div>
+            <label for="youdaoAppKey" style="font-size: 13px;" data-i18n="appKey">App Key</label>
+            <input type="text" id="youdaoAppKey" data-i18n-placeholder="enterAppKey">
+            <div class="description" data-i18n="getAppKeyFrom">Get your App Key from <a href="https://ai.youdao.com/" target="_blank" rel="noopener noreferrer" style="color: #667eea;" data-i18n="youdaoOpenPlatform">Youdao AI Open Platform</a></div>
           </div>
 
           <div style="margin-top: 15px;">
-            <label for="youdaoAppSecret" style="font-size: 13px;">App Secret</label>
-            <input type="password" id="youdaoAppSecret" placeholder="Enter your Youdao App Secret">
-            <div class="description">Keep your App Secret secure. It will be stored locally.</div>
+            <label for="youdaoAppSecret" style="font-size: 13px;" data-i18n="appSecret">App Secret</label>
+            <input type="password" id="youdaoAppSecret" data-i18n-placeholder="enterAppSecret">
+            <div class="description" data-i18n="keepSecretSecure">Keep your App Secret secure. It will be stored locally.</div>
           </div>
 
           <div class="info-box" style="margin-top: 15px;">
-            <strong>🔑 How to get Youdao API credentials:</strong><br>
-            1. Visit <a href="https://ai.youdao.com/" target="_blank" style="color: #004085; text-decoration: underline;">Youdao AI Open Platform</a><br>
-            2. Register/Login to your account<br>
-            3. Create a new application<br>
-            4. Get your App Key and App Secret<br>
-            5. Copy them to the fields above and save
-          </div>
-
-          <!-- 音标补充选项 -->
-          <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
-            <div class="checkbox-item">
-              <input type="checkbox" id="enablePhoneticFallback" checked>
-              <label for="enablePhoneticFallback">📖 Enable Phonetic Fallback (FreeDictionary)</label>
-            </div>
-            <div class="description" style="margin-top: 8px; margin-left: 12px;">
-              When Youdao API doesn't return phonetics, automatically fetch them from FreeDictionary API (free, no registration required). Only works for English single words.
-            </div>
-            <div class="info-box" style="margin-top: 12px;">
-              <strong>💡 How it works:</strong><br>
-              1. Youdao translates the word → Gets translation and definitions<br>
-              2. If no phonetics → Automatically queries FreeDictionary → Gets /phonetics/<br>
-              3. Result: Translation + Definitions (Youdao) + Phonetics (FreeDictionary)<br>
-              <br>
-              <strong>✅ Benefits:</strong> Best of both worlds - quality translation + reliable phonetics!
-            </div>
+            <strong>🔑 <span data-i18n="howToGetCredentials">How to get Youdao API credentials:</span></strong><br>
+            <span data-i18n="credentialsStep1">1. Visit <a href="https://ai.youdao.com/" target="_blank" rel="noopener noreferrer" style="color: #004085; text-decoration: underline;">Youdao AI Open Platform</a></span><br>
+            <span data-i18n="credentialsStep2">2. Register/Login to your account</span><br>
+            <span data-i18n="credentialsStep3">3. Create a new application</span><br>
+            <span data-i18n="credentialsStep4">4. Get your App Key and App Secret</span><br>
+            <span data-i18n="credentialsStep5">5. Copy them to the fields above and save</span>
           </div>
         </div>
       </div>
 
       <!-- 语言设置 -->
       <div class="section">
-        <div class="section-title">Language Settings</div>
+        <div class="section-title" data-i18n="languageSettings">Language Settings</div>
         
         <div class="setting-item">
-          <label for="targetLanguage">Default Target Language</label>
-          <select id="targetLanguage">
-            <option value="zh-CN">Chinese (Simplified)</option>
-            <option value="zh-TW">Chinese (Traditional)</option>
-            <option value="en">English</option>
-            <option value="ja">Japanese</option>
-            <option value="ko">Korean</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="ru">Russian</option>
+          <label for="uiLanguage" data-i18n="uiLanguage">Interface Language</label>
+          <select id="uiLanguage">
+            <!-- Options will be populated by JavaScript -->
           </select>
-          <div class="description">The default language to translate text into</div>
+          <div class="description" data-i18n="uiLanguageDesc">The language for the extension interface (requires page reload)</div>
+        </div>
+        
+        <div class="setting-item">
+          <label for="targetLanguage" data-i18n="defaultTargetLanguage">Default Target Language</label>
+          <select id="targetLanguage">
+            <!-- Options will be populated by JavaScript with i18n -->
+          </select>
+          <div class="description" data-i18n="targetLanguageDesc">The default language to translate text into</div>
         </div>
       </div>
 
       <!-- UI设置 -->
       <div class="section">
-        <div class="section-title">UI Settings</div>
+        <div class="section-title" data-i18n="uiSettings">UI Settings</div>
         
         <div class="checkbox-item">
           <input type="checkbox" id="enableAudio" checked>
-          <label for="enableAudio">Enable Audio Pronunciation</label>
+          <label for="enableAudio" data-i18n="enableAudio">Enable Audio Pronunciation</label>
         </div>
 
         <div class="checkbox-item">
           <input type="checkbox" id="showPhonetics" checked>
-          <label for="showPhonetics">Show Phonetic Symbols</label>
+          <label for="showPhonetics" data-i18n="showPhonetics">Show Phonetic Symbols</label>
         </div>
 
         <div class="checkbox-item">
           <input type="checkbox" id="showDefinitions" checked>
-          <label for="showDefinitions">Show Word Definitions</label>
+          <label for="showDefinitions" data-i18n="showDefinitions">Show Word Definitions</label>
         </div>
 
         <div class="checkbox-item">
           <input type="checkbox" id="showExamples" checked>
-          <label for="showExamples">Show Example Sentences</label>
+          <label for="showExamples" data-i18n="showExamples">Show Example Sentences</label>
         </div>
 
         <div class="setting-item">
-          <label for="maxExamples">Maximum Number of Examples</label>
+          <label for="maxExamples" data-i18n="maxExamples">Maximum Number of Examples</label>
           <input type="number" id="maxExamples" min="1" max="10" value="3">
-          <div class="description">How many example sentences to display (1-10)</div>
+          <div class="description" data-i18n="maxExamplesDesc">How many example sentences to display (1-10)</div>
         </div>
 
         <div class="setting-item">
-          <label for="autoCloseDelay">Auto-close Delay (seconds)</label>
+          <label for="autoCloseDelay" data-i18n="autoCloseDelay">Auto-close Delay (seconds)</label>
           <input type="number" id="autoCloseDelay" min="0" max="60" value="10">
-          <div class="description">Automatically close translation popup after this many seconds (0 = never)</div>
+          <div class="description" data-i18n="autoCloseDelayDesc">Automatically close translation popup after this many seconds (0 = never)</div>
+        </div>
+      </div>
+
+      <!-- 音标与注音设置 -->
+      <div class="section">
+        <div class="section-title">🔊 <span data-i18n="phoneticSettings">Phonetic & Pronunciation Settings</span></div>
+        
+        <div class="checkbox-item">
+          <input type="checkbox" id="enablePhoneticFallback" checked>
+          <label for="enablePhoneticFallback" data-i18n="enablePhoneticFallback">Enable Phonetic Supplement</label>
+        </div>
+        <div class="description" style="margin-top: 8px; margin-left: 12px;" data-i18n="phoneticFallbackDesc">
+          When translation provider doesn't return phonetic information, automatically fetch it from external sources. Currently supports English phonetics (via FreeDictionary API). Future support planned for Chinese Pinyin and other languages.
+        </div>
+        
+        <div class="info-box" style="margin-top: 12px;">
+          <strong>💡 <span data-i18n="phoneticFallbackHow">How it works:</span></strong><br>
+          <span data-i18n="phoneticFallbackStep1">1. Translation provider processes the word → Returns translation and definitions</span><br>
+          <span data-i18n="phoneticFallbackStep2">2. If no phonetics returned → Automatically queries external API → Gets phonetics</span><br>
+          <span data-i18n="phoneticFallbackStep3">3. Result: Complete information with translation + definitions + phonetics</span><br>
+          <br>
+          <strong>✅ <span data-i18n="phoneticFallbackCurrentSupport">Current support: English phonetics (single words, via FreeDictionary API - free, no registration)</span></strong><br>
+          <strong>🚀 <span data-i18n="phoneticFallbackFutureSupport">Planned: Chinese Pinyin, and more languages</span></strong>
         </div>
       </div>
 
       <!-- 标注设置 -->
       <div class="section">
-        <div class="section-title">Annotation Settings <span class="badge badge-new">New</span></div>
+        <div class="section-title"><span data-i18n="annotationSettings">Annotation Settings</span> <span class="badge badge-new" data-i18n="badgeNew">New</span></div>
         
         <div class="checkbox-item">
           <input type="checkbox" id="showPhoneticInAnnotation" checked>
-          <label for="showPhoneticInAnnotation">Show Phonetic + Translation in Annotation</label>
+          <label for="showPhoneticInAnnotation" data-i18n="showPhoneticInAnnotation">Show Phonetic + Translation in Annotation</label>
         </div>
-        <div class="description" style="margin-top: 8px; margin-left: 12px;">
-          When enabled, annotations will show both phonetic symbols and translation (e.g., "/həˈloʊ/ 你好").<br>
+        <div class="description" style="margin-top: 8px; margin-left: 12px;" data-i18n="showPhoneticInAnnotationDesc">
+          When enabled, annotations will show both phonetic symbols and translation (e.g., "/həˈloʊ/ 你好").
           When disabled, annotations will only show the translation (e.g., "你好").
         </div>
 
         <div class="info-box" style="margin-top: 12px;">
-          <strong>💡 Tip:</strong>
-          This setting affects the auto-translate feature in annotation mode. 
-          You can still manually enter any text you want for annotations.
+          <strong>💡</strong>
+          <span data-i18n="annotationTip">This setting affects the auto-translate feature in annotation mode. You can still manually enter any text you want for annotations.</span>
         </div>
       </div>
 
       <!-- 性能设置 -->
       <div class="section">
-        <div class="section-title">Performance Settings</div>
+        <div class="section-title" data-i18n="performanceSettings">Performance Settings</div>
         
         <div class="checkbox-item">
           <input type="checkbox" id="enableCache" checked>
-          <label for="enableCache">Enable Translation Cache</label>
+          <label for="enableCache" data-i18n="enableCache">Enable Translation Cache</label>
         </div>
 
         <div class="setting-item">
-          <label for="cacheSize">Cache Size</label>
+          <label for="cacheSize" data-i18n="cacheSize">Cache Size</label>
           <input type="number" id="cacheSize" min="10" max="500" value="100">
-          <div class="description">Maximum number of cached translations (10-500)</div>
+          <div class="description" data-i18n="cacheSizeDesc">Maximum number of cached translations (10-500)</div>
         </div>
 
         <div class="info-box">
-          <strong>💡 Tip:</strong>
-          Caching improves performance by storing recent translations locally. Larger cache size uses more memory but reduces API calls.
+          <strong>💡</strong>
+          <span data-i18n="cacheTip">Caching improves performance by storing recent translations locally. Larger cache size uses more memory but reduces API calls.</span>
         </div>
       </div>
 
       <!-- 调试设置 -->
       <div class="section">
-        <div class="section-title">Debug Settings <span class="badge badge-debug">Advanced</span></div>
+        <div class="section-title"><span data-i18n="debugSettings">Debug Settings</span> <span class="badge badge-debug" data-i18n="badgeAdvanced">Advanced</span></div>
         
         <div class="checkbox-item">
           <input type="checkbox" id="enableDebugMode">
-          <label for="enableDebugMode">Enable Debug Mode</label>
-        </div>
-
-        <div class="checkbox-item">
-          <input type="checkbox" id="showConsoleLog">
-          <label for="showConsoleLog">Show Console Logs</label>
+          <label for="enableDebugMode" data-i18n="enableDebugMode">Enable Debug Mode</label>
         </div>
 
         <div class="info-box">
-          <strong>🐛 Debug Mode:</strong>
-          When enabled, detailed logs will be printed to the browser console. Use Debug provider for testing without API calls.
+          <strong>🐛</strong>
+          <span data-i18n="debugTip">When enabled, detailed logs will be printed to the browser console and Debug translation provider will be available for testing without API calls.</span>
         </div>
       </div>
 
@@ -524,13 +522,14 @@
 
       <!-- 按钮组 -->
       <div class="button-group">
-        <button class="btn btn-primary" id="saveButton">💾 Save Settings</button>
-        <button class="btn btn-secondary" id="resetButton">🔄 Reset to Defaults</button>
-        <button class="btn btn-danger" id="clearCacheButton">🗑️ Clear Cache</button>
+        <button class="btn btn-primary" id="saveButton">💾 <span data-i18n="saveSettings">Save Settings</span></button>
+        <button class="btn btn-secondary" id="resetButton">🔄 <span data-i18n="resetToDefaults">Reset to Defaults</span></button>
+        <button class="btn btn-danger" id="clearCacheButton">🗑️ <span data-i18n="clearCache">Clear Cache</span></button>
       </div>
     </div>
   </div>
 
+  <script src="i18n-helper.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

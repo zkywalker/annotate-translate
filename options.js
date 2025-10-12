@@ -9,8 +9,11 @@ const DEFAULT_SETTINGS = {
   enableTranslate: true,
   enableAnnotate: true,
   
+  // UI settings
+  uiLanguage: 'auto', // 'auto' means follow browser language
+  
   // Translation settings
-  translationProvider: 'debug',
+  translationProvider: 'google',
   targetLanguage: 'zh-CN',
   
   // Youdao API settings
@@ -34,14 +37,14 @@ const DEFAULT_SETTINGS = {
   cacheSize: 100,
   
   // Debug settings
-  enableDebugMode: false,
-  showConsoleLog: false
+  enableDebugMode: false
 };
 
 // DOM elements
 const elements = {
   enableTranslate: document.getElementById('enableTranslate'),
   enableAnnotate: document.getElementById('enableAnnotate'),
+  uiLanguage: document.getElementById('uiLanguage'),
   targetLanguage: document.getElementById('targetLanguage'),
   youdaoAppKey: document.getElementById('youdaoAppKey'),
   youdaoAppSecret: document.getElementById('youdaoAppSecret'),
@@ -57,7 +60,8 @@ const elements = {
   enableCache: document.getElementById('enableCache'),
   cacheSize: document.getElementById('cacheSize'),
   enableDebugMode: document.getElementById('enableDebugMode'),
-  showConsoleLog: document.getElementById('showConsoleLog'),
+  debugProviderOption: document.getElementById('debugProviderOption'),
+  debugProviderDesc: document.getElementById('debugProviderDesc'),
   statusMessage: document.getElementById('statusMessage'),
   saveButton: document.getElementById('saveButton'),
   resetButton: document.getElementById('resetButton'),
@@ -67,8 +71,15 @@ const elements = {
 /**
  * Initialize the options page
  */
-function init() {
+async function init() {
   console.log('[Options] Initializing options page...');
+  
+  // Initialize i18n (load user-selected language first)
+  await initializeLanguage();
+  localizeHtmlPage();
+  
+  // Populate language select with localized options
+  populateLanguageSelect();
   
   // Load settings
   loadSettings();
@@ -77,6 +88,53 @@ function init() {
   setupEventListeners();
   
   console.log('[Options] Options page initialized');
+}
+
+/**
+ * Populate language select with localized options
+ */
+function populateLanguageSelect() {
+  const targetSelect = elements.targetLanguage;
+  const uiSelect = elements.uiLanguage;
+  
+  const languages = [
+    { value: 'zh-CN', labelKey: 'langChineseSimplified', nativeName: '中文（简体）' },
+    { value: 'zh-TW', labelKey: 'langChineseTraditional', nativeName: '中文（繁體）' },
+    { value: 'en', labelKey: 'langEnglish', nativeName: 'English' },
+    { value: 'ja', labelKey: 'langJapanese', nativeName: '日本語' },
+    { value: 'ko', labelKey: 'langKorean', nativeName: '한국어' },
+    { value: 'es', labelKey: 'langSpanish', nativeName: 'Español' },
+    { value: 'fr', labelKey: 'langFrench', nativeName: 'Français' },
+    { value: 'de', labelKey: 'langGerman', nativeName: 'Deutsch' },
+    { value: 'ru', labelKey: 'langRussian', nativeName: 'Русский' }
+  ];
+  
+  // Populate target language select
+  if (targetSelect) {
+    languages.forEach(lang => {
+      const option = document.createElement('option');
+      option.value = lang.value;
+      option.textContent = i18n(lang.labelKey);
+      targetSelect.appendChild(option);
+    });
+  }
+  
+  // Populate UI language select
+  if (uiSelect) {
+    // Add "Auto" option
+    const autoOption = document.createElement('option');
+    autoOption.value = 'auto';
+    autoOption.textContent = i18n('autoDetect') || '🌐 Auto Detect';
+    uiSelect.appendChild(autoOption);
+    
+    // Add language options (using native names for better recognition)
+    languages.forEach(lang => {
+      const option = document.createElement('option');
+      option.value = lang.value;
+      option.textContent = lang.nativeName;
+      uiSelect.appendChild(option);
+    });
+  }
 }
 
 /**
@@ -90,6 +148,10 @@ function loadSettings() {
     elements.enableTranslate.checked = settings.enableTranslate;
     elements.enableAnnotate.checked = settings.enableAnnotate;
     
+    // Debug settings (must be set first to determine provider visibility)
+    elements.enableDebugMode.checked = settings.enableDebugMode;
+    updateDebugProviderVisibility(settings.enableDebugMode);
+    
     // Translation provider
     const providerRadio = document.querySelector(`input[name="provider"][value="${settings.translationProvider}"]`);
     if (providerRadio) {
@@ -98,6 +160,9 @@ function loadSettings() {
     }
     
     // Language settings
+    elements.uiLanguage.value = settings.uiLanguage || 'auto';
+    // Store current value to detect changes
+    elements.uiLanguage.dataset.previousValue = settings.uiLanguage || 'auto';
     elements.targetLanguage.value = settings.targetLanguage;
     
     // Youdao API settings
@@ -119,10 +184,6 @@ function loadSettings() {
     // Performance settings
     elements.enableCache.checked = settings.enableCache;
     elements.cacheSize.value = settings.cacheSize;
-    
-    // Debug settings
-    elements.enableDebugMode.checked = settings.enableDebugMode;
-    elements.showConsoleLog.checked = settings.showConsoleLog;
   });
 }
 
@@ -130,10 +191,17 @@ function loadSettings() {
  * Save settings to chrome.storage
  */
 function saveSettings() {
+  const previousUiLanguage = elements.uiLanguage.dataset.previousValue || 'auto';
+  const newUiLanguage = elements.uiLanguage.value;
+  const languageChanged = previousUiLanguage !== newUiLanguage;
+  
   const settings = {
     // Feature toggles
     enableTranslate: elements.enableTranslate.checked,
     enableAnnotate: elements.enableAnnotate.checked,
+    
+    // UI language
+    uiLanguage: newUiLanguage,
     
     // Translation provider
     translationProvider: document.querySelector('input[name="provider"]:checked').value,
@@ -160,15 +228,28 @@ function saveSettings() {
     cacheSize: parseInt(elements.cacheSize.value, 10),
     
     // Debug settings
-    enableDebugMode: elements.enableDebugMode.checked,
-    showConsoleLog: elements.showConsoleLog.checked
+    enableDebugMode: elements.enableDebugMode.checked
   };
 
   console.log('[Options] Saving settings:', settings);
 
   chrome.storage.sync.set(settings, () => {
     console.log('[Options] Settings saved successfully');
-    showStatus('Settings saved successfully! ✓', 'success');
+    
+    // If language changed, show reload message
+    if (languageChanged) {
+      showStatus(i18n('languageChangedReload') || 'Language changed! Reloading page...', 'success');
+      
+      // Store the new language value
+      elements.uiLanguage.dataset.previousValue = newUiLanguage;
+      
+      // Reload the page after a short delay to apply new language
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      showStatus(i18n('settingsSaved'), 'success');
+    }
     
     // Notify content scripts to reload settings
     notifyContentScripts(settings);
@@ -179,12 +260,14 @@ function saveSettings() {
  * Reset settings to defaults
  */
 function resetSettings() {
-  if (confirm('Are you sure you want to reset all settings to defaults?')) {
+  // Use i18n for confirm message (note: confirm dialogs are system-level and don't support i18n, but we try)
+  const confirmMessage = i18n('confirmReset') || 'Are you sure you want to reset all settings to defaults?';
+  if (confirm(confirmMessage)) {
     console.log('[Options] Resetting to default settings...');
     
     chrome.storage.sync.set(DEFAULT_SETTINGS, () => {
       console.log('[Options] Settings reset successfully');
-      showStatus('Settings reset to defaults! 🔄', 'success');
+      showStatus(i18n('settingsReset'), 'success');
       loadSettings();
       
       // Notify content scripts
@@ -197,7 +280,8 @@ function resetSettings() {
  * Clear translation cache
  */
 function clearCache() {
-  if (confirm('Are you sure you want to clear the translation cache?')) {
+  const confirmMessage = i18n('confirmClearCache') || 'Are you sure you want to clear the translation cache?';
+  if (confirm(confirmMessage)) {
     console.log('[Options] Clearing cache...');
     
     // Send message to background script to clear cache
@@ -206,10 +290,10 @@ function clearCache() {
     }, (response) => {
       if (response && response.success) {
         console.log('[Options] Cache cleared successfully');
-        showStatus('Cache cleared successfully! 🗑️', 'success');
+        showStatus(i18n('cacheCleared'), 'success');
       } else {
         console.error('[Options] Failed to clear cache');
-        showStatus('Failed to clear cache', 'error');
+        showStatus(i18n('failedToClearCache') || 'Failed to clear cache', 'error');
       }
     });
   }
@@ -265,6 +349,33 @@ function updateProviderSelection(provider) {
   } else {
     elements.youdaoConfigSection.style.display = 'none';
   }
+  
+  // Show/hide debug provider description
+  if (provider === 'debug') {
+    elements.debugProviderDesc.style.display = 'block';
+  } else {
+    elements.debugProviderDesc.style.display = 'none';
+  }
+}
+
+/**
+ * Update debug provider visibility
+ */
+function updateDebugProviderVisibility(enabled) {
+  if (enabled) {
+    elements.debugProviderOption.style.display = 'flex';
+  } else {
+    elements.debugProviderOption.style.display = 'none';
+    // If debug provider is currently selected, switch to google
+    const debugRadio = document.querySelector('input[name="provider"][value="debug"]');
+    if (debugRadio && debugRadio.checked) {
+      const googleRadio = document.querySelector('input[name="provider"][value="google"]');
+      if (googleRadio) {
+        googleRadio.checked = true;
+        updateProviderSelection('google');
+      }
+    }
+  }
 }
 
 /**
@@ -279,6 +390,11 @@ function setupEventListeners() {
   
   // Clear cache button
   elements.clearCacheButton.addEventListener('click', clearCache);
+  
+  // Debug mode toggle
+  elements.enableDebugMode.addEventListener('change', (e) => {
+    updateDebugProviderVisibility(e.target.checked);
+  });
   
   // Provider radio buttons
   document.querySelectorAll('input[name="provider"]').forEach((radio) => {
@@ -307,6 +423,10 @@ function setupEventListeners() {
         const checkbox = item.querySelector('input[type="checkbox"]');
         if (checkbox) {
           checkbox.checked = !checkbox.checked;
+          // If it's the debug mode checkbox, trigger the visibility update
+          if (checkbox.id === 'enableDebugMode') {
+            updateDebugProviderVisibility(checkbox.checked);
+          }
         }
       }
     });

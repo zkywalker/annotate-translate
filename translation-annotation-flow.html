@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Translation & Annotation Architecture Flow</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .flow-container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .flow-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      color: #333;
+      text-align: center;
+    }
+
+    .flow-stage {
+      margin-bottom: 20px;
+    }
+
+    .stage-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stage-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+      padding: 0 10px;
+    }
+
+    .box {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .box.shared {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    .box.different {
+      background: #fff3e0;
+      border-color: #ff9800;
+    }
+
+    .box h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .box .content {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .badge-shared {
+      background: #4caf50;
+      color: white;
+    }
+
+    .badge-partial {
+      background: #ff9800;
+      color: white;
+    }
+
+    .arrow {
+      text-align: center;
+      font-size: 24px;
+      color: #667eea;
+      margin: 10px 0;
+    }
+
+    .data-structure {
+      background: #f8f9fa;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .data-structure h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .data-structure pre {
+      background: #2d2d2d;
+      color: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .stat-card .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-box {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 2px solid;
+    }
+
+    .legend-box.shared {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    .legend-box.different {
+      background: #fff3e0;
+      border-color: #ff9800;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏗️ Translation & Annotation Architecture</h1>
+      <p>共享基础设施，差异化UI渲染</p>
+    </div>
+
+    <div class="flow-container">
+      <div class="flow-title">数据流程</div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-box shared"></div>
+          <span>✅ 完全共享</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box different"></div>
+          <span>⚠️ 部分共享或差异化</span>
+        </div>
+      </div>
+
+      <!-- Stage 1: User Input -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>📝</span> Stage 1: 用户输入
+        </div>
+        <div class="stage-content">
+          <div class="box">
+            <h3>翻译功能</h3>
+            <div class="content">
+              • 用户选中文本<br>
+              • 点击 "T" 按钮<br>
+              • 触发 <code>translateText()</code>
+            </div>
+          </div>
+          <div class="box">
+            <h3>注释功能</h3>
+            <div class="content">
+              • 用户选中文本<br>
+              • 点击 "A" 按钮<br>
+              • 触发 <code>annotateSelectedText()</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">⬇️</div>
+
+      <!-- Stage 2: Translation Service -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>🔄</span> Stage 2: 翻译服务
+          <span class="badge badge-shared">100% 共享</span>
+        </div>
+        <div class="stage-content">
+          <div class="box shared" style="grid-column: 1 / -1;">
+            <h3>TranslationService.translate()</h3>
+            <div class="content">
+              <strong>两个功能都调用同一个方法：</strong><br>
+              • 参数相同：text, targetLanguage, sourceLang<br>
+              • 缓存策略相同<br>
+              • 提供商选择相同<br>
+              • 返回数据结构相同
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">⬇️</div>
+
+      <!-- Stage 3: Cache -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>💾</span> Stage 3: 缓存检查
+          <span class="badge badge-shared">100% 共享</span>
+        </div>
+        <div class="stage-content">
+          <div class="box shared" style="grid-column: 1 / -1;">
+            <h3>统一缓存机制</h3>
+            <div class="content">
+              • Cache Key: <code>${text}:${sourceLang}:${targetLang}:${provider}</code><br>
+              • LRU 策略（最近最少使用）<br>
+              • 可配置大小（10-1000 项）<br>
+              • <strong>翻译和注释共享同一个缓存池</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">⬇️</div>
+
+      <!-- Stage 4: Provider -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>🌐</span> Stage 4: 翻译提供商
+          <span class="badge badge-shared">100% 共享</span>
+        </div>
+        <div class="stage-content">
+          <div class="box shared">
+            <h3>Debug Provider</h3>
+            <div class="content">
+              • 返回测试数据<br>
+              • 包含完整的音标、词义、例句<br>
+              • 支持 annotationText 生成
+            </div>
+          </div>
+          <div class="box shared">
+            <h3>Youdao Provider</h3>
+            <div class="content">
+              • 调用有道 API<br>
+              • 解析音标、词义、例句<br>
+              • 音标补充机制（FreeDictionary）
+            </div>
+          </div>
+          <div class="box shared">
+            <h3>Google Provider</h3>
+            <div class="content">
+              • 调用 Google Translate<br>
+              • 基础翻译功能<br>
+              • 可扩展音标支持
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">⬇️</div>
+
+      <!-- Stage 5: TranslationResult -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>📦</span> Stage 5: 数据结构
+          <span class="badge badge-shared">100% 共享</span>
+        </div>
+        <div class="data-structure">
+          <h3>TranslationResult (两个功能收到相同的数据)</h3>
+          <pre>{
+  originalText: "technique",
+  translatedText: "技术",
+  sourceLang: "en",
+  targetLang: "zh-CN",
+  
+  <span style="color: #4caf50;">// ✅ 音标数据（共享）</span>
+  phonetics: [
+    { text: "/tekˈniːk/", type: "us", audioUrl: "..." },
+    { text: "/tekˈniːk/", type: "uk", audioUrl: "..." }
+  ],
+  
+  <span style="color: #4caf50;">// ✅ 词义数据（共享）</span>
+  definitions: [
+    { partOfSpeech: "n.", text: "技术；技巧", synonyms: ["method", "skill"] }
+  ],
+  
+  <span style="color: #4caf50;">// ✅ 例句数据（共享）</span>
+  examples: [
+    { source: "Practice makes perfect", translation: "熟能生巧" }
+  ],
+  
+  <span style="color: #4caf50;">// ✅ 标注文本（共享，专为注释功能生成）</span>
+  annotationText: "/tekˈniːk/ 技术",
+  
+  provider: "Youdao Translate",
+  timestamp: 1697123456789
+}</pre>
+        </div>
+      </div>
+
+      <div class="arrow">⬇️</div>
+
+      <!-- Stage 6: UI Rendering -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>🎨</span> Stage 6: UI 渲染
+          <span class="badge badge-partial">差异化设计</span>
+        </div>
+        <div class="stage-content">
+          <div class="box different">
+            <h3>翻译功能 UI</h3>
+            <div class="content">
+              <strong>TranslationUI.render(result)</strong><br><br>
+              ✅ 原文（originalText）<br>
+              ✅ 译文（translatedText）<br>
+              ✅ 读音（phonetics[]）- 完整列表<br>
+              ✅ 词义（definitions[]）- 全部显示<br>
+              ✅ 例句（examples[]）- 全部显示<br>
+              ✅ 提供商（provider）<br>
+              ✅ 关闭按钮<br><br>
+              <strong>形式：</strong>悬浮卡片（Tooltip）
+            </div>
+          </div>
+          <div class="box different">
+            <h3>注释功能 UI</h3>
+            <div class="content">
+              <strong>createRubyAnnotation(result)</strong><br><br>
+              ✅ 标注文本（annotationText）<br>
+              ✅ 音频按钮（如果有 phonetics）<br>
+              ❌ 不显示词义（空间限制）<br>
+              ❌ 不显示例句（空间限制）<br><br>
+              <strong>形式：</strong>内联 Ruby 标签<br>
+              <code>&lt;ruby&gt;technique&lt;rt&gt;/tekˈniːk/ 技术 🔊&lt;/rt&gt;&lt;/ruby&gt;</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">⬇️</div>
+
+      <!-- Stage 7: Audio -->
+      <div class="flow-stage">
+        <div class="stage-header">
+          <span>🔊</span> Stage 7: 音频播放
+          <span class="badge badge-partial">70% 共享</span>
+        </div>
+        <div class="stage-content">
+          <div class="box shared">
+            <h3>共享部分</h3>
+            <div class="content">
+              ✅ 相同的 phonetics 数据源<br>
+              ✅ 相同的音频 URL/数据<br>
+              ✅ 都支持 Web Speech API（TTS）<br>
+              ✅ 都使用 LRU 缓存策略
+            </div>
+          </div>
+          <div class="box different">
+            <h3>实现差异</h3>
+            <div class="content">
+              ⚠️ 翻译：TranslationUI 内的实现<br>
+              ⚠️ 注释：content.js 内的独立实现<br>
+              ⚠️ 各自维护独立的音频缓存<br><br>
+              <strong>可优化：</strong>统一到共享的 AudioService
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="icon">🔄</div>
+        <div class="value">100%</div>
+        <div class="label">翻译服务共享</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">💾</div>
+        <div class="value">100%</div>
+        <div class="label">缓存机制共享</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">📦</div>
+        <div class="value">100%</div>
+        <div class="label">数据结构共享</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">🎵</div>
+        <div class="value">100%</div>
+        <div class="label">音标数据共享</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">🔊</div>
+        <div class="value">70%</div>
+        <div class="label">音频播放共享</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">⭐</div>
+        <div class="value">95%</div>
+        <div class="label">总体共享度</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add smooth animations
+    document.addEventListener('DOMContentLoaded', () => {
+      const boxes = document.querySelectorAll('.box');
+      boxes.forEach((box, index) => {
+        box.style.opacity = '0';
+        box.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          box.style.transition = 'all 0.3s ease-out';
+          box.style.opacity = '1';
+          box.style.transform = 'translateY(0)';
+        }, index * 50);
+      });
+    });
+  </script>
+</body>
+</html>
+

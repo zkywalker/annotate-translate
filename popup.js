@@ -1,6 +1,13 @@
 // Popup JavaScript for Annotate Translate Extension
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  // Initialize language and localize the page
+  await initializeLanguage();
+  localizeHtmlPage();
+  
+  // Populate language select with localized options
+  populateLanguageSelect();
+  
   // Load saved settings
   loadSettings();
 
@@ -9,7 +16,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Clear annotations button
   document.getElementById('clear-annotations').addEventListener('click', clearAnnotations);
+
+  // Open settings page button
+  document.getElementById('open-settings').addEventListener('click', openSettingsPage);
 });
+
+// Open settings page
+function openSettingsPage() {
+  chrome.runtime.openOptionsPage();
+}
+
+// Populate language select with localized options
+function populateLanguageSelect() {
+  const select = document.getElementById('target-language');
+  if (!select) return;
+  
+  const languages = [
+    { value: 'zh-CN', labelKey: 'langChineseSimplified' },
+    { value: 'zh-TW', labelKey: 'langChineseTraditional' },
+    { value: 'en', labelKey: 'langEnglish' },
+    { value: 'ja', labelKey: 'langJapanese' },
+    { value: 'ko', labelKey: 'langKorean' },
+    { value: 'es', labelKey: 'langSpanish' },
+    { value: 'fr', labelKey: 'langFrench' },
+    { value: 'de', labelKey: 'langGerman' }
+  ];
+  
+  languages.forEach(lang => {
+    const option = document.createElement('option');
+    option.value = lang.value;
+    option.textContent = i18n(lang.labelKey);
+    select.appendChild(option);
+  });
+}
 
 // Check if the tab URL is valid for content scripts
 function isValidTabUrl(url) {
@@ -54,7 +93,7 @@ function saveSettings() {
   chrome.storage.sync.set(settings, function() {
     // Update status to let user know settings were saved
     const status = document.getElementById('status');
-    status.textContent = 'Settings saved successfully!';
+    status.textContent = i18n('settingsSaved');
     status.className = 'status success';
     
     // Send message to content script to apply new settings
@@ -86,7 +125,7 @@ function clearAnnotations() {
       // Check if the tab URL is valid for content scripts
       if (!isValidTabUrl(tabs[0].url)) {
         const status = document.getElementById('status');
-        status.textContent = 'Cannot clear annotations on this page.';
+        status.textContent = i18n('cannotClearOnThisPage');
         status.className = 'status error';
         
         setTimeout(function() {
@@ -104,13 +143,13 @@ function clearAnnotations() {
         // Check for connection errors
         if (chrome.runtime.lastError) {
           console.log('Could not send message to content script:', chrome.runtime.lastError.message);
-          status.textContent = 'Content script not available on this page.';
+          status.textContent = i18n('contentScriptNotAvailable');
           status.className = 'status error';
         } else if (response && response.success) {
-          status.textContent = 'All annotations cleared!';
+          status.textContent = i18n('allAnnotationsCleared');
           status.className = 'status success';
         } else {
-          status.textContent = 'Failed to clear annotations.';
+          status.textContent = i18n('failedToClear');
           status.className = 'status error';
         }
         

@@ -22,6 +22,41 @@ class TranslationUI {
       ...options
     };
     this.audioCache = new Map(); // 缓存音频数据
+    
+    // 允许的 HTML 标签（用于例句高亮）
+    this.allowedHTMLTags = ['b', 'i', 'em', 'strong', 'u', 'mark', 'span'];
+  }
+  
+  /**
+   * 清理 HTML，只保留安全的标签
+   * @param {string} html - 原始 HTML 字符串
+   * @returns {string} 清理后的 HTML
+   */
+  sanitizeHTML(html) {
+    if (!html || typeof html !== 'string') {
+      return '';
+    }
+    
+    // 创建一个临时元素来解析 HTML
+    const temp = document.createElement('div');
+    temp.textContent = html; // 先转义所有内容
+    
+    // 然后只恢复允许的标签
+    let sanitized = temp.innerHTML;
+    
+    // 恢复允许的标签
+    this.allowedHTMLTags.forEach(tag => {
+      // 匹配 &lt;tag&gt; 和 &lt;/tag&gt;
+      const openTagRegex = new RegExp(`&lt;${tag}(&gt;|\\s[^&]*?&gt;)`, 'gi');
+      const closeTagRegex = new RegExp(`&lt;/${tag}&gt;`, 'gi');
+      
+      sanitized = sanitized.replace(openTagRegex, (match) => {
+        return match.replace('&lt;', '<').replace('&gt;', '>');
+      });
+      sanitized = sanitized.replace(closeTagRegex, `</${tag}>`);
+    });
+    
+    return sanitized;
   }
 
   /**
@@ -34,12 +69,12 @@ class TranslationUI {
     container.className = 'translation-result-container';
 
     // 原文
-    const originalSection = this.createSection('original-text', 'Original');
+    const originalSection = this.createSection('original-text', 'original');
     originalSection.appendChild(this.createTextElement(result.originalText, 'original'));
     container.appendChild(originalSection);
 
     // 译文（主要内容）
-    const translationSection = this.createSection('translated-text', 'Translation');
+    const translationSection = this.createSection('translated-text', 'translation');
     translationSection.appendChild(this.createTextElement(result.translatedText, 'translated'));
     container.appendChild(translationSection);
 
@@ -71,7 +106,7 @@ class TranslationUI {
   /**
    * 创建区域容器
    * @param {string} className - CSS类名
-   * @param {string} title - 标题
+   * @param {string} title - 标题（i18n键名）
    * @returns {HTMLElement}
    */
   createSection(className, title) {
@@ -81,7 +116,10 @@ class TranslationUI {
     if (title) {
       const titleEl = document.createElement('div');
       titleEl.className = 'section-title';
-      titleEl.textContent = title;
+      // 使用 i18n 或回退到原始文本
+      titleEl.textContent = (typeof chrome !== 'undefined' && chrome.i18n) 
+        ? chrome.i18n.getMessage(title) || title
+        : title;
       section.appendChild(titleEl);
     }
     
@@ -108,7 +146,7 @@ class TranslationUI {
    * @returns {HTMLElement}
    */
   createPhoneticSection(phonetics, originalText) {
-    const section = this.createSection('phonetic-section', 'Pronunciation');
+    const section = this.createSection('phonetic-section', 'pronunciation');
     
     const phoneticContainer = document.createElement('div');
     phoneticContainer.className = 'phonetic-container';
@@ -155,8 +193,11 @@ class TranslationUI {
     const button = document.createElement('button');
     button.className = 'audio-play-button';
     button.innerHTML = '🔊'; // 使用emoji作为图标
-    button.title = 'Play pronunciation';
-    button.setAttribute('aria-label', 'Play pronunciation');
+    const playPronunciationText = (typeof chrome !== 'undefined' && chrome.i18n) 
+      ? chrome.i18n.getMessage('playPronunciation') || 'Play pronunciation'
+      : 'Play pronunciation';
+    button.title = playPronunciationText;
+    button.setAttribute('aria-label', playPronunciationText);
 
     // 点击播放
     button.addEventListener('click', async (e) => {
@@ -355,7 +396,7 @@ class TranslationUI {
    * @returns {HTMLElement}
    */
   createDefinitionSection(definitions) {
-    const section = this.createSection('definition-section', 'Definitions');
+    const section = this.createSection('definition-section', 'definitions');
     
     const list = document.createElement('ul');
     list.className = 'definition-list';
@@ -378,14 +419,29 @@ class TranslationUI {
       text.textContent = def.text;
       item.appendChild(text);
 
-      // 同义词
-      if (def.synonyms && def.synonyms.length > 0) {
-        const synonyms = document.createElement('div');
-        synonyms.className = 'synonyms';
-        synonyms.innerHTML = '<span class="label">Synonyms:</span> ' + 
-                            def.synonyms.join(', ');
-        item.appendChild(synonyms);
-      }
+      // 同义词 - 暂时移除，UI布局有问题
+      // if (def.synonyms) {
+      //   // 确保 synonyms 是数组格式
+      //   let synonymsList = [];
+      //   if (Array.isArray(def.synonyms)) {
+      //     synonymsList = def.synonyms;
+      //   } else if (typeof def.synonyms === 'string') {
+      //     // 如果是字符串，尝试按逗号分割
+      //     synonymsList = def.synonyms.split(',').map(s => s.trim()).filter(s => s);
+      //   }
+      //   
+      //   // 只有当有同义词时才显示
+      //   if (synonymsList.length > 0) {
+      //     const synonyms = document.createElement('div');
+      //     synonyms.className = 'synonyms';
+      //     const synonymsLabel = (typeof chrome !== 'undefined' && chrome.i18n) 
+      //       ? chrome.i18n.getMessage('synonyms') || 'Synonyms'
+      //       : 'Synonyms';
+      //     synonyms.innerHTML = `<span class="label">${synonymsLabel}:</span> ` + 
+      //                         synonymsList.join(', ');
+      //     item.appendChild(synonyms);
+      //   }
+      // }
 
       list.appendChild(item);
     });
@@ -400,7 +456,7 @@ class TranslationUI {
    * @returns {HTMLElement}
    */
   createExampleSection(examples) {
-    const section = this.createSection('example-section', 'Examples');
+    const section = this.createSection('example-section', 'examples');
     
     const list = document.createElement('ul');
     list.className = 'example-list';
@@ -411,17 +467,19 @@ class TranslationUI {
       const item = document.createElement('li');
       item.className = 'example-item';
 
-      // 原文
+      // 原文（支持 HTML 格式以高亮关键词）
       const source = document.createElement('div');
       source.className = 'example-source';
-      source.textContent = example.source;
+      // 使用 innerHTML 支持富文本，但先进行安全清理
+      source.innerHTML = this.sanitizeHTML(example.source);
       item.appendChild(source);
 
-      // 译文
+      // 译文（支持 HTML 格式）
       if (example.translation) {
         const translation = document.createElement('div');
         translation.className = 'example-translation';
-        translation.textContent = example.translation;
+        // 使用 innerHTML 支持富文本，但先进行安全清理
+        translation.innerHTML = this.sanitizeHTML(example.translation);
         item.appendChild(translation);
       }
 
@@ -443,7 +501,10 @@ class TranslationUI {
 
     const provider = document.createElement('span');
     provider.className = 'provider-info';
-    provider.textContent = `Powered by ${result.provider || 'Unknown'}`;
+    const poweredByText = (typeof chrome !== 'undefined' && chrome.i18n) 
+      ? chrome.i18n.getMessage('poweredBy') || 'Powered by'
+      : 'Powered by';
+    provider.textContent = `${poweredByText} ${result.provider || 'Unknown'}`;
     footer.appendChild(provider);
 
     if (result.timestamp) {

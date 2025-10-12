@@ -5,11 +5,38 @@ chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     console.log('Annotate Translate extension installed');
     
-    // Set default settings
+    // Detect browser language and set default target language
+    const browserLanguage = chrome.i18n.getUILanguage() || navigator.language || 'en';
+    console.log('Detected browser language:', browserLanguage);
+    
+    // Map browser language to target language
+    let targetLanguage = 'en'; // Default to English
+    
+    if (browserLanguage.startsWith('zh-CN') || browserLanguage.startsWith('zh-Hans')) {
+      targetLanguage = 'zh-CN'; // Simplified Chinese
+    } else if (browserLanguage.startsWith('zh-TW') || browserLanguage.startsWith('zh-Hant')) {
+      targetLanguage = 'zh-TW'; // Traditional Chinese
+    } else if (browserLanguage.startsWith('zh')) {
+      targetLanguage = 'zh-CN'; // Default Chinese to Simplified
+    } else if (browserLanguage.startsWith('ja')) {
+      targetLanguage = 'ja'; // Japanese
+    } else if (browserLanguage.startsWith('ko')) {
+      targetLanguage = 'ko'; // Korean
+    } else if (browserLanguage.startsWith('es')) {
+      targetLanguage = 'es'; // Spanish
+    } else if (browserLanguage.startsWith('fr')) {
+      targetLanguage = 'fr'; // French
+    } else if (browserLanguage.startsWith('de')) {
+      targetLanguage = 'de'; // German
+    }
+    
+    console.log('Setting default target language to:', targetLanguage);
+    
+    // Set default settings with detected language
     chrome.storage.sync.set({
       enableTranslate: false,  // 默认关闭翻译功能
       enableAnnotate: true,
-      targetLanguage: 'en'
+      targetLanguage: targetLanguage
     });
 
     // Create context menu items

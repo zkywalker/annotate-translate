@@ -140,15 +140,15 @@
 /* 翻译卡片关闭按钮 */
 .translation-close-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
   border: none;
-  background-color: #f1f3f4;
+  background-color: rgba(95, 99, 104, 0.1);
   color: #5f6368;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -157,24 +157,35 @@
   transition: all 0.2s;
   padding: 0;
   z-index: 10;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .translation-close-btn:hover {
-  background-color: #e8eaed;
+  background-color: rgba(95, 99, 104, 0.2);
   color: #202124;
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .translation-close-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 /* 确保翻译UI组件在tooltip内正常显示 */
-.annotate-translate-tooltip .translation-card,
-.annotate-translate-tooltip .simple-translation {
+.annotate-translate-tooltip .translation-result-container,
+.annotate-translate-tooltip .translation-simple-container {
   box-shadow: none;
-  border-radius: 8px;
   max-width: none;
+}
+
+/* 为翻译结果容器留出关闭按钮的空间 */
+.annotate-translate-tooltip .translation-result-container {
+  position: relative;
+}
+
+/* 调整第一个section的右侧padding，避免被关闭按钮遮挡 */
+.annotate-translate-tooltip .translation-section:first-child {
+  padding-right: 44px;
 }
 
 .annotate-translate-highlight {
@@ -192,12 +203,31 @@
 ruby.annotate-translate-ruby {
   /* 使用 ruby 显示模式，让浏览器原生处理对齐 */
   ruby-align: center;
-  cursor: pointer;
   position: relative;
   /* 不使用 inline-block，使用默认的 ruby 显示方式 */
   display: ruby;
   /* 保持原文本的正常宽度，不被标注撑开 */
   white-space: nowrap;
+  /* 默认样式，可能会被 JavaScript 修改为 pointer */
+  cursor: default;
+  /* 添加过渡效果 */
+  transition: all 0.2s ease;
+}
+
+/* 可点击的标注样式 */
+ruby.annotate-translate-ruby[style*="cursor: pointer"] {
+  /* 轻微的悬停效果，提示可点击 */
+}
+
+ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover {
+  background-color: rgba(26, 115, 232, 0.05);
+  border-radius: 3px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+
+ruby.annotate-translate-ruby[style*="cursor: pointer"]:active {
+  background-color: rgba(26, 115, 232, 0.1);
 }
 
 ruby.annotate-translate-ruby rt.annotate-translate-rt {
@@ -217,16 +247,14 @@ ruby.annotate-translate-ruby rt.annotate-translate-rt {
   white-space: nowrap;
   /* 如果标注比原文长，允许溢出显示 */
   overflow: visible;
+  /* 添加过渡效果 */
+  transition: color 0.2s ease, font-weight 0.2s ease;
 }
 
-/* 移除悬浮背景效果，避免挡住标注 */
-ruby.annotate-translate-ruby:hover {
-  /* 不添加背景，保持标注清晰可见 */
-}
-
-ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
-  /* 可以稍微加深颜色，但不改变字重 */
+ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-translate-rt {
+  /* 可以稍微加深颜色，提示可点击 */
   color: #1557b0;
+  font-weight: 600;
 }
 
 /* Dialog styles for multiple matches */
@@ -380,4 +408,20 @@ ruby.annotate-translate-ruby:hover rt.annotate-translate-rt {
 /* Ensure rt content is displayed inline */
 ruby.annotate-translate-ruby rt.annotate-translate-rt span {
   display: inline;
+}
+
+/* Annotation detail popup specific styles */
+.annotation-detail-popup {
+  animation: annotationPopupSlideIn 0.3s ease-out;
+}
+
+@keyframes annotationPopupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

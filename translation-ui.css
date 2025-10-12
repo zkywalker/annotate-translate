@@ -7,54 +7,82 @@
 .translation-result-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  padding: 16px;
-  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  max-width: 450px;
+  min-width: 280px;
   color: #333;
   line-height: 1.6;
+  overflow: hidden;
 }
 
 /* 区域标题 */
 .translation-section {
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  padding: 12px 16px;
 }
 
-.translation-section:last-of-type {
-  margin-bottom: 0;
+.translation-section:not(:last-of-type) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 原文区域 - 浅灰背景 */
+.translation-section.original-text {
+  background: #f8f9fa;
+}
+
+/* 译文区域 - 突出显示 */
+.translation-section.translated-text {
+  background: #ffffff;
+  padding: 16px;
 }
 
 .section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
+  font-size: 10px;
+  font-weight: 700;
+  color: #999;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  background: #1a73e8;
+  border-radius: 2px;
+  display: inline-block;
 }
 
 /* 文本内容 */
 .text-content {
   font-size: 14px;
-  padding: 8px 0;
+  padding: 0;
+  line-height: 1.6;
 }
 
 .text-content.original {
-  color: #666;
-  font-size: 13px;
+  color: #5f6368;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .text-content.translated {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: #202124;
+  line-height: 1.5;
 }
 
 /* 读音部分 */
 .phonetic-section {
-  background: #f5f5f5;
-  border-radius: 6px;
-  padding: 10px;
+  background: #f8f9fa;
+  padding: 12px 16px;
 }
 
 .phonetic-container {
@@ -142,85 +170,176 @@
 
 /* 词义部分 */
 .definition-section {
-  border-top: 1px solid #e0e0e0;
-  padding-top: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
 }
 
 .definition-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .definition-item {
-  margin-bottom: 8px;
-  padding-left: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #1a73e8;
+  transition: all 0.2s;
 }
 
-.definition-item:last-child {
-  margin-bottom: 0;
+.definition-item:hover {
+  background: #f1f3f4;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .part-of-speech {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   font-weight: 600;
-  color: #2196F3;
-  font-size: 12px;
-  margin-right: 6px;
-  font-style: italic;
+  color: #ffffff;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: #1a73e8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(26, 115, 232, 0.2);
 }
 
 .definition-text {
-  font-size: 14px;
-  color: #333;
+  font-size: 15px;
+  color: #202124;
+  line-height: 1.6;
+  font-weight: 400;
+  padding-left: 2px;
 }
 
 .synonyms {
-  margin-top: 4px;
-  padding-left: 20px;
+  margin-top: 2px;
+  padding: 6px 10px;
   font-size: 12px;
-  color: #666;
+  color: #5f6368;
+  line-height: 1.4;
+  background: rgba(26, 115, 232, 0.05);
+  border-radius: 6px;
+  border-left: 2px solid #1a73e8;
 }
 
 .synonyms .label {
   font-weight: 600;
-  color: #888;
+  color: #1a73e8;
+  margin-right: 6px;
 }
 
 /* 例句部分 */
 .example-section {
-  border-top: 1px solid #e0e0e0;
-  padding-top: 12px;
+  padding: 12px 16px;
+  background: #fafbfc;
 }
 
 .example-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .example-item {
-  margin-bottom: 12px;
-  padding: 8px;
-  background: #f9f9f9;
-  border-radius: 4px;
-  border-left: 3px solid #4CAF50;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #34a853;
+  transition: all 0.2s;
 }
 
-.example-item:last-child {
-  margin-bottom: 0;
+.example-item:hover {
+  background: #f1f3f4;
+  border-left-color: #1e8e3e;
 }
 
 .example-source {
   font-size: 13px;
-  color: #333;
-  margin-bottom: 4px;
+  color: #202124;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.example-source::before {
+  content: '"';
+  color: #5f6368;
+  margin-right: 2px;
+}
+
+.example-source::after {
+  content: '"';
+  color: #5f6368;
+  margin-left: 2px;
+}
+
+/* 例句中的富文本格式 */
+.example-source b,
+.example-source strong {
+  font-weight: 700;
+  color: #1a73e8;
+}
+
+.example-source i,
+.example-source em {
+  font-style: italic;
+  color: #d32f2f;
+}
+
+.example-source u {
+  text-decoration: underline;
+  text-decoration-color: #1a73e8;
+  text-decoration-thickness: 2px;
+}
+
+.example-source mark {
+  background-color: #fff176;
+  padding: 2px 4px;
+  border-radius: 2px;
 }
 
 .example-translation {
   font-size: 12px;
-  color: #666;
+  color: #5f6368;
+  line-height: 1.4;
+  padding-left: 12px;
+  border-left: 2px solid #e8eaed;
+}
+
+/* 译文中的富文本格式 */
+.example-translation b,
+.example-translation strong {
+  font-weight: 700;
+  color: #1a73e8;
+}
+
+.example-translation i,
+.example-translation em {
   font-style: italic;
+}
+
+.example-translation u {
+  text-decoration: underline;
+  text-decoration-color: #1a73e8;
+}
+
+.example-translation mark {
+  background-color: #fff176;
+  padding: 2px 4px;
+  border-radius: 2px;
 }
 
 /* 页脚 */
@@ -228,11 +347,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px solid #e0e0e0;
+  padding: 10px 16px;
+  background: #f8f9fa;
   font-size: 11px;
   color: #999;
+  border-top: 1px solid #f0f0f0;
 }
 
 .provider-info {
@@ -246,18 +365,20 @@
 /* 简化版UI */
 .translation-simple-container {
   background: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 12px 16px;
-  max-width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 14px 18px;
+  max-width: 320px;
+  min-width: 200px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .simple-translation {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 500;
-  color: #1a1a1a;
-  margin-bottom: 8px;
+  color: #202124;
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
 
 .simple-phonetic-row {
@@ -297,69 +418,125 @@
 /* 深色模式支持 */
 @media (prefers-color-scheme: dark) {
   .translation-result-container {
-    background: #2d2d2d;
-    color: #e0e0e0;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    background: #292a2d;
+    color: #e8eaed;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  
+  .translation-section {
+    border-bottom-color: #3c4043;
+  }
+  
+  .translation-section.original-text {
+    background: #202124;
+  }
+  
+  .translation-section.translated-text {
+    background: #292a2d;
   }
   
   .section-title {
-    color: #aaa;
+    color: #9aa0a6;
+  }
+  
+  .section-title::before {
+    background: #8ab4f8;
   }
   
   .text-content.original {
-    color: #999;
+    color: #9aa0a6;
   }
   
   .text-content.translated {
-    color: #f5f5f5;
+    color: #e8eaed;
   }
   
   .phonetic-section {
-    background: #3a3a3a;
+    background: #202124;
   }
   
   .phonetic-text {
-    color: #ccc;
+    color: #bdc1c6;
   }
   
-  .definition-section,
-  .example-section {
-    border-top-color: #444;
+  .definition-section {
+    background: #292a2d;
+  }
+  
+  .definition-item {
+    background: #292a2d;
+    border-left-color: #8ab4f8;
+  }
+  
+  .definition-item:hover {
+    background: #303134;
+  }
+  
+  .part-of-speech {
+    color: #202124;
+    background: #8ab4f8;
+    box-shadow: 0 1px 2px rgba(138, 180, 248, 0.2);
   }
   
   .definition-text {
-    color: #ddd;
+    color: #e8eaed;
+  }
+  
+  .synonyms {
+    color: #9aa0a6;
+    background: rgba(138, 180, 248, 0.08);
+    border-left-color: #8ab4f8;
+  }
+  
+  .synonyms .label {
+    color: #8ab4f8;
+  }
+  
+  .example-section {
+    background: #202124;
   }
   
   .example-item {
-    background: #3a3a3a;
-    border-left-color: #4CAF50;
+    background: #35363a;
+    border-left-color: #81c995;
+  }
+  
+  .example-item:hover {
+    background: #3c4043;
+    border-left-color: #81c995;
   }
   
   .example-source {
-    color: #ddd;
+    color: #e8eaed;
+  }
+  
+  .example-source::before,
+  .example-source::after {
+    color: #9aa0a6;
   }
   
   .example-translation {
-    color: #999;
+    color: #9aa0a6;
+    border-left-color: #5f6368;
   }
   
   .translation-footer {
-    border-top-color: #444;
-    color: #888;
+    background: #202124;
+    border-top-color: #3c4043;
+    color: #9aa0a6;
   }
   
   .translation-simple-container {
-    background: #2d2d2d;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: #292a2d;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
   
   .simple-translation {
-    color: #f5f5f5;
+    color: #e8eaed;
   }
   
   .simple-phonetic-text {
-    color: #999;
+    color: #9aa0a6;
   }
 }
 
