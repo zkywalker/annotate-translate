@@ -128,14 +128,18 @@ function applyTranslationSettings() {
       if (youdaoProvider) {
         youdaoProvider.updateConfig(
           settings.youdaoAppKey, 
-          settings.youdaoAppSecret,
-          settings.enablePhoneticFallback
+          settings.youdaoAppSecret
         );
         console.log('[Annotate-Translate] Youdao provider configured:');
         console.log('  - AppKey:', settings.youdaoAppKey ? 'Set' : 'Not set');
-        console.log('  - Phonetic Fallback:', settings.enablePhoneticFallback ? 'Enabled' : 'Disabled');
       }
     }
+  }
+  
+  // 🆕 配置翻译服务的通用设置
+  if (settings.enablePhoneticFallback !== undefined) {
+    translationService.enablePhoneticFallback = settings.enablePhoneticFallback;
+    console.log('[Annotate-Translate] Phonetic fallback:', settings.enablePhoneticFallback ? 'Enabled' : 'Disabled');
   }
   
   // 配置缓存

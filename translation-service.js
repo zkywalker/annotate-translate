@@ -152,6 +152,8 @@ class GoogleTranslateProvider extends TranslationProvider {
       console.log('[GoogleTranslate] Has Definitions:', result.definitions.length > 0);
       console.log('[GoogleTranslate] Has Examples:', result.examples.length > 0);
       
+      // ✅ 移除提供者级别的音标补充，由 TranslationService 统一处理
+      
       return result;
     } catch (error) {
       console.error('[GoogleTranslate] Translation error:', error);
@@ -283,20 +285,17 @@ class YoudaoTranslateProvider extends TranslationProvider {
     this.appKey = config.appKey || '';
     this.appSecret = config.appSecret || '';
     this.apiUrl = 'https://openapi.youdao.com/api';
-    this.enablePhoneticFallback = config.enablePhoneticFallback !== false; // 默认启用音标补充（通用设置，各提供商可自行实现）
   }
 
   /**
    * 更新 API 密钥配置
    * @param {string} appKey - 应用 ID
    * @param {string} appSecret - 应用密钥
-   * @param {boolean} enablePhoneticFallback - 是否启用音标补充（通用功能设置）
    */
-  updateConfig(appKey, appSecret, enablePhoneticFallback = true) {
+  updateConfig(appKey, appSecret) {
     this.appKey = appKey || '';
     this.appSecret = appSecret || '';
-    this.enablePhoneticFallback = enablePhoneticFallback;
-    console.log(`[YoudaoTranslate] Config updated. AppKey: ${this.appKey ? 'Set' : 'Not set'}, Phonetic fallback: ${this.enablePhoneticFallback}`);
+    console.log(`[YoudaoTranslate] Config updated. AppKey: ${this.appKey ? 'Set' : 'Not set'}`);
   }
 
   /**
@@ -603,12 +602,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
       console.log('[YoudaoTranslate] ⚠ No translation, using original text');
     }
 
-    // 如果没有音标且启用了补充功能，尝试从外部 API 获取
-    // 这是一个通用功能，当前支持英文音标，未来可扩展支持汉语拼音等
-    if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
-      console.log('[YoudaoTranslate] No phonetics found, trying external phonetic supplement...');
-      await this.supplementPhoneticsFromFreeDictionary(result, originalText);
-    }
+    // ✅ 移除提供者级别的音标补充，由 TranslationService 统一处理
 
     // 生成标注文本（用于 Ruby 标注）
     result.annotationText = this.generateAnnotationText(result);
@@ -622,48 +616,6 @@ class YoudaoTranslateProvider extends TranslationProvider {
     console.log('[YoudaoTranslate] =====================================');
 
     return result;
-  }
-
-  /**
-   * 从外部 API 补充音标/注音（通用音标补充功能）
-   * 当前实现：使用 FreeDictionary API 为英文单词补充音标
-   * 未来扩展：可添加汉语拼音、日语假名等其他语言的注音支持
-   * @param {Object} result - 翻译结果对象
-   * @param {string} originalText - 原始文本
-   */
-  async supplementPhoneticsFromFreeDictionary(result, originalText) {
-    try {
-      // 当前版本：只为单个英文单词补充音标
-      // TODO: 未来可扩展支持汉语拼音（通过拼音 API）
-      const words = originalText.trim().split(/\s+/);
-      if (words.length !== 1) {
-        console.log('[PhoneticSupplement] Skipping for non-single-word text');
-        return;
-      }
-
-      // 检查是否是英文（简单判断）
-      // TODO: 未来添加汉字检测，使用拼音 API
-      if (!/^[a-zA-Z]+$/.test(originalText.trim())) {
-        console.log('[PhoneticSupplement] Skipping for non-English text (future: support Chinese)');
-        return;
-      }
-
-      // 使用全局的 translationService 获取 FreeDictionary 提供者
-      if (typeof translationService !== 'undefined') {
-        const freeDictProvider = translationService.providers.get('freedict');
-        if (freeDictProvider) {
-          const phoneticData = await freeDictProvider.fetchPhonetics(originalText);
-          if (phoneticData && phoneticData.phonetics.length > 0) {
-            result.phonetics = phoneticData.phonetics;
-            console.log(`[YoudaoTranslate] ✓ Supplemented ${phoneticData.phonetics.length} phonetics from FreeDictionary`);
-          } else {
-            console.log('[YoudaoTranslate] ⚠️ FreeDictionary did not return phonetics');
-          }
-        }
-      }
-    } catch (error) {
-      console.error('[YoudaoTranslate] Error supplementing phonetics:', error);
-    }
   }
 
   /**
@@ -1037,6 +989,7 @@ class TranslationService {
     this.activeProvider = null;
     this.cache = new Map(); // 翻译缓存
     this.maxCacheSize = 100;
+    this.enablePhoneticFallback = true; // 默认启用音标补充
   }
 
   /**
@@ -1096,6 +1049,12 @@ class TranslationService {
       const provider = this.getActiveProvider();
       const result = await provider.translate(text, targetLang, sourceLang);
       
+      // 🆕 通用音标补充：如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
+      if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
+        console.log('[TranslationService] No phonetics found, trying FreeDictionary supplement...');
+        await this.supplementPhoneticsFromFreeDictionary(result, text);
+      }
+      
       // 缓存结果（仅在缓存启用时）
       if (this.maxCacheSize > 0) {
         this.addToCache(cacheKey, result);
@@ -1105,6 +1064,46 @@ class TranslationService {
     } catch (error) {
       console.error('[TranslationService] Translation failed:', error);
       throw error;
+    }
+  }
+
+  /**
+   * 从 FreeDictionary API 补充音标和发音（通用服务）
+   * 这是一个通用的后处理步骤，适用于所有翻译提供者
+   * @param {Object} result - 翻译结果对象
+   * @param {string} originalText - 原始文本
+   */
+  async supplementPhoneticsFromFreeDictionary(result, originalText) {
+    try {
+      // 只为单个英文单词补充音标
+      const words = originalText.trim().split(/\s+/);
+      if (words.length !== 1) {
+        console.log('[TranslationService] Skipping FreeDictionary for non-single-word text');
+        return;
+      }
+
+      // 检查是否是英文（简单判断）
+      if (!/^[a-zA-Z]+$/.test(originalText.trim())) {
+        console.log('[TranslationService] Skipping FreeDictionary for non-English text');
+        return;
+      }
+
+      // 获取 FreeDictionary 提供者
+      const freeDictProvider = this.providers.get('freedict');
+      if (!freeDictProvider) {
+        console.log('[TranslationService] ⚠️ FreeDictionary provider not available');
+        return;
+      }
+
+      const phoneticData = await freeDictProvider.fetchPhonetics(originalText);
+      if (phoneticData && phoneticData.phonetics.length > 0) {
+        result.phonetics = phoneticData.phonetics;
+        console.log(`[TranslationService] ✓ Supplemented ${phoneticData.phonetics.length} phonetics from FreeDictionary`);
+      } else {
+        console.log('[TranslationService] ⚠️ FreeDictionary did not return phonetics');
+      }
+    } catch (error) {
+      console.error('[TranslationService] Error supplementing phonetics:', error);
     }
   }
 
