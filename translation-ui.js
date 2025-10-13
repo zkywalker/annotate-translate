@@ -8,6 +8,29 @@
  */
 
 /**
+ * 安全获取 i18n 消息，避免扩展上下文失效错误
+ * @param {string} key - 消息 key
+ * @param {Array|string} substitutions - 替换参数
+ * @param {string} fallback - 后备文本
+ * @returns {string} 翻译后的消息或后备文本
+ */
+function safeGetMessage(key, substitutions = null, fallback = '') {
+  try {
+    if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
+      const message = substitutions 
+        ? chrome.i18n.getMessage(key, substitutions)
+        : chrome.i18n.getMessage(key);
+      return message || fallback;
+    }
+    return fallback;
+  } catch (e) {
+    // 扩展上下文失效时返回后备文本
+    console.warn('[Translation-UI] Extension context invalidated, using fallback text');
+    return fallback;
+  }
+}
+
+/**
  * 翻译结果UI渲染器
  */
 class TranslationUI {
@@ -116,10 +139,8 @@ class TranslationUI {
     if (title) {
       const titleEl = document.createElement('div');
       titleEl.className = 'section-title';
-      // 使用 i18n 或回退到原始文本
-      titleEl.textContent = (typeof chrome !== 'undefined' && chrome.i18n) 
-        ? chrome.i18n.getMessage(title) || title
-        : title;
+      // 安全获取 i18n 消息
+      titleEl.textContent = safeGetMessage(title, null, title);
       section.appendChild(titleEl);
     }
     
@@ -193,9 +214,7 @@ class TranslationUI {
     const button = document.createElement('button');
     button.className = 'audio-play-button';
     button.innerHTML = '🔊'; // 使用emoji作为图标
-    const playPronunciationText = (typeof chrome !== 'undefined' && chrome.i18n) 
-      ? chrome.i18n.getMessage('playPronunciation') || 'Play pronunciation'
-      : 'Play pronunciation';
+    const playPronunciationText = safeGetMessage('playPronunciation', null, 'Play pronunciation');
     button.title = playPronunciationText;
     button.setAttribute('aria-label', playPronunciationText);
 
@@ -501,9 +520,7 @@ class TranslationUI {
 
     const provider = document.createElement('span');
     provider.className = 'provider-info';
-    const poweredByText = (typeof chrome !== 'undefined' && chrome.i18n) 
-      ? chrome.i18n.getMessage('poweredBy') || 'Powered by'
-      : 'Powered by';
+    const poweredByText = safeGetMessage('poweredBy', null, 'Powered by');
     provider.textContent = `${poweredByText} ${result.provider || 'Unknown'}`;
     footer.appendChild(provider);
 

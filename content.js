@@ -1,5 +1,28 @@
 // Content Script for Annotate Translate Extension
 
+/**
+ * 安全获取 i18n 消息，避免扩展上下文失效错误
+ * @param {string} key - 消息 key
+ * @param {Array|string} substitutions - 替换参数
+ * @param {string} fallback - 后备文本
+ * @returns {string} 翻译后的消息或后备文本
+ */
+function safeGetMessage(key, substitutions = null, fallback = '') {
+  try {
+    if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
+      const message = substitutions 
+        ? chrome.i18n.getMessage(key, substitutions)
+        : chrome.i18n.getMessage(key);
+      return message || fallback;
+    }
+    return fallback;
+  } catch (e) {
+    // 扩展上下文失效时返回后备文本
+    console.warn('[Annotate-Translate] Extension context invalidated, using fallback text');
+    return fallback;
+  }
+}
+
 let settings = {
   enableTranslate: false,
   enableAnnotate: true,
@@ -197,7 +220,7 @@ function showContextMenu(x, y, text) {
     const translateBtn = document.createElement('button');
     translateBtn.textContent = 'T';
     translateBtn.className = 'menu-button';
-    translateBtn.title = chrome.i18n.getMessage('translate') || 'Translate'; // 悬停提示
+    translateBtn.title = safeGetMessage('translate', null, 'Translate');
     translateBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // 阻止事件冒泡
       e.preventDefault();  // 阻止默认行为
@@ -212,7 +235,7 @@ function showContextMenu(x, y, text) {
     const annotateBtn = document.createElement('button');
     annotateBtn.textContent = 'A';
     annotateBtn.className = 'menu-button';
-    annotateBtn.title = chrome.i18n.getMessage('annotate') || 'Annotate'; // 悬停提示
+    annotateBtn.title = safeGetMessage('annotate', null, 'Annotate');
     annotateBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // 阻止事件冒泡
       e.preventDefault();  // 阻止默认行为
@@ -261,7 +284,7 @@ async function translateText(text) {
   loadingTooltip.innerHTML = `
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <span>${chrome.i18n.getMessage('translating') || 'Translating...'}</span>
+      <span>${safeGetMessage('translating', null, 'Translating...')}</span>
     </div>
   `;
   
@@ -326,7 +349,7 @@ async function translateText(text) {
     const closeBtn = document.createElement('button');
     closeBtn.className = 'translation-close-btn';
     closeBtn.innerHTML = '×';
-    closeBtn.title = chrome.i18n.getMessage('close') || 'Close';
+    closeBtn.title = safeGetMessage('close', null, 'Close');
     closeBtn.addEventListener('click', () => {
       element.remove();
       currentTooltip = null;
@@ -366,7 +389,7 @@ async function translateText(text) {
       <div class="error-content">
         <span class="error-icon">⚠️</span>
         <div class="error-message">
-          <strong>${chrome.i18n.getMessage('translationFailed') || 'Translation failed'}</strong>
+          <strong>${safeGetMessage('translationFailed', null, 'Translation failed')}</strong>
           <p>${error.message}</p>
         </div>
       </div>
@@ -469,12 +492,12 @@ function promptForMultipleMatches(matches, text) {
   // 创建一个更友好的对话框
   const dialog = document.createElement('div');
   dialog.className = 'annotate-translate-dialog';
-  const multipleMatchesText = chrome.i18n.getMessage('multipleMatchesFound') || 'Multiple matches found';
-  const foundOccurrencesText = chrome.i18n.getMessage('foundOccurrences', [matches.length.toString(), escapeHtml(text)]) || 
-    `Found <strong>${matches.length}</strong> occurrences of "<strong>${escapeHtml(text)}</strong>"`;
-  const annotateFirstText = chrome.i18n.getMessage('annotateFirstOnly') || 'Annotate First Only';
-  const annotateAllText = chrome.i18n.getMessage('annotateAll', [matches.length.toString()]) || `Annotate All (${matches.length})`;
-  const cancelText = chrome.i18n.getMessage('cancel') || 'Cancel';
+  const multipleMatchesText = safeGetMessage('multipleMatchesFound', null, 'Multiple matches found');
+  const foundOccurrencesText = safeGetMessage('foundOccurrences', [matches.length.toString(), escapeHtml(text)], 
+    `Found <strong>${matches.length}</strong> occurrences of "<strong>${escapeHtml(text)}</strong>"`);
+  const annotateFirstText = safeGetMessage('annotateFirstOnly', null, 'Annotate First Only');
+  const annotateAllText = safeGetMessage('annotateAll', [matches.length.toString()], `Annotate All (${matches.length})`);
+  const cancelText = safeGetMessage('cancel', null, 'Cancel');
   
   dialog.innerHTML = `
     <div class="dialog-content">
@@ -669,7 +692,7 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
     // Add click event to show detailed translation
     if (result && (result.definitions || result.examples)) {
       ruby.style.cursor = 'pointer';
-      ruby.setAttribute('title', chrome.i18n.getMessage('clickToViewDetails') || 'Click to view detailed translation');
+      ruby.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
       
       ruby.addEventListener('click', (e) => {
         // 如果点击的是音频按钮，不显示详细弹窗
@@ -931,7 +954,7 @@ function showDetailedTranslation(rubyElement, result) {
   const closeBtn = document.createElement('button');
   closeBtn.className = 'translation-close-btn';
   closeBtn.innerHTML = '×';
-  closeBtn.title = chrome.i18n.getMessage('close') || 'Close';
+  closeBtn.title = safeGetMessage('close', null, 'Close');
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     element.remove();
