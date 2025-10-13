@@ -703,7 +703,16 @@ class DeepLTranslateProvider extends TranslationProvider {
   updateConfig(apiKey, useFreeApi = true) {
     this.apiKey = apiKey || '';
     this.useFreeApi = useFreeApi;
-    console.log(`[DeepLTranslate] Config updated. API Type: ${useFreeApi ? 'Free' : 'Pro'}`);
+    
+    // 🆕 根据 API 密钥自动检测类型（免费密钥通常以 :fx 结尾）
+    if (this.apiKey && this.apiKey.includes(':fx')) {
+      this.useFreeApi = true;
+      console.log(`[DeepLTranslate] Detected Free API key (ends with :fx)`);
+    }
+    
+    console.log(`[DeepLTranslate] Config updated.`);
+    console.log(`[DeepLTranslate]   API Key: ${this.apiKey ? (this.apiKey.substring(0, 10) + '...') : 'Not set'}`);
+    console.log(`[DeepLTranslate]   API Type: ${this.useFreeApi ? 'Free (api-free.deepl.com)' : 'Pro (api.deepl.com)'}`);
   }
 
   /**
@@ -839,6 +848,9 @@ class DeepLTranslateProvider extends TranslationProvider {
 
       // 获取 API URL
       const apiUrl = this.getApiUrl();
+      
+      console.log(`[DeepLTranslate] Using API URL: ${apiUrl}`);
+      console.log(`[DeepLTranslate] API Key: ${this.apiKey ? (this.apiKey.substring(0, 10) + '...') : 'Not set'}`);
 
       // 通过 background script 发送请求（绕过 CORS）
       const data = await this.sendRequestViaBackground(apiUrl, params);
@@ -854,9 +866,17 @@ class DeepLTranslateProvider extends TranslationProvider {
       
       // 处理常见的 DeepL API 错误
       if (error.message.includes('403')) {
+        // 检查是否是端点错误
+        if (error.message.includes('Wrong endpoint')) {
+          const suggestedEndpoint = error.message.includes('api-free.deepl.com') ? 'Free' : 'Pro';
+          throw new Error(
+            `DeepL API endpoint mismatch. Your API key requires the ${suggestedEndpoint} API endpoint. ` +
+            `Please ${suggestedEndpoint === 'Free' ? 'check' : 'uncheck'} the "Use Free API" option in settings.`
+          );
+        }
         throw new Error('DeepL API authentication failed. Please check your API key.');
       } else if (error.message.includes('456')) {
-        throw new Error('DeepL API quota exceeded. Please check your usage limits.');
+        throw new Error('DeepL API quota exceeded. Please check your usage limits or upgrade your plan.');
       } else if (error.message.includes('400')) {
         throw new Error('DeepL API bad request. Please check your parameters.');
       }

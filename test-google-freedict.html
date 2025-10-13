@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google FreeDictionary 音标补充测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      max-width: 1000px;
+      margin: 50px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: #1a73e8;
+      border-bottom: 3px solid #1a73e8;
+      padding-bottom: 10px;
+    }
+    
+    .test-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1a73e8;
+    }
+    
+    .test-word {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 5px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .test-word:hover {
+      background: #1a73e8;
+      color: white;
+      border-color: #1a73e8;
+    }
+    
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .result h3 {
+      margin-top: 0;
+      color: #1a73e8;
+    }
+    
+    .phonetic-item {
+      padding: 10px;
+      margin: 5px 0;
+      background: #e8f0fe;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .phonetic-text {
+      font-size: 18px;
+      font-weight: 500;
+      color: #1967d2;
+    }
+    
+    .phonetic-type {
+      background: #1a73e8;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .audio-button {
+      background: #34a853;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .audio-button:hover {
+      background: #2d8e47;
+    }
+    
+    .no-phonetics {
+      color: #d93025;
+      font-weight: 500;
+    }
+    
+    .success {
+      color: #0f9d58;
+      font-weight: 500;
+    }
+    
+    .log-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .log-info { color: #4fc3f7; }
+    .log-success { color: #81c784; }
+    .log-warning { color: #ffb74d; }
+    .log-error { color: #e57373; }
+    
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    
+    button:hover {
+      background: #1557b0;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a73e8;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔊 Google 翻译 FreeDictionary 音标补充测试</h1>
+  
+  <div class="test-section">
+    <h2>📝 快速测试</h2>
+    <p>点击下面的单词进行测试：</p>
+    <div id="test-words">
+      <span class="test-word" onclick="testWord('hello')">hello</span>
+      <span class="test-word" onclick="testWord('world')">world</span>
+      <span class="test-word" onclick="testWord('example')">example</span>
+      <span class="test-word" onclick="testWord('beautiful')">beautiful</span>
+      <span class="test-word" onclick="testWord('programming')">programming</span>
+      <span class="test-word" onclick="testWord('dictionary')">dictionary</span>
+      <span class="test-word" onclick="testWord('translate')">translate</span>
+      <span class="test-word" onclick="testWord('phonetic')">phonetic</span>
+    </div>
+    
+    <div id="result" class="result" style="display: none;"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>🚀 批量测试</h2>
+    <button onclick="runBatchTest()">运行批量测试</button>
+    <button onclick="clearResults()">清空结果</button>
+    
+    <div class="stats" id="stats" style="display: none;">
+      <div class="stat-card">
+        <div class="stat-value" id="total-tests">0</div>
+        <div class="stat-label">测试总数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="success-count">0</div>
+        <div class="stat-label">成功获取音标</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="fail-count">0</div>
+        <div class="stat-label">未获取音标</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="success-rate">0%</div>
+        <div class="stat-label">成功率</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>📋 控制台日志</h2>
+    <button onclick="clearLogs()">清空日志</button>
+    <div id="logs" class="log-output">等待测试...</div>
+  </div>
+  
+  <script src="translation-service.js"></script>
+  <script>
+    // 初始化翻译服务
+    const translationService = new TranslationService();
+    
+    // 劫持 console.log 以在页面显示
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    const logsDiv = document.getElementById('logs');
+    let logBuffer = [];
+    
+    function addLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `[${timestamp}] ${message}\n`;
+      logBuffer.push(logEntry);
+      
+      let className = 'log-info';
+      if (type === 'success') className = 'log-success';
+      if (type === 'warning') className = 'log-warning';
+      if (type === 'error') className = 'log-error';
+      
+      logsDiv.innerHTML += `<span class="${className}">${logEntry}</span>`;
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      const message = args.join(' ');
+      
+      let type = 'info';
+      if (message.includes('✓') || message.includes('Supplemented')) type = 'success';
+      if (message.includes('⚠️') || message.includes('Skipping')) type = 'warning';
+      
+      addLog(message, type);
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addLog(args.join(' '), 'error');
+    };
+    
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      addLog(args.join(' '), 'warning');
+    };
+    
+    function clearLogs() {
+      logsDiv.innerHTML = '日志已清空，等待新的测试...\n';
+      logBuffer = [];
+    }
+    
+    function clearResults() {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('stats').style.display = 'none';
+      clearLogs();
+    }
+    
+    // 测试单个单词
+    async function testWord(word) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<h3>⏳ 翻译中...</h3>';
+      
+      addLog(`\n========== Testing word: "${word}" ==========`, 'info');
+      
+      try {
+        const result = await translationService.translate(word, 'zh-CN');
+        
+        let html = `<h3>📖 "${word}" 的翻译结果</h3>`;
+        html += `<p><strong>翻译：</strong>${result.translatedText}</p>`;
+        html += `<p><strong>来源：</strong>${result.provider}</p>`;
+        
+        if (result.phonetics && result.phonetics.length > 0) {
+          html += `<p class="success">✅ 成功获取 ${result.phonetics.length} 个音标</p>`;
+          result.phonetics.forEach((p, i) => {
+            html += `<div class="phonetic-item">`;
+            html += `<span class="phonetic-type">${p.type || 'default'}</span>`;
+            html += `<span class="phonetic-text">${p.text}</span>`;
+            if (p.audioUrl) {
+              html += `<button class="audio-button" onclick="playAudio('${p.audioUrl}')">🔊 播放</button>`;
+            }
+            html += `</div>`;
+          });
+          addLog(`✓ 成功获取 ${result.phonetics.length} 个音标`, 'success');
+        } else {
+          html += `<p class="no-phonetics">❌ 未获取到音标</p>`;
+          addLog('✗ 未获取到音标', 'error');
+        }
+        
+        // 显示词义
+        if (result.definitions && result.definitions.length > 0) {
+          html += `<h4>词义：</h4>`;
+          result.definitions.forEach(def => {
+            html += `<p><strong>${def.partOfSpeech}</strong> ${def.text}</p>`;
+          });
+        }
+        
+        resultDiv.innerHTML = html;
+        
+      } catch (error) {
+        resultDiv.innerHTML = `<h3>❌ 错误</h3><p>${error.message}</p>`;
+        addLog(`Error: ${error.message}`, 'error');
+      }
+      
+      addLog(`========== Test complete ==========\n`, 'info');
+    }
+    
+    // 播放音频
+    function playAudio(url) {
+      const audio = new Audio(url);
+      audio.play().catch(err => {
+        alert('播放失败：' + err.message);
+      });
+    }
+    
+    // 批量测试
+    async function runBatchTest() {
+      const words = [
+        'hello', 'world', 'example', 'beautiful', 
+        'programming', 'dictionary', 'translate', 'phonetic',
+        'language', 'computer', 'internet', 'software'
+      ];
+      
+      clearLogs();
+      addLog('========== 开始批量测试 ==========\n', 'info');
+      
+      let totalTests = 0;
+      let successCount = 0;
+      let failCount = 0;
+      
+      for (const word of words) {
+        addLog(`\n--- Testing: "${word}" ---`, 'info');
+        
+        try {
+          const result = await translationService.translate(word, 'zh-CN');
+          totalTests++;
+          
+          if (result.phonetics && result.phonetics.length > 0) {
+            successCount++;
+            addLog(`✓ "${word}": 获取 ${result.phonetics.length} 个音标`, 'success');
+          } else {
+            failCount++;
+            addLog(`✗ "${word}": 未获取到音标`, 'error');
+          }
+          
+          // 更新统计
+          updateStats(totalTests, successCount, failCount);
+          
+          // 短暂延迟避免请求过快
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+        } catch (error) {
+          totalTests++;
+          failCount++;
+          addLog(`✗ "${word}": 错误 - ${error.message}`, 'error');
+          updateStats(totalTests, successCount, failCount);
+        }
+      }
+      
+      addLog(`\n========== 批量测试完成 ==========`, 'info');
+      addLog(`总测试数: ${totalTests}`, 'info');
+      addLog(`成功: ${successCount}`, 'success');
+      addLog(`失败: ${failCount}`, 'error');
+      addLog(`成功率: ${((successCount / totalTests) * 100).toFixed(1)}%`, 'info');
+    }
+    
+    function updateStats(total, success, fail) {
+      const statsDiv = document.getElementById('stats');
+      statsDiv.style.display = 'grid';
+      
+      document.getElementById('total-tests').textContent = total;
+      document.getElementById('success-count').textContent = success;
+      document.getElementById('fail-count').textContent = fail;
+      document.getElementById('success-rate').textContent = 
+        total > 0 ? `${((success / total) * 100).toFixed(1)}%` : '0%';
+    }
+    
+    // 页面加载完成后的初始化
+    addLog('✓ 页面加载完成', 'success');
+    addLog('✓ 翻译服务已初始化', 'success');
+    addLog('点击单词开始测试，或运行批量测试\n', 'info');
+  </script>
+</body>
+</html>

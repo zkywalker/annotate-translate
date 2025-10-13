@@ -96,7 +96,7 @@
     "description": "How to get credentials title"
   },
   "credentialsStep1": {
-    "message": "访问有道智云开放平台",
+    "message": "访问",
     "description": "Credentials step 1"
   },
   "credentialsStep2": {
@@ -149,7 +149,7 @@
     "description": "How to get DeepL credentials title"
   },
   "deeplCredentialsStep1": {
-    "message": "访问DeepL Pro API",
+    "message": "访问",
     "description": "DeepL credentials step 1"
   },
   "deeplCredentialsStep2": {
