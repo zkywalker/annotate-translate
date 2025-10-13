@@ -59,17 +59,39 @@ function populateProviderSelect() {
   if (!select) return;
   
   const providers = [
-    { value: 'google', labelKey: 'googleTranslate' },
-    { value: 'youdao', labelKey: 'youdaoTranslate' },
-    { value: 'deepl', labelKey: 'deeplTranslate' }
+    { value: 'google', labelKey: 'googleTranslate', logo: 'icons/icon_logo_google.svg' },
+    { value: 'youdao', labelKey: 'youdaoTranslate', logo: 'icons/icon_logo_youdao.svg' },
+    { value: 'deepl', labelKey: 'deeplTranslate', logo: 'icons/icon_logo_deepl.svg' }
   ];
   
   providers.forEach(provider => {
     const option = document.createElement('option');
     option.value = provider.value;
     option.textContent = i18n(provider.labelKey);
+    option.dataset.logo = provider.logo;
     select.appendChild(option);
   });
+  
+  // Add event listener to update icon when provider changes
+  select.addEventListener('change', updateProviderIcon);
+}
+
+// Update provider icon based on selected provider
+function updateProviderIcon() {
+  const select = document.getElementById('translation-provider');
+  const icon = document.getElementById('provider-select-icon');
+  if (!select || !icon) return;
+  
+  const selectedOption = select.options[select.selectedIndex];
+  const logoPath = selectedOption.dataset.logo;
+  
+  if (logoPath) {
+    icon.src = chrome.runtime.getURL(logoPath);
+    icon.alt = selectedOption.textContent;
+    icon.style.display = 'block';
+  } else {
+    icon.style.display = 'none';
+  }
 }
 
 // Check if the tab URL is valid for content scripts
@@ -103,6 +125,9 @@ function loadSettings() {
     document.getElementById('enable-annotate').checked = items.enableAnnotate;
     document.getElementById('target-language').value = items.targetLanguage;
     document.getElementById('translation-provider').value = items.translationProvider;
+    
+    // Update provider icon after loading settings
+    updateProviderIcon();
   });
 }
 

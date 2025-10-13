@@ -111,6 +111,41 @@ h2 {
   box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
 }
 
+/* Provider logo styles for select options */
+.provider-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.provider-option-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.provider-select-container {
+  position: relative;
+}
+
+.provider-select-container select {
+  padding-left: 36px;
+}
+
+.provider-select-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .actions {
   display: flex;
   flex-direction: column;

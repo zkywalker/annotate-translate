@@ -32,9 +32,12 @@
             </div>
             <div class="setting-item">
                 <label for="translation-provider" data-i18n="selectTranslationService">Translation Service:</label>
-                <select id="translation-provider">
-                    <!-- Options will be populated by JavaScript with i18n -->
-                </select>
+                <div class="provider-select-container">
+                    <img id="provider-select-icon" class="provider-select-icon" src="" alt="" style="display: none;">
+                    <select id="translation-provider">
+                        <!-- Options will be populated by JavaScript with i18n -->
+                    </select>
+                </div>
             </div>
             <div class="setting-item">
                 <label for="target-language" data-i18n="defaultTargetLanguage">Target Language:</label>

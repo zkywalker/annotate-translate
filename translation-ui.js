@@ -530,7 +530,27 @@ class TranslationUI {
     const provider = document.createElement('span');
     provider.className = 'provider-info';
     const poweredByText = safeGetMessage('poweredBy', null, 'Powered by');
-    provider.textContent = `${poweredByText} ${result.provider || 'Unknown'}`;
+    
+    // 添加 logo 图标
+    const providerName = result.provider ? result.provider.toLowerCase() : 'unknown';
+    const logoMap = {
+      'google': 'icons/icon_logo_google.svg',
+      'youdao': 'icons/icon_logo_youdao.svg',
+      'deepl': 'icons/icon_logo_deepl.svg'
+    };
+    
+    if (logoMap[providerName]) {
+      const logo = document.createElement('img');
+      logo.className = 'provider-logo';
+      logo.src = chrome.runtime.getURL(logoMap[providerName]);
+      logo.alt = result.provider || 'Unknown';
+      provider.appendChild(logo);
+    }
+    
+    const providerText = document.createElement('span');
+    providerText.textContent = `${poweredByText} ${result.provider || 'Unknown'}`;
+    provider.appendChild(providerText);
+    
     footer.appendChild(provider);
 
     if (result.timestamp) {
