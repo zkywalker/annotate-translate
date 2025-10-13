@@ -734,14 +734,57 @@ class DeepLTranslateProvider extends TranslationProvider {
   /**
    * 将语言代码转换为 DeepL API 支持的格式
    * @param {string} langCode - 通用语言代码
+   * @param {boolean} isTarget - 是否为目标语言（目标语言和源语言的代码可能不同）
    * @returns {string} DeepL API 语言代码
    */
-  convertLangCode(langCode) {
-    const langMap = {
+  convertLangCode(langCode, isTarget = false) {
+    // DeepL 源语言代码映射
+    const sourceLangMap = {
       'auto': '', // DeepL 不需要指定源语言，自动检测
-      'zh-CN': 'ZH', // 中文（简体）
-      'zh-TW': 'ZH', // 中文（繁体）- DeepL 只有一个中文代码
+      'zh-CN': 'ZH',
+      'zh-TW': 'ZH',
+      'zh': 'ZH',
       'en': 'EN',
+      'en-US': 'EN',
+      'en-GB': 'EN',
+      'ja': 'JA',
+      'ko': 'KO',
+      'fr': 'FR',
+      'es': 'ES',
+      'ru': 'RU',
+      'de': 'DE',
+      'it': 'IT',
+      'pt': 'PT',
+      'pt-BR': 'PT',
+      'pt-PT': 'PT',
+      'nl': 'NL',
+      'pl': 'PL',
+      'ar': 'AR',
+      'bg': 'BG',
+      'cs': 'CS',
+      'da': 'DA',
+      'el': 'EL',
+      'et': 'ET',
+      'fi': 'FI',
+      'hu': 'HU',
+      'id': 'ID',
+      'lt': 'LT',
+      'lv': 'LV',
+      'ro': 'RO',
+      'sk': 'SK',
+      'sl': 'SL',
+      'sv': 'SV',
+      'tr': 'TR',
+      'uk': 'UK'
+    };
+
+    // DeepL 目标语言代码映射（某些语言需要指定变体）
+    const targetLangMap = {
+      'auto': 'EN', // auto 不能作为目标语言，默认英语
+      'zh-CN': 'ZH', // 中文简体
+      'zh-TW': 'ZH', // 中文繁体（DeepL 会自动处理）
+      'zh': 'ZH',
+      'en': 'EN-US', // 英语默认美式
       'en-US': 'EN-US',
       'en-GB': 'EN-GB',
       'ja': 'JA',
@@ -751,14 +794,40 @@ class DeepLTranslateProvider extends TranslationProvider {
       'ru': 'RU',
       'de': 'DE',
       'it': 'IT',
-      'pt': 'PT',
+      'pt': 'PT-BR', // 葡萄牙语默认巴西
       'pt-BR': 'PT-BR',
       'pt-PT': 'PT-PT',
       'nl': 'NL',
       'pl': 'PL',
-      'ar': 'AR'
+      'ar': 'AR',
+      'bg': 'BG',
+      'cs': 'CS',
+      'da': 'DA',
+      'el': 'EL',
+      'et': 'ET',
+      'fi': 'FI',
+      'hu': 'HU',
+      'id': 'ID',
+      'lt': 'LT',
+      'lv': 'LV',
+      'ro': 'RO',
+      'sk': 'SK',
+      'sl': 'SL',
+      'sv': 'SV',
+      'tr': 'TR',
+      'uk': 'UK'
     };
-    return langMap[langCode] || langCode.toUpperCase();
+
+    const langMap = isTarget ? targetLangMap : sourceLangMap;
+    const result = langMap[langCode];
+    
+    if (result !== undefined) {
+      return result;
+    }
+    
+    // 如果没有找到映射，尝试转换为大写（可能是标准 ISO 代码）
+    console.warn(`[DeepLTranslate] Unknown language code: ${langCode}, using uppercase version`);
+    return langCode.toUpperCase();
   }
 
   /**
@@ -825,9 +894,16 @@ class DeepLTranslateProvider extends TranslationProvider {
     try {
       console.log(`[DeepLTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
       
-      // 转换语言代码
-      const source_lang = this.convertLangCode(sourceLang);
-      const target_lang = this.convertLangCode(targetLang);
+      // 转换语言代码（源语言和目标语言分别转换）
+      const source_lang = this.convertLangCode(sourceLang, false); // 源语言
+      const target_lang = this.convertLangCode(targetLang, true);  // 目标语言
+
+      console.log(`[DeepLTranslate] Language code conversion:`, {
+        sourceLang: sourceLang,
+        source_lang: source_lang,
+        targetLang: targetLang,
+        target_lang: target_lang
+      });
 
       // 构建请求参数
       const params = {
@@ -835,16 +911,16 @@ class DeepLTranslateProvider extends TranslationProvider {
         target_lang: target_lang
       };
 
-      // 只有在明确指定源语言时才添加 source_lang 参数
-      if (source_lang && source_lang !== '') {
+      // DeepL 自动检测源语言：不传 source_lang 参数
+      // 只有在明确指定非 'auto' 的源语言时才添加 source_lang 参数
+      if (sourceLang !== 'auto' && source_lang && source_lang !== '') {
         params.source_lang = source_lang;
+        console.log(`[DeepLTranslate] Using explicit source language: ${source_lang}`);
+      } else {
+        console.log(`[DeepLTranslate] Using auto-detection (no source_lang parameter)`);
       }
 
-      console.log(`[DeepLTranslate] Request params:`, {
-        text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
-        source_lang: source_lang || 'auto',
-        target_lang: target_lang
-      });
+      console.log(`[DeepLTranslate] Final request params:`, params);
 
       // 获取 API URL
       const apiUrl = this.getApiUrl();
@@ -878,7 +954,17 @@ class DeepLTranslateProvider extends TranslationProvider {
       } else if (error.message.includes('456')) {
         throw new Error('DeepL API quota exceeded. Please check your usage limits or upgrade your plan.');
       } else if (error.message.includes('400')) {
-        throw new Error('DeepL API bad request. Please check your parameters.');
+        // 提取更详细的错误信息
+        let detailedError = 'DeepL API bad request.';
+        if (error.message.includes('source_lang')) {
+          detailedError = `DeepL API error: Unsupported source language. The language code may not be supported by DeepL.`;
+        } else if (error.message.includes('target_lang')) {
+          detailedError = `DeepL API error: Unsupported target language "${targetLang}". Please check language settings.`;
+        } else if (error.message.includes('text')) {
+          detailedError = 'DeepL API error: Invalid text parameter.';
+        }
+        console.error('[DeepLTranslate] Error details:', error.message);
+        throw new Error(detailedError);
       }
       
       throw error;
