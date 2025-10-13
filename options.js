@@ -144,6 +144,14 @@ function loadSettings() {
   chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
     console.log('[Options] Loaded settings:', settings);
     
+    // 检查并修正状态不一致：如果 debug 模式关闭但提供者是 debug，则切换到 google
+    if (settings.translationProvider === 'debug' && !settings.enableDebugMode) {
+      console.log('[Options] Debug mode is off but provider is debug, switching to google');
+      settings.translationProvider = 'google';
+      // 更新存储
+      chrome.storage.sync.set({ translationProvider: 'google' });
+    }
+    
     // Feature toggles
     elements.enableTranslate.checked = settings.enableTranslate;
     elements.enableAnnotate.checked = settings.enableAnnotate;
@@ -195,6 +203,22 @@ function saveSettings() {
   const newUiLanguage = elements.uiLanguage.value;
   const languageChanged = previousUiLanguage !== newUiLanguage;
   
+  // 获取选中的翻译提供者
+  let selectedProvider = document.querySelector('input[name="provider"]:checked').value;
+  const debugModeEnabled = elements.enableDebugMode.checked;
+  
+  // 如果 debug 模式关闭但选中的是 debug 提供者，则强制切换到 google
+  if (selectedProvider === 'debug' && !debugModeEnabled) {
+    console.log('[Options] Cannot select debug provider when debug mode is off, switching to google');
+    selectedProvider = 'google';
+    // 更新 UI
+    const googleRadio = document.querySelector('input[name="provider"][value="google"]');
+    if (googleRadio) {
+      googleRadio.checked = true;
+      updateProviderSelection('google');
+    }
+  }
+  
   const settings = {
     // Feature toggles
     enableTranslate: elements.enableTranslate.checked,
@@ -204,7 +228,7 @@ function saveSettings() {
     uiLanguage: newUiLanguage,
     
     // Translation provider
-    translationProvider: document.querySelector('input[name="provider"]:checked').value,
+    translationProvider: selectedProvider,
     targetLanguage: elements.targetLanguage.value,
     
     // Youdao API settings

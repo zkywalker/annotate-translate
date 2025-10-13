@@ -4,7 +4,7 @@ let settings = {
   enableTranslate: false,
   enableAnnotate: true,
   targetLanguage: 'zh-CN',
-  translationProvider: 'debug',
+  translationProvider: 'google',
   youdaoAppKey: '',
   youdaoAppSecret: '',
   enablePhoneticFallback: true,
@@ -43,7 +43,7 @@ function init() {
     enableTranslate: false,
     enableAnnotate: true,
     targetLanguage: 'zh-CN',
-    translationProvider: 'debug',
+    translationProvider: 'google',
     youdaoAppKey: '',
     youdaoAppSecret: '',
     enablePhoneticFallback: true,
@@ -60,6 +60,14 @@ function init() {
   }, function(items) {
     settings = items;
     console.log('[Annotate-Translate] Settings loaded:', settings);
+    
+    // 如果 debug 模式关闭但提供者是 debug，则切换到 google
+    if (settings.translationProvider === 'debug' && !settings.debugMode) {
+      console.log('[Annotate-Translate] Debug mode is off but provider is debug, switching to google');
+      settings.translationProvider = 'google';
+      // 更新存储
+      chrome.storage.sync.set({ translationProvider: 'google' });
+    }
     
     // 应用设置到翻译服务
     applyTranslationSettings();
