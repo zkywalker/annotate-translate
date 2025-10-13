@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试内容脚本图标加载</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #1a73e8;
+      padding-bottom: 10px;
+    }
+    .test-button {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px;
+      transition: all 0.2s;
+    }
+    .test-button:hover {
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+    .icon-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      background: #f0f0f0;
+    }
+    .success {
+      background: #e6f4ea;
+      color: #137333;
+      border-left: 4px solid #137333;
+    }
+    .error {
+      background: #fce8e6;
+      color: #c5221f;
+      border-left: 4px solid #c5221f;
+    }
+    .info {
+      background: #e8f0fe;
+      color: #1967d2;
+      border-left: 4px solid #1967d2;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .select-text {
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 15px 0;
+      border: 2px dashed #ffc107;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 内容脚本图标加载测试</h1>
+  
+  <div class="test-section">
+    <h2>1. 检查 Lucide 库加载状态</h2>
+    <button class="test-button" onclick="checkLucideLoaded()">
+      <span>检查 Lucide</span>
+    </button>
+    <div id="lucide-status" class="result info">
+      点击按钮检查 Lucide 库是否加载...
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. 测试动态创建图标</h2>
+    <button class="test-button" onclick="createDynamicIcon()">
+      <span>动态创建图标</span>
+    </button>
+    <div id="dynamic-icons"></div>
+    <div id="create-status" class="result info">
+      点击按钮动态创建图标元素...
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. 测试手动初始化</h2>
+    <button class="test-button" onclick="manualInitialize()">
+      <span>手动初始化所有图标</span>
+    </button>
+    <div id="init-status" class="result info">
+      点击按钮手动调用 lucide.createIcons()...
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. 测试翻译功能</h2>
+    <div class="select-text">
+      <strong>选中这段文字进行翻译测试：</strong><br>
+      Hello world! This is a test for translation feature.
+      The audio button should display the Lucide volume-2 icon.
+    </div>
+    <div id="translation-status" class="result info">
+      选中上方文字，等待翻译弹窗出现，检查音频按钮图标是否显示。
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>5. 控制台日志检查</h2>
+    <div class="result info">
+      <strong>打开开发者工具控制台（F12），应该看到：</strong>
+      <ul>
+        <li><code>[Lucide] Loaded successfully from extension</code></li>
+        <li><code>[Lucide] Icons initialized</code></li>
+      </ul>
+      <strong>如果看到这些日志，说明 Lucide 加载成功。</strong>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>6. 预期结果</h2>
+    <div class="result success">
+      <strong>✅ 成功标志：</strong>
+      <ul>
+        <li>动态创建的图标应该立即显示为 🔊 图标（volume-2）</li>
+        <li>翻译弹窗的音频按钮应该显示图标</li>
+        <li>标注中的音频按钮应该显示图标</li>
+        <li>所有图标都可以正常点击</li>
+        <li>控制台无 CSP 错误</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function checkLucideLoaded() {
+      const statusDiv = document.getElementById('lucide-status');
+      
+      if (typeof lucide === 'undefined') {
+        statusDiv.className = 'result error';
+        statusDiv.innerHTML = `
+          <strong>❌ Lucide 未加载</strong><br>
+          <code>typeof lucide === 'undefined'</code>
+        `;
+        return;
+      }
+      
+      if (typeof lucide.createIcons !== 'function') {
+        statusDiv.className = 'result error';
+        statusDiv.innerHTML = `
+          <strong>⚠️ Lucide 已加载但 createIcons 不可用</strong><br>
+          <code>typeof lucide.createIcons: ${typeof lucide.createIcons}</code>
+        `;
+        return;
+      }
+      
+      statusDiv.className = 'result success';
+      statusDiv.innerHTML = `
+        <strong>✅ Lucide 已成功加载</strong><br>
+        <code>typeof lucide: object</code><br>
+        <code>typeof lucide.createIcons: function</code>
+      `;
+    }
+
+    function createDynamicIcon() {
+      const container = document.getElementById('dynamic-icons');
+      const statusDiv = document.getElementById('create-status');
+      
+      // 创建测试按钮
+      const button = document.createElement('button');
+      button.className = 'test-button';
+      button.style.cssText = `
+        background: transparent;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px;
+        cursor: pointer;
+        margin: 5px;
+      `;
+      
+      const icon = document.createElement('i');
+      icon.setAttribute('data-lucide', 'volume-2');
+      icon.setAttribute('width', '16');
+      icon.setAttribute('height', '16');
+      button.appendChild(icon);
+      
+      container.appendChild(button);
+      
+      // 模拟内容脚本的初始化逻辑
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        requestAnimationFrame(() => {
+          lucide.createIcons({ nameAttr: 'data-lucide' });
+          statusDiv.className = 'result success';
+          statusDiv.innerHTML = `
+            <strong>✅ 图标已创建并初始化</strong><br>
+            使用 <code>requestAnimationFrame(() => lucide.createIcons())</code>
+          `;
+        });
+      } else {
+        statusDiv.className = 'result error';
+        statusDiv.innerHTML = `
+          <strong>❌ 无法初始化图标</strong><br>
+          Lucide 库未加载
+        `;
+      }
+    }
+
+    function manualInitialize() {
+      const statusDiv = document.getElementById('init-status');
+      
+      if (typeof lucide === 'undefined' || typeof lucide.createIcons !== 'function') {
+        statusDiv.className = 'result error';
+        statusDiv.innerHTML = `
+          <strong>❌ 无法初始化</strong><br>
+          Lucide 库未正确加载
+        `;
+        return;
+      }
+      
+      try {
+        const before = document.querySelectorAll('[data-lucide]').length;
+        lucide.createIcons({ nameAttr: 'data-lucide' });
+        const after = document.querySelectorAll('[data-lucide]').length;
+        
+        statusDiv.className = 'result success';
+        statusDiv.innerHTML = `
+          <strong>✅ 手动初始化成功</strong><br>
+          初始化前: ${before} 个图标元素<br>
+          初始化后: ${after} 个图标元素<br>
+          所有 <code>[data-lucide]</code> 元素已转换为 SVG 图标
+        `;
+      } catch (error) {
+        statusDiv.className = 'result error';
+        statusDiv.innerHTML = `
+          <strong>❌ 初始化失败</strong><br>
+          错误: ${error.message}
+        `;
+      }
+    }
+
+    // 监听 lucide-ready 事件
+    window.addEventListener('lucide-ready', () => {
+      console.log('✅ Lucide ready event received!');
+      const allStatus = document.querySelectorAll('.result.info');
+      allStatus.forEach(el => {
+        if (el.textContent.includes('Lucide')) {
+          el.className = 'result success';
+          el.innerHTML = `<strong>✅ Lucide ready 事件已触发</strong>`;
+        }
+      });
+    });
+
+    // 页面加载时检查
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (typeof lucide !== 'undefined') {
+          console.log('✅ Page loaded, Lucide is available');
+          checkLucideLoaded();
+        } else {
+          console.warn('⚠️ Page loaded, but Lucide is not available yet');
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

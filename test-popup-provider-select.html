@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试：Popup 翻译提供商选择</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .feature-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .feature-section h2 {
+      margin-top: 0;
+      color: #667eea;
+      font-size: 18px;
+    }
+
+    .demo-box {
+      background: white;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .popup-preview {
+      width: 300px;
+      margin: 20px auto;
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .popup-header h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+      color: #1a73e8;
+      flex: 1;
+      text-align: center;
+    }
+
+    .settings-icon {
+      width: 20px;
+      height: 20px;
+      color: #555;
+    }
+
+    .popup-settings {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup-settings h4 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0 0 12px 0;
+      color: #555;
+    }
+
+    .setting-item {
+      margin-bottom: 12px;
+    }
+
+    .setting-item label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .setting-item input[type="checkbox"] {
+      margin-right: 8px;
+    }
+
+    .setting-item select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .popup-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .popup-actions button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-save {
+      background-color: #1a73e8;
+      color: white;
+    }
+
+    .btn-clear {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .highlight {
+      background: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .steps ol {
+      line-height: 1.8;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .comparison-item {
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      border: 2px solid #dee2e6;
+    }
+
+    .comparison-item h4 {
+      margin-top: 0;
+      color: #667eea;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    .badge-new {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-old {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    @media (max-width: 768px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✨ Popup 新功能：翻译提供商选择</h1>
+    <p class="subtitle">现在可以在扩展弹出窗口中快速切换翻译服务了！</p>
+
+    <div class="feature-section">
+      <h2>🎯 新增功能</h2>
+      <p>在扩展的弹出窗口（点击插件图标）中新增了 <span class="highlight">翻译提供商选择</span> 功能，用户可以快速切换翻译服务，无需打开完整的设置页面。</p>
+    </div>
+
+    <div class="feature-section">
+      <h2>📱 Popup 预览</h2>
+      <div class="popup-preview">
+        <div class="popup-header">
+          <h3>Annotate Translate</h3>
+          <svg class="settings-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 6.5C8.067 6.5 6.5 8.067 6.5 10C6.5 11.933 8.067 13.5 10 13.5C11.933 13.5 13.5 11.933 13.5 10C13.5 8.067 11.933 6.5 10 6.5Z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        
+        <div class="popup-settings">
+          <h4>设置</h4>
+          
+          <div class="setting-item">
+            <label>
+              <input type="checkbox" checked>
+              启用翻译功能
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <label>
+              <input type="checkbox" checked>
+              启用标注功能
+            </label>
+          </div>
+          
+          <div class="setting-item" style="border: 2px solid #667eea; padding: 10px; border-radius: 6px; background: #e7e9ff;">
+            <label style="color: #667eea; font-weight: 600;">
+              🆕 翻译服务：
+            </label>
+            <select>
+              <option>谷歌翻译</option>
+              <option>有道翻译</option>
+              <option>DeepL翻译</option>
+            </select>
+          </div>
+          
+          <div class="setting-item">
+            <label>目标语言：</label>
+            <select>
+              <option>中文（简体）</option>
+              <option>English</option>
+              <option>日本語</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="popup-actions">
+          <button class="btn-save">保存设置</button>
+          <button class="btn-clear">清除所有标注</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>📝 使用步骤</h2>
+      <div class="steps">
+        <ol>
+          <li>点击浏览器工具栏中的扩展图标</li>
+          <li>在弹出的窗口中找到 <span class="highlight">翻译服务</span> 下拉菜单</li>
+          <li>选择你喜欢的翻译提供商（谷歌翻译/有道翻译/DeepL翻译）</li>
+          <li>点击 <span class="code">保存设置</span> 按钮</li>
+          <li>新的翻译服务会立即生效</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>🔄 功能对比</h2>
+      <div class="comparison">
+        <div class="comparison-item">
+          <h4><span class="badge badge-old">之前</span>旧版本</h4>
+          <p>✗ 只能切换目标语言</p>
+          <p>✗ 需要打开完整设置页面才能切换翻译服务</p>
+          <p>✗ 步骤繁琐</p>
+        </div>
+        
+        <div class="comparison-item">
+          <h4><span class="badge badge-new">现在</span>新版本</h4>
+          <p>✓ 可以直接在 popup 中切换翻译服务</p>
+          <p>✓ 无需打开设置页面</p>
+          <p>✓ 快速方便</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>🎨 可选的翻译服务</h2>
+      <div class="demo-box">
+        <ul style="line-height: 2;">
+          <li><strong>谷歌翻译 (Google Translate)</strong> - 免费，支持最多语言</li>
+          <li><strong>有道翻译 (Youdao)</strong> - 需要 API 密钥，适合中文翻译</li>
+          <li><strong>DeepL翻译</strong> - 需要 API 密钥，高质量翻译</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>💡 提示</h2>
+      <div class="demo-box">
+        <p><strong>快速访问：</strong></p>
+        <ul>
+          <li>在 popup 中快速切换常用的翻译服务</li>
+          <li>在完整设置页面中配置 API 密钥和高级选项</li>
+        </ul>
+        
+        <p style="margin-top: 15px;"><strong>注意：</strong></p>
+        <ul>
+          <li>有道翻译和 DeepL 需要先在设置页面配置 API 密钥</li>
+          <li>如果未配置 API 密钥，这些服务可能无法使用</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>🔧 技术实现</h2>
+      <div class="demo-box">
+        <p><strong>修改的文件：</strong></p>
+        <ul>
+          <li><code>popup.html</code> - 添加翻译提供商选择控件</li>
+          <li><code>popup.js</code> - 实现提供商选择和保存逻辑</li>
+        </ul>
+        
+        <p style="margin-top: 15px;"><strong>新增功能：</strong></p>
+        <ul>
+          <li><code>populateProviderSelect()</code> - 填充翻译提供商选项</li>
+          <li>保存和加载 <code>translationProvider</code> 配置</li>
+          <li>与 content script 同步更新设置</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <h2>✅ 验证方法</h2>
+      <div class="demo-box">
+        <p><strong>在浏览器控制台运行：</strong></p>
+        <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto;"><code>// 检查当前翻译提供商
+chrome.storage.sync.get('translationProvider', console.log);
+
+// 切换到有道翻译
+chrome.storage.sync.set({ translationProvider: 'youdao' });
+
+// 切换到 DeepL
+chrome.storage.sync.set({ translationProvider: 'deepl' });
+
+// 切换到谷歌翻译
+chrome.storage.sync.set({ translationProvider: 'google' });</code></pre>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

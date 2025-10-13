@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>调试翻译UI图标</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .test-container {
+      border: 2px solid #1a73e8;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+    .select-text {
+      background: #fff;
+      padding: 15px;
+      border: 2px dashed #ffc107;
+      border-radius: 4px;
+      margin: 15px 0;
+      user-select: text;
+      cursor: text;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .success { background: #e6f4ea; color: #137333; }
+    .error { background: #fce8e6; color: #c5221f; }
+    .info { background: #e8f0fe; color: #1967d2; }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1557b0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐛 调试翻译UI图标问题</h1>
+  
+  <div class="test-container">
+    <h2>步骤 1: 检查 Lucide 加载</h2>
+    <button onclick="checkLucide()">检查 Lucide</button>
+    <div id="lucide-status" class="status info">点击按钮检查...</div>
+  </div>
+
+  <div class="test-container">
+    <h2>步骤 2: 检查页面上的图标元素</h2>
+    <button onclick="checkIcons()">检查图标元素</button>
+    <div id="icons-status" class="status info">点击按钮检查...</div>
+  </div>
+
+  <div class="test-container">
+    <h2>步骤 3: 手动创建测试图标</h2>
+    <button onclick="createTestIcon()">创建测试图标</button>
+    <div id="test-icon-container"></div>
+    <div id="create-status" class="status info">点击按钮创建...</div>
+  </div>
+
+  <div class="test-container">
+    <h2>步骤 4: 测试翻译功能</h2>
+    <div class="select-text">
+      <strong>选中这段文字进行翻译：</strong><br>
+      Hello world! Test the translation feature with audio buttons.
+    </div>
+    <div id="translation-status" class="status info">
+      选中上方文字，等待翻译弹窗出现。
+      <br>检查音频按钮是否显示图标。
+    </div>
+  </div>
+
+  <div class="test-container">
+    <h2>步骤 5: 查看控制台</h2>
+    <div class="status info">
+      <strong>打开开发者工具（F12），查看：</strong>
+      <ul>
+        <li>是否有 [Lucide] 相关日志</li>
+        <li>是否有 [TranslationUI] Lucide icons initialized 日志</li>
+        <li>是否有任何错误</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="test-container">
+    <h2>步骤 6: 手动初始化所有图标</h2>
+    <button onclick="manualInitialize()">手动初始化</button>
+    <div id="manual-status" class="status info">如果图标不显示，点击此按钮手动初始化...</div>
+  </div>
+
+  <script>
+    function checkLucide() {
+      const statusDiv = document.getElementById('lucide-status');
+      
+      console.log('[Debug] Checking Lucide...');
+      console.log('[Debug] typeof lucide:', typeof lucide);
+      console.log('[Debug] typeof window.lucide:', typeof window.lucide);
+      
+      if (typeof lucide === 'undefined') {
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = `
+          ❌ <strong>Lucide 未加载</strong><br>
+          typeof lucide: undefined
+        `;
+        return;
+      }
+      
+      if (typeof lucide.createIcons !== 'function') {
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = `
+          ⚠️ <strong>Lucide 对象存在但 createIcons 不可用</strong><br>
+          typeof lucide.createIcons: ${typeof lucide.createIcons}
+        `;
+        return;
+      }
+      
+      statusDiv.className = 'status success';
+      statusDiv.innerHTML = `
+        ✅ <strong>Lucide 已正确加载</strong><br>
+        typeof lucide: object<br>
+        typeof lucide.createIcons: function
+      `;
+    }
+
+    function checkIcons() {
+      const statusDiv = document.getElementById('icons-status');
+      const icons = document.querySelectorAll('[data-lucide]');
+      
+      console.log('[Debug] Found icons:', icons.length);
+      console.log('[Debug] Icons:', icons);
+      
+      if (icons.length === 0) {
+        statusDiv.className = 'status info';
+        statusDiv.innerHTML = `
+          ℹ️ <strong>页面上没有找到图标元素</strong><br>
+          未找到 [data-lucide] 元素<br>
+          请先进行翻译操作
+        `;
+        return;
+      }
+      
+      let svgCount = 0;
+      icons.forEach(icon => {
+        if (icon.tagName.toLowerCase() === 'svg') {
+          svgCount++;
+        }
+      });
+      
+      statusDiv.className = svgCount > 0 ? 'status success' : 'status error';
+      statusDiv.innerHTML = `
+        <strong>找到 ${icons.length} 个图标元素</strong><br>
+        已转换为 SVG: ${svgCount} 个<br>
+        ${svgCount === 0 ? '❌ 图标未初始化' : '✅ 图标已初始化'}
+      `;
+    }
+
+    function createTestIcon() {
+      const container = document.getElementById('test-icon-container');
+      const statusDiv = document.getElementById('create-status');
+      
+      // 清空容器
+      container.innerHTML = '';
+      
+      // 创建测试按钮
+      const button = document.createElement('button');
+      button.style.cssText = 'background: transparent; border: 1px solid #ddd; padding: 8px;';
+      
+      const icon = document.createElement('i');
+      icon.setAttribute('data-lucide', 'volume-2');
+      icon.setAttribute('width', '24');
+      icon.setAttribute('height', '24');
+      button.appendChild(icon);
+      
+      const text = document.createElement('span');
+      text.textContent = ' 测试图标';
+      button.appendChild(text);
+      
+      container.appendChild(button);
+      
+      console.log('[Debug] Test icon created:', icon);
+      
+      // 尝试初始化
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        console.log('[Debug] Calling lucide.createIcons...');
+        
+        // 双重 requestAnimationFrame
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            lucide.createIcons({ nameAttr: 'data-lucide' });
+            
+            const svgElement = button.querySelector('svg');
+            if (svgElement) {
+              statusDiv.className = 'status success';
+              statusDiv.innerHTML = '✅ <strong>测试图标创建成功并已初始化</strong>';
+            } else {
+              statusDiv.className = 'status error';
+              statusDiv.innerHTML = '❌ <strong>图标创建了但未转换为 SVG</strong>';
+            }
+          });
+        });
+      } else {
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = '❌ <strong>Lucide 未加载，无法初始化</strong>';
+      }
+    }
+
+    function manualInitialize() {
+      const statusDiv = document.getElementById('manual-status');
+      
+      if (typeof lucide === 'undefined' || typeof lucide.createIcons !== 'function') {
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = '❌ <strong>Lucide 未加载</strong>';
+        return;
+      }
+      
+      const before = document.querySelectorAll('[data-lucide]').length;
+      const beforeSvg = document.querySelectorAll('[data-lucide]').length;
+      
+      console.log('[Debug] Manual initialization...');
+      console.log('[Debug] Before:', before, 'elements');
+      
+      lucide.createIcons({ nameAttr: 'data-lucide' });
+      
+      setTimeout(() => {
+        const after = document.querySelectorAll('[data-lucide]').length;
+        const afterSvg = document.querySelectorAll('svg[data-lucide]').length;
+        
+        console.log('[Debug] After:', after, 'elements,', afterSvg, 'SVG');
+        
+        if (afterSvg > 0) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = `
+            ✅ <strong>手动初始化成功</strong><br>
+            找到 ${after} 个图标元素<br>
+            转换了 ${afterSvg} 个 SVG
+          `;
+        } else {
+          statusDiv.className = 'status error';
+          statusDiv.innerHTML = `
+            ❌ <strong>初始化失败</strong><br>
+            找到 ${after} 个图标元素，但没有转换为 SVG
+          `;
+        }
+      }, 100);
+    }
+
+    // 页面加载时自动检查
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        console.log('[Debug] Page loaded, auto-checking...');
+        checkLucide();
+      }, 1000);
+    });
+
+    // 监听 lucide-ready 事件
+    window.addEventListener('lucide-ready', () => {
+      console.log('[Debug] ✅ lucide-ready event received!');
+      const statusDiv = document.getElementById('lucide-status');
+      statusDiv.className = 'status success';
+      statusDiv.innerHTML = '✅ <strong>lucide-ready 事件已触发</strong>';
+    });
+
+    // 监听翻译弹窗的出现
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1 && node.classList && 
+              (node.classList.contains('translation-result-container') || 
+               node.classList.contains('annotate-translate-tooltip'))) {
+            console.log('[Debug] Translation UI detected!');
+            
+            setTimeout(() => {
+              const icons = node.querySelectorAll('[data-lucide]');
+              console.log('[Debug] Icons in translation UI:', icons.length);
+              
+              const statusDiv = document.getElementById('translation-status');
+              if (icons.length > 0) {
+                const svgCount = Array.from(icons).filter(i => i.tagName === 'SVG').length;
+                statusDiv.className = svgCount > 0 ? 'status success' : 'status error';
+                statusDiv.innerHTML = `
+                  翻译UI已出现<br>
+                  找到 ${icons.length} 个图标元素<br>
+                  ${svgCount > 0 ? '✅' : '❌'} 转换为 SVG: ${svgCount} 个
+                `;
+              }
+            }, 200);
+          }
+        });
+      });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+  </script>
+</body>
+</html>
