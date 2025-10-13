@@ -123,6 +123,12 @@ class TranslationUI {
     const footer = this.createFooter(result);
     container.appendChild(footer);
 
+    // ⭐ 使用 requestAnimationFrame 确保 DOM 添加后再初始化图标
+    // 即使容器还未添加到 document，也会在下一帧初始化
+    requestAnimationFrame(() => {
+      this.initializeLucideIcon(container);
+    });
+
     return container;
   }
 
@@ -241,8 +247,8 @@ class TranslationUI {
       }
     });
     
-    // 等待 Lucide 加载后初始化图标
-    this.initializeLucideIcon(button);
+    // ⭐ 不在这里初始化，统一在 render() 方法中初始化
+    // this.initializeLucideIcon(button);
 
     return button;
   }
@@ -252,19 +258,24 @@ class TranslationUI {
    * @param {HTMLElement} container - 包含图标的容器元素
    */
   initializeLucideIcon(container) {
+    const tryInitialize = () => {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        // 使用双重 requestAnimationFrame 确保 DOM 完全渲染
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            lucide.createIcons({ nameAttr: 'data-lucide' });
+            console.log('[TranslationUI] Lucide icons initialized');
+          });
+        });
+      }
+    };
+
     if (typeof lucide !== 'undefined' && lucide.createIcons) {
-      // 使用 requestAnimationFrame 确保 DOM 更新后再初始化
-      requestAnimationFrame(() => {
-        lucide.createIcons({ nameAttr: 'data-lucide' });
-      });
+      tryInitialize();
     } else {
       // 如果 Lucide 还未加载，等待加载完成
       const handleLucideReady = () => {
-        if (typeof lucide !== 'undefined' && lucide.createIcons) {
-          requestAnimationFrame(() => {
-            lucide.createIcons({ nameAttr: 'data-lucide' });
-          });
-        }
+        tryInitialize();
         window.removeEventListener('lucide-ready', handleLucideReady);
       };
       window.addEventListener('lucide-ready', handleLucideReady);
@@ -605,6 +616,11 @@ class TranslationUI {
 
       container.appendChild(phoneticRow);
     }
+
+    // ⭐ 使用 requestAnimationFrame 确保 DOM 添加后再初始化图标
+    requestAnimationFrame(() => {
+      this.initializeLucideIcon(container);
+    });
 
     return container;
   }
