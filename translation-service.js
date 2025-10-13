@@ -682,6 +682,330 @@ class YoudaoTranslateProvider extends TranslationProvider {
 }
 
 /**
+ * DeepL 翻译提供者
+ * 使用 DeepL API 进行高质量翻译
+ * API 文档: https://www.deepl.com/docs-api
+ */
+class DeepLTranslateProvider extends TranslationProvider {
+  constructor(config = {}) {
+    super('DeepL Translate', config);
+    this.apiKey = config.apiKey || '';
+    this.useFreeApi = config.useFreeApi !== false; // 默认使用免费 API
+    this.freeApiUrl = 'https://api-free.deepl.com/v2/translate';
+    this.proApiUrl = 'https://api.deepl.com/v2/translate';
+  }
+
+  /**
+   * 更新 API 密钥配置
+   * @param {string} apiKey - API 密钥
+   * @param {boolean} useFreeApi - 是否使用免费 API
+   */
+  updateConfig(apiKey, useFreeApi = true) {
+    this.apiKey = apiKey || '';
+    this.useFreeApi = useFreeApi;
+    console.log(`[DeepLTranslate] Config updated. API Type: ${useFreeApi ? 'Free' : 'Pro'}`);
+  }
+
+  /**
+   * 检查配置是否完整
+   * @returns {boolean}
+   */
+  isConfigured() {
+    return !!this.apiKey;
+  }
+
+  /**
+   * 获取 API URL
+   * @returns {string}
+   */
+  getApiUrl() {
+    return this.useFreeApi ? this.freeApiUrl : this.proApiUrl;
+  }
+
+  /**
+   * 将语言代码转换为 DeepL API 支持的格式
+   * @param {string} langCode - 通用语言代码
+   * @returns {string} DeepL API 语言代码
+   */
+  convertLangCode(langCode) {
+    const langMap = {
+      'auto': '', // DeepL 不需要指定源语言，自动检测
+      'zh-CN': 'ZH', // 中文（简体）
+      'zh-TW': 'ZH', // 中文（繁体）- DeepL 只有一个中文代码
+      'en': 'EN',
+      'en-US': 'EN-US',
+      'en-GB': 'EN-GB',
+      'ja': 'JA',
+      'ko': 'KO',
+      'fr': 'FR',
+      'es': 'ES',
+      'ru': 'RU',
+      'de': 'DE',
+      'it': 'IT',
+      'pt': 'PT',
+      'pt-BR': 'PT-BR',
+      'pt-PT': 'PT-PT',
+      'nl': 'NL',
+      'pl': 'PL',
+      'ar': 'AR'
+    };
+    return langMap[langCode] || langCode.toUpperCase();
+  }
+
+  /**
+   * 通过 background script 发送请求（绕过 CORS）
+   * @param {string} url - API URL
+   * @param {Object} params - 请求参数
+   * @returns {Promise<Object>} API 响应数据
+   */
+  async sendRequestViaBackground(url, params) {
+    return new Promise((resolve, reject) => {
+      // 检查是否在扩展环境中
+      if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+        reject(new Error('Chrome extension API not available'));
+        return;
+      }
+
+      // 构建请求体
+      const formData = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        if (Array.isArray(value)) {
+          value.forEach(v => formData.append(key, v));
+        } else {
+          formData.append(key, value);
+        }
+      }
+
+      chrome.runtime.sendMessage({
+        action: 'deeplTranslate',
+        params: {
+          url: url,
+          method: 'POST',
+          headers: {
+            'Authorization': `DeepL-Auth-Key ${this.apiKey}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData.toString()
+        }
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(`Background script error: ${chrome.runtime.lastError.message}`));
+          return;
+        }
+
+        if (!response) {
+          reject(new Error('No response from background script'));
+          return;
+        }
+
+        if (response.success) {
+          resolve(response.data);
+        } else {
+          reject(new Error(response.error || 'Unknown error from background script'));
+        }
+      });
+    });
+  }
+
+  async translate(text, targetLang, sourceLang = 'auto') {
+    // 检查配置
+    if (!this.isConfigured()) {
+      throw new Error('DeepL API not configured. Please set API key in settings.');
+    }
+
+    try {
+      console.log(`[DeepLTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
+      
+      // 转换语言代码
+      const source_lang = this.convertLangCode(sourceLang);
+      const target_lang = this.convertLangCode(targetLang);
+
+      // 构建请求参数
+      const params = {
+        text: text,
+        target_lang: target_lang
+      };
+
+      // 只有在明确指定源语言时才添加 source_lang 参数
+      if (source_lang && source_lang !== '') {
+        params.source_lang = source_lang;
+      }
+
+      console.log(`[DeepLTranslate] Request params:`, {
+        text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+        source_lang: source_lang || 'auto',
+        target_lang: target_lang
+      });
+
+      // 获取 API URL
+      const apiUrl = this.getApiUrl();
+
+      // 通过 background script 发送请求（绕过 CORS）
+      const data = await this.sendRequestViaBackground(apiUrl, params);
+      
+      console.log(`[DeepLTranslate] ========== API Response START ==========`);
+      console.log(`[DeepLTranslate] Full response:`, JSON.stringify(data, null, 2));
+      console.log(`[DeepLTranslate] ========== API Response END ==========`);
+
+      // 解析响应
+      return this.parseDeepLResponse(data, text, sourceLang, targetLang);
+    } catch (error) {
+      console.error('[DeepLTranslate] Translation error:', error);
+      
+      // 处理常见的 DeepL API 错误
+      if (error.message.includes('403')) {
+        throw new Error('DeepL API authentication failed. Please check your API key.');
+      } else if (error.message.includes('456')) {
+        throw new Error('DeepL API quota exceeded. Please check your usage limits.');
+      } else if (error.message.includes('400')) {
+        throw new Error('DeepL API bad request. Please check your parameters.');
+      }
+      
+      throw error;
+    }
+  }
+
+  parseDeepLResponse(data, originalText, sourceLang, targetLang) {
+    console.log('[DeepLTranslate] Parsing response data...');
+    
+    const result = {
+      originalText: originalText,
+      translatedText: '',
+      sourceLang: sourceLang,
+      targetLang: targetLang,
+      phonetics: [],
+      definitions: [],
+      examples: [],
+      provider: this.name,
+      timestamp: Date.now()
+    };
+
+    // DeepL API 返回的数据结构：
+    // {
+    //   "translations": [
+    //     {
+    //       "detected_source_language": "EN",
+    //       "text": "translated text"
+    //     }
+    //   ]
+    // }
+
+    if (data.translations && data.translations.length > 0) {
+      const translation = data.translations[0];
+      
+      // 翻译文本
+      result.translatedText = translation.text;
+      console.log('[DeepLTranslate] ✓ Translation:', result.translatedText);
+
+      // 检测到的源语言
+      if (translation.detected_source_language) {
+        result.sourceLang = translation.detected_source_language.toLowerCase();
+        console.log('[DeepLTranslate] ✓ Detected source language:', result.sourceLang);
+      }
+    } else {
+      console.log('[DeepLTranslate] ⚠ No translation in response');
+      result.translatedText = originalText;
+    }
+
+    // DeepL 不提供音标和词义解释，这些将由 TranslationService 的统一后处理补充
+    console.log('[DeepLTranslate] ⓘ Note: DeepL does not provide phonetics or definitions');
+    console.log('[DeepLTranslate] ⓘ These will be supplemented by TranslationService if enabled');
+
+    // 生成标注文本
+    result.annotationText = this.generateAnnotationText(result);
+    console.log('[DeepLTranslate] ✓ Annotation text:', result.annotationText);
+
+    console.log('[DeepLTranslate] ========== Parsing Summary ==========');
+    console.log('[DeepLTranslate] Phonetics found:', result.phonetics.length);
+    console.log('[DeepLTranslate] Definitions found:', result.definitions.length);
+    console.log('[DeepLTranslate] Examples found:', result.examples.length);
+    console.log('[DeepLTranslate] Annotation text:', result.annotationText);
+    console.log('[DeepLTranslate] =====================================');
+
+    return result;
+  }
+
+  /**
+   * 生成用于标注的文本
+   * DeepL 只返回翻译文本，音标由后续处理补充
+   * @param {Object} result - 翻译结果对象
+   * @returns {string} 标注文本
+   */
+  generateAnnotationText(result) {
+    const parts = [];
+    
+    // 如果有音标（由后续处理补充），优先使用美式音标
+    const usPhonetic = result.phonetics.find(p => p.type === 'us');
+    const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
+    const phonetic = usPhonetic || defaultPhonetic || result.phonetics[0];
+    
+    if (phonetic && phonetic.text) {
+      parts.push(phonetic.text);
+    }
+    
+    // 添加翻译文本
+    if (result.translatedText) {
+      parts.push(result.translatedText);
+    }
+    
+    return parts.join(' ');
+  }
+
+  async detectLanguage(text) {
+    // DeepL 会在翻译时自动检测语言
+    // 我们可以通过翻译到英语来检测语言
+    try {
+      const result = await this.translate(text, 'en', 'auto');
+      return result.sourceLang;
+    } catch (error) {
+      console.error('[DeepLTranslate] Language detection error:', error);
+      return 'auto';
+    }
+  }
+
+  async getSupportedLanguages() {
+    // DeepL 支持的语言列表（截至 2024）
+    return [
+      { code: 'auto', name: 'Auto Detect' },
+      { code: 'ar', name: 'Arabic' },
+      { code: 'zh-CN', name: 'Chinese (Simplified)' },
+      { code: 'zh-TW', name: 'Chinese (Traditional)' },
+      { code: 'cs', name: 'Czech' },
+      { code: 'da', name: 'Danish' },
+      { code: 'nl', name: 'Dutch' },
+      { code: 'en', name: 'English' },
+      { code: 'en-US', name: 'English (American)' },
+      { code: 'en-GB', name: 'English (British)' },
+      { code: 'et', name: 'Estonian' },
+      { code: 'fi', name: 'Finnish' },
+      { code: 'fr', name: 'French' },
+      { code: 'de', name: 'German' },
+      { code: 'el', name: 'Greek' },
+      { code: 'hu', name: 'Hungarian' },
+      { code: 'id', name: 'Indonesian' },
+      { code: 'it', name: 'Italian' },
+      { code: 'ja', name: 'Japanese' },
+      { code: 'ko', name: 'Korean' },
+      { code: 'lv', name: 'Latvian' },
+      { code: 'lt', name: 'Lithuanian' },
+      { code: 'nb', name: 'Norwegian' },
+      { code: 'pl', name: 'Polish' },
+      { code: 'pt', name: 'Portuguese' },
+      { code: 'pt-BR', name: 'Portuguese (Brazilian)' },
+      { code: 'pt-PT', name: 'Portuguese (European)' },
+      { code: 'ro', name: 'Romanian' },
+      { code: 'ru', name: 'Russian' },
+      { code: 'sk', name: 'Slovak' },
+      { code: 'sl', name: 'Slovenian' },
+      { code: 'es', name: 'Spanish' },
+      { code: 'sv', name: 'Swedish' },
+      { code: 'tr', name: 'Turkish' },
+      { code: 'uk', name: 'Ukrainian' }
+    ];
+  }
+}
+
+/**
  * Debug翻译提供者（用于开发和测试）
  * 返回固定的测试数据，无需API调用
  */
@@ -1222,6 +1546,7 @@ const translationService = new TranslationService();
 translationService.registerProvider('debug', new DebugTranslateProvider());
 translationService.registerProvider('google', new GoogleTranslateProvider());
 translationService.registerProvider('youdao', new YoudaoTranslateProvider());
+translationService.registerProvider('deepl', new DeepLTranslateProvider());
 translationService.registerProvider('freedict', new FreeDictionaryProvider());
 
 // 设置默认提供者为 Google Translate
@@ -1235,6 +1560,7 @@ if (typeof module !== 'undefined' && module.exports) {
     DebugTranslateProvider,
     GoogleTranslateProvider,
     YoudaoTranslateProvider,
+    DeepLTranslateProvider,
     FreeDictionaryProvider,
     TranslationService,
     translationService

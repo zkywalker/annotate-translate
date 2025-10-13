@@ -50,6 +50,10 @@
     "message": "Youdao",
     "description": "Youdao provider name"
   },
+  "deeplTranslate": {
+    "message": "DeepL",
+    "description": "DeepL provider name"
+  },
   "debugProviderDesc": {
     "message": "Returns fixed test data for development and debugging. No API calls required.",
     "description": "Debug provider description"
@@ -110,6 +114,59 @@
   "credentialsStep5": {
     "message": "Copy them to the fields above and save",
     "description": "Credentials step 5"
+  },
+  
+  "deeplConfig": {
+    "message": "DeepL API Configuration",
+    "description": "DeepL API configuration section title"
+  },
+  "apiKey": {
+    "message": "API Key",
+    "description": "API Key label"
+  },
+  "enterApiKey": {
+    "message": "Enter your DeepL API key",
+    "description": "API Key placeholder"
+  },
+  "getApiKeyFrom": {
+    "message": "Get your API Key from",
+    "description": "Get API Key instruction"
+  },
+  "deeplProApi": {
+    "message": "DeepL Pro API",
+    "description": "DeepL Pro API platform name"
+  },
+  "useFreeApi": {
+    "message": "Use Free API (api-free.deepl.com)",
+    "description": "Use Free API checkbox label"
+  },
+  "freeApiDesc": {
+    "message": "Free API has usage limits but is sufficient for personal use. Uncheck if you have a Pro subscription.",
+    "description": "Free API description"
+  },
+  "howToGetDeeplCredentials": {
+    "message": "How to get DeepL API credentials:",
+    "description": "How to get DeepL credentials title"
+  },
+  "deeplCredentialsStep1": {
+    "message": "Visit DeepL Pro API",
+    "description": "DeepL credentials step 1"
+  },
+  "deeplCredentialsStep2": {
+    "message": "Sign up for a free or pro account",
+    "description": "DeepL credentials step 2"
+  },
+  "deeplCredentialsStep3": {
+    "message": "Get your API key from the account page",
+    "description": "DeepL credentials step 3"
+  },
+  "deeplCredentialsStep4": {
+    "message": "Free tier includes 500,000 characters/month",
+    "description": "DeepL credentials step 4"
+  },
+  "deeplCredentialsStep5": {
+    "message": "Copy your API key to the field above and save",
+    "description": "DeepL credentials step 5"
   },
   
   "phoneticSettings": {

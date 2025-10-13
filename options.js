@@ -19,6 +19,11 @@ const DEFAULT_SETTINGS = {
   // Youdao API settings
   youdaoAppKey: '',
   youdaoAppSecret: '',
+  
+  // DeepL API settings
+  deeplApiKey: '',
+  deeplUseFreeApi: true,
+  
   enablePhoneticFallback: true, // 默认启用音标补充
   
   // UI settings
@@ -50,6 +55,9 @@ const elements = {
   youdaoAppKey: document.getElementById('youdaoAppKey'),
   youdaoAppSecret: document.getElementById('youdaoAppSecret'),
   youdaoConfigSection: document.getElementById('youdaoConfigSection'),
+  deeplApiKey: document.getElementById('deeplApiKey'),
+  deeplUseFreeApi: document.getElementById('deeplUseFreeApi'),
+  deeplConfigSection: document.getElementById('deeplConfigSection'),
   enablePhoneticFallback: document.getElementById('enablePhoneticFallback'),
   enableAudio: document.getElementById('enableAudio'),
   showPhonetics: document.getElementById('showPhonetics'),
@@ -178,6 +186,11 @@ function loadSettings() {
     // Youdao API settings
     elements.youdaoAppKey.value = settings.youdaoAppKey || '';
     elements.youdaoAppSecret.value = settings.youdaoAppSecret || '';
+    
+    // DeepL API settings
+    elements.deeplApiKey.value = settings.deeplApiKey || '';
+    elements.deeplUseFreeApi.checked = settings.deeplUseFreeApi !== false;
+    
     elements.enablePhoneticFallback.checked = settings.enablePhoneticFallback !== false;
     
     // UI settings
@@ -237,6 +250,11 @@ function saveSettings() {
     // Youdao API settings
     youdaoAppKey: elements.youdaoAppKey.value.trim(),
     youdaoAppSecret: elements.youdaoAppSecret.value.trim(),
+    
+    // DeepL API settings
+    deeplApiKey: elements.deeplApiKey.value.trim(),
+    deeplUseFreeApi: elements.deeplUseFreeApi.checked,
+    
     enablePhoneticFallback: elements.enablePhoneticFallback.checked,
     
     // UI settings
@@ -376,6 +394,13 @@ function updateProviderSelection(provider) {
     elements.youdaoConfigSection.style.display = 'block';
   } else {
     elements.youdaoConfigSection.style.display = 'none';
+  }
+  
+  // Show/hide DeepL config section
+  if (provider === 'deepl') {
+    elements.deeplConfigSection.style.display = 'block';
+  } else {
+    elements.deeplConfigSection.style.display = 'none';
   }
   
   // Show/hide debug provider description

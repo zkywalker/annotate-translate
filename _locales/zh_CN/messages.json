@@ -50,6 +50,10 @@
     "message": "有道翻译",
     "description": "Youdao provider name"
   },
+  "deeplTranslate": {
+    "message": "DeepL翻译",
+    "description": "DeepL provider name"
+  },
   "debugProviderDesc": {
     "message": "返回固定的测试数据用于开发和调试。无需API调用。",
     "description": "Debug provider description"
@@ -110,6 +114,59 @@
   "credentialsStep5": {
     "message": "将它们复制到上面的字段并保存",
     "description": "Credentials step 5"
+  },
+  
+  "deeplConfig": {
+    "message": "DeepL API配置",
+    "description": "DeepL API configuration section title"
+  },
+  "apiKey": {
+    "message": "API密钥",
+    "description": "API Key label"
+  },
+  "enterApiKey": {
+    "message": "输入您的DeepL API密钥",
+    "description": "API Key placeholder"
+  },
+  "getApiKeyFrom": {
+    "message": "从以下网址获取API密钥",
+    "description": "Get API Key instruction"
+  },
+  "deeplProApi": {
+    "message": "DeepL Pro API",
+    "description": "DeepL Pro API platform name"
+  },
+  "useFreeApi": {
+    "message": "使用免费API (api-free.deepl.com)",
+    "description": "Use Free API checkbox label"
+  },
+  "freeApiDesc": {
+    "message": "免费API有使用限制，但对个人使用足够。如果您有专业版订阅，请取消勾选。",
+    "description": "Free API description"
+  },
+  "howToGetDeeplCredentials": {
+    "message": "如何获取DeepL API凭证：",
+    "description": "How to get DeepL credentials title"
+  },
+  "deeplCredentialsStep1": {
+    "message": "访问DeepL Pro API",
+    "description": "DeepL credentials step 1"
+  },
+  "deeplCredentialsStep2": {
+    "message": "注册免费或专业版账户",
+    "description": "DeepL credentials step 2"
+  },
+  "deeplCredentialsStep3": {
+    "message": "从账户页面获取您的API密钥",
+    "description": "DeepL credentials step 3"
+  },
+  "deeplCredentialsStep4": {
+    "message": "免费账户包含每月500,000字符的翻译额度",
+    "description": "DeepL credentials step 4"
+  },
+  "deeplCredentialsStep5": {
+    "message": "将您的API密钥复制到上面的字段并保存",
+    "description": "DeepL credentials step 5"
   },
   
   "phoneticSettings": {

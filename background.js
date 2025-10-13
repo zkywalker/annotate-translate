@@ -196,6 +196,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true; // Keep message channel open for async response
   }
+  
+  // Handle DeepL translation request (to bypass CORS)
+  if (request.action === 'deeplTranslate') {
+    console.log('[Annotate-Translate BG] Handling DeepL translation request...');
+    handleDeepLTranslate(request.params)
+      .then(data => {
+        console.log('[Annotate-Translate BG] DeepL translation successful');
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[Annotate-Translate BG] DeepL translation failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep message channel open for async response
+  }
 });
 
 /**
@@ -219,6 +234,36 @@ async function handleYoudaoTranslate(params) {
     return data;
   } catch (error) {
     console.error('[Annotate-Translate BG] Fetch error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Handle DeepL translation API request in background script (bypasses CORS)
+ * @param {Object} params - Request parameters (url, method, headers, body)
+ * @returns {Promise<Object>} Response data
+ */
+async function handleDeepLTranslate(params) {
+  try {
+    const response = await fetch(params.url, {
+      method: params.method || 'POST',
+      headers: params.headers || {},
+      body: params.body
+    });
+
+    if (!response.ok) {
+      // DeepL API 返回详细的错误信息
+      const errorData = await response.json().catch(() => null);
+      if (errorData && errorData.message) {
+        throw new Error(`DeepL API error [${response.status}]: ${errorData.message}`);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Annotate-Translate BG] DeepL fetch error:', error);
     throw error;
   }
 }

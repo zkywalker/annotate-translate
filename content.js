@@ -30,6 +30,8 @@ let settings = {
   translationProvider: 'google',
   youdaoAppKey: '',
   youdaoAppSecret: '',
+  deeplApiKey: '',
+  deeplUseFreeApi: true,
   enablePhoneticFallback: true,
   enableAudio: true,
   showPhonetics: true,
@@ -69,6 +71,8 @@ function init() {
     translationProvider: 'google',
     youdaoAppKey: '',
     youdaoAppSecret: '',
+    deeplApiKey: '',
+    deeplUseFreeApi: true,
     enablePhoneticFallback: true,
     enableAudio: true,
     showPhonetics: true,
@@ -155,6 +159,20 @@ function applyTranslationSettings() {
         );
         console.log('[Annotate-Translate] Youdao provider configured:');
         console.log('  - AppKey:', settings.youdaoAppKey ? 'Set' : 'Not set');
+      }
+    }
+    
+    // 如果是 DeepL 提供商，更新其 API 配置
+    if (settings.translationProvider === 'deepl') {
+      const deeplProvider = translationService.providers.get('deepl');
+      if (deeplProvider) {
+        deeplProvider.updateConfig(
+          settings.deeplApiKey,
+          settings.deeplUseFreeApi
+        );
+        console.log('[Annotate-Translate] DeepL provider configured:');
+        console.log('  - API Key:', settings.deeplApiKey ? 'Set' : 'Not set');
+        console.log('  - Use Free API:', settings.deeplUseFreeApi);
       }
     }
   }
