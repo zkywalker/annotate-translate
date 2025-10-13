@@ -1055,6 +1055,12 @@ class TranslationService {
         await this.supplementPhoneticsFromFreeDictionary(result, text);
       }
       
+      // 🆕 生成或更新 annotationText（在补充音标后）
+      if (!result.annotationText || result.phonetics.length > 0) {
+        result.annotationText = this.generateAnnotationText(result);
+        console.log('[TranslationService] ✓ Generated annotation text:', result.annotationText);
+      }
+      
       // 缓存结果（仅在缓存启用时）
       if (this.maxCacheSize > 0) {
         this.addToCache(cacheKey, result);
@@ -1105,6 +1111,36 @@ class TranslationService {
     } catch (error) {
       console.error('[TranslationService] Error supplementing phonetics:', error);
     }
+  }
+
+  /**
+   * 生成用于标注的文本（通用方法）
+   * 优先使用：音标 + 翻译
+   * @param {Object} result - 翻译结果对象
+   * @returns {string} 标注文本
+   */
+  generateAnnotationText(result) {
+    const parts = [];
+    
+    // 如果有音标，优先使用美式音标，其次是默认音标
+    const usPhonetic = result.phonetics.find(p => p.type === 'us');
+    const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
+    const phonetic = usPhonetic || defaultPhonetic || result.phonetics[0];
+    
+    if (phonetic && phonetic.text) {
+      parts.push(phonetic.text);
+    }
+    
+    // 添加翻译（如果是单词，使用第一个词义；如果是句子，使用完整翻译）
+    if (result.definitions && result.definitions.length > 0 && result.originalText.split(' ').length === 1) {
+      // 单词：使用第一个词义
+      parts.push(result.definitions[0].text);
+    } else if (result.translatedText) {
+      // 句子或短语：使用完整翻译
+      parts.push(result.translatedText);
+    }
+    
+    return parts.join(' ');
   }
 
   /**
