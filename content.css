@@ -215,10 +215,6 @@ ruby.annotate-translate-ruby {
 }
 
 /* 可点击的标注样式 */
-ruby.annotate-translate-ruby[style*="cursor: pointer"] {
-  /* 轻微的悬停效果，提示可点击 */
-}
-
 ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover {
   background-color: rgba(26, 115, 232, 0.05);
   border-radius: 3px;
@@ -247,14 +243,26 @@ ruby.annotate-translate-ruby rt.annotate-translate-rt {
   white-space: nowrap;
   /* 如果标注比原文长，允许溢出显示 */
   overflow: visible;
+  /* 添加文字阴影，提高小字可读性 */
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8),
+               0 1px 1px rgba(255, 255, 255, 0.9),
+               1px 0 1px rgba(255, 255, 255, 0.9),
+               -1px 0 1px rgba(255, 255, 255, 0.9),
+               0 -1px 1px rgba(255, 255, 255, 0.9);
   /* 添加过渡效果 */
-  transition: color 0.2s ease, font-weight 0.2s ease;
+  transition: color 0.2s ease, font-weight 0.2s ease, text-shadow 0.2s ease;
 }
 
 ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-translate-rt {
   /* 可以稍微加深颜色，提示可点击 */
   color: #1557b0;
   font-weight: 600;
+  /* 悬停时增强阴影效果 */
+  text-shadow: 0 0 3px rgba(255, 255, 255, 1),
+               0 1px 2px rgba(255, 255, 255, 1),
+               1px 0 2px rgba(255, 255, 255, 1),
+               -1px 0 2px rgba(255, 255, 255, 1),
+               0 -1px 2px rgba(255, 255, 255, 1);
 }
 
 /* Dialog styles for multiple matches */
