@@ -1,6 +1,6 @@
 /**
  * Lucide Icons Loader
- * 动态加载 Lucide 图标库
+ * 从扩展包加载 Lucide 图标库
  */
 
 (function() {
@@ -10,13 +10,13 @@
     return;
   }
 
-  // 创建 script 标签加载 Lucide
+  // 从扩展包加载 Lucide
   const script = document.createElement('script');
-  script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+  script.src = chrome.runtime.getURL('lucide.min.js');
   script.async = true;
   
   script.onload = function() {
-    console.log('[Lucide] Loaded successfully');
+    console.log('[Lucide] Loaded successfully from extension');
     
     // 初始化页面上的图标
     if (typeof lucide !== 'undefined' && lucide.createIcons) {
@@ -26,7 +26,7 @@
   };
   
   script.onerror = function() {
-    console.error('[Lucide] Failed to load');
+    console.error('[Lucide] Failed to load from extension');
   };
   
   // 添加到 head
