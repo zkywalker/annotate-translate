@@ -101,6 +101,7 @@ class GoogleTranslateProvider extends TranslationProvider {
     super('Google Translate', config);
     this.apiKey = config.apiKey || null;
     this.usePublicApi = config.usePublicApi !== false; // 默认使用公共API
+    this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false; // 默认在标注中显示音标
   }
 
   async translate(text, targetLang, sourceLang = 'auto') {
@@ -285,6 +286,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
     this.appKey = config.appKey || '';
     this.appSecret = config.appSecret || '';
     this.apiUrl = 'https://openapi.youdao.com/api';
+    this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false; // 默认在标注中显示音标
   }
 
   /**
@@ -642,13 +644,16 @@ class YoudaoTranslateProvider extends TranslationProvider {
   generateAnnotationText(result) {
     const parts = [];
     
-    // 如果有音标，优先使用美式音标，其次是默认音标
-    const usPhonetic = result.phonetics.find(p => p.type === 'us');
-    const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
-    const phonetic = usPhonetic || defaultPhonetic;
-    
-    if (phonetic) {
-      parts.push(phonetic.text);
+    // 只有在 showPhoneticInAnnotation 开启时才添加音标
+    if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
+      // 如果有音标，优先使用美式音标，其次是默认音标
+      const usPhonetic = result.phonetics.find(p => p.type === 'us');
+      const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
+      const phonetic = usPhonetic || defaultPhonetic;
+      
+      if (phonetic) {
+        parts.push(phonetic.text);
+      }
     }
     
     // 添加翻译文本
@@ -693,6 +698,7 @@ class DeepLTranslateProvider extends TranslationProvider {
     this.useFreeApi = config.useFreeApi !== false; // 默认使用免费 API
     this.freeApiUrl = 'https://api-free.deepl.com/v2/translate';
     this.proApiUrl = 'https://api.deepl.com/v2/translate';
+    this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false; // 默认在标注中显示音标
   }
 
   /**
@@ -1040,13 +1046,16 @@ class DeepLTranslateProvider extends TranslationProvider {
   generateAnnotationText(result) {
     const parts = [];
     
-    // 如果有音标（由后续处理补充），优先使用美式音标
-    const usPhonetic = result.phonetics.find(p => p.type === 'us');
-    const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
-    const phonetic = usPhonetic || defaultPhonetic || result.phonetics[0];
-    
-    if (phonetic && phonetic.text) {
-      parts.push(phonetic.text);
+    // 只有在 showPhoneticInAnnotation 开启时才添加音标
+    if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
+      // 如果有音标（由后续处理补充），优先使用美式音标
+      const usPhonetic = result.phonetics.find(p => p.type === 'us');
+      const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
+      const phonetic = usPhonetic || defaultPhonetic || result.phonetics[0];
+      
+      if (phonetic && phonetic.text) {
+        parts.push(phonetic.text);
+      }
     }
     
     // 添加翻译文本
@@ -1417,6 +1426,7 @@ class TranslationService {
     this.cache = new Map(); // 翻译缓存
     this.maxCacheSize = 100;
     this.enablePhoneticFallback = true; // 默认启用音标补充
+    this.showPhoneticInAnnotation = true; // 默认在标注中显示音标 + 翻译
   }
 
   /**
@@ -1549,13 +1559,16 @@ class TranslationService {
   generateAnnotationText(result) {
     const parts = [];
     
-    // 如果有音标，优先使用美式音标，其次是默认音标
-    const usPhonetic = result.phonetics.find(p => p.type === 'us');
-    const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
-    const phonetic = usPhonetic || defaultPhonetic || result.phonetics[0];
-    
-    if (phonetic && phonetic.text) {
-      parts.push(phonetic.text);
+    // 只有在 showPhoneticInAnnotation 开启时才添加音标
+    if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
+      // 如果有音标，优先使用美式音标，其次是默认音标
+      const usPhonetic = result.phonetics.find(p => p.type === 'us');
+      const defaultPhonetic = result.phonetics.find(p => p.type === 'default');
+      const phonetic = usPhonetic || defaultPhonetic || result.phonetics[0];
+      
+      if (phonetic && phonetic.text) {
+        parts.push(phonetic.text);
+      }
     }
     
     // 添加翻译文本

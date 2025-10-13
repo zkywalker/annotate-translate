@@ -140,6 +140,15 @@ function applyTranslationSettings() {
     translationService.setActiveProvider(settings.translationProvider);
     console.log('[Annotate-Translate] Provider set to:', settings.translationProvider);
     
+    // 如果是 Google 提供商，更新其配置
+    if (settings.translationProvider === 'google') {
+      const googleProvider = translationService.providers.get('google');
+      if (googleProvider) {
+        googleProvider.showPhoneticInAnnotation = settings.showPhoneticInAnnotation !== false;
+        console.log('[Annotate-Translate] Google provider configured - showPhoneticInAnnotation:', googleProvider.showPhoneticInAnnotation);
+      }
+    }
+    
     // 如果是 Debug 提供商，更新其配置
     if (settings.translationProvider === 'debug') {
       const debugProvider = translationService.providers.get('debug');
@@ -157,8 +166,10 @@ function applyTranslationSettings() {
           settings.youdaoAppKey, 
           settings.youdaoAppSecret
         );
+        youdaoProvider.showPhoneticInAnnotation = settings.showPhoneticInAnnotation !== false;
         console.log('[Annotate-Translate] Youdao provider configured:');
         console.log('  - AppKey:', settings.youdaoAppKey ? 'Set' : 'Not set');
+        console.log('  - showPhoneticInAnnotation:', youdaoProvider.showPhoneticInAnnotation);
       }
     }
     
@@ -170,14 +181,21 @@ function applyTranslationSettings() {
           settings.deeplApiKey,
           settings.deeplUseFreeApi
         );
+        deeplProvider.showPhoneticInAnnotation = settings.showPhoneticInAnnotation !== false;
         console.log('[Annotate-Translate] DeepL provider configured:');
         console.log('  - API Key:', settings.deeplApiKey ? 'Set' : 'Not set');
         console.log('  - Use Free API:', settings.deeplUseFreeApi);
+        console.log('  - showPhoneticInAnnotation:', deeplProvider.showPhoneticInAnnotation);
       }
     }
   }
   
   // 🆕 配置翻译服务的通用设置
+  if (settings.showPhoneticInAnnotation !== undefined) {
+    translationService.showPhoneticInAnnotation = settings.showPhoneticInAnnotation;
+    console.log('[Annotate-Translate] Show phonetic in annotation:', settings.showPhoneticInAnnotation ? 'Enabled' : 'Disabled');
+  }
+  
   if (settings.enablePhoneticFallback !== undefined) {
     translationService.enablePhoneticFallback = settings.enablePhoneticFallback;
     console.log('[Annotate-Translate] Phonetic fallback:', settings.enablePhoneticFallback ? 'Enabled' : 'Disabled');
