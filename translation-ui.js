@@ -241,12 +241,34 @@ class TranslationUI {
       }
     });
     
-    // 初始化 Lucide 图标
-    if (typeof lucide !== 'undefined') {
-      setTimeout(() => lucide.createIcons({ icons: { 'volume-2': lucide.Volume2 } }), 0);
-    }
+    // 等待 Lucide 加载后初始化图标
+    this.initializeLucideIcon(button);
 
     return button;
+  }
+
+  /**
+   * 初始化 Lucide 图标
+   * @param {HTMLElement} container - 包含图标的容器元素
+   */
+  initializeLucideIcon(container) {
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      // 使用 requestAnimationFrame 确保 DOM 更新后再初始化
+      requestAnimationFrame(() => {
+        lucide.createIcons({ nameAttr: 'data-lucide' });
+      });
+    } else {
+      // 如果 Lucide 还未加载，等待加载完成
+      const handleLucideReady = () => {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+          requestAnimationFrame(() => {
+            lucide.createIcons({ nameAttr: 'data-lucide' });
+          });
+        }
+        window.removeEventListener('lucide-ready', handleLucideReady);
+      };
+      window.addEventListener('lucide-ready', handleLucideReady);
+    }
   }
 
   /**
@@ -418,6 +440,8 @@ class TranslationUI {
     setTimeout(() => {
       button.innerHTML = originalHTML;
       button.classList.remove('error');
+      // 重新初始化图标
+      this.initializeLucideIcon(button);
     }, 2000);
   }
 

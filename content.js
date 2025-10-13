@@ -869,21 +869,39 @@ function createAudioButton(phonetics, text) {
       button.style.color = '#d93025';
       setTimeout(() => {
         button.style.color = '';
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons({ icons: { 'volume-2': lucide.Volume2 } });
-        }
+        // 重新初始化图标
+        initializeLucideIcon(button);
       }, 1000);
     } finally {
       button.classList.remove('playing');
     }
   });
   
-  // 初始化 Lucide 图标
-  if (typeof lucide !== 'undefined') {
-    setTimeout(() => lucide.createIcons({ icons: { 'volume-2': lucide.Volume2 } }), 0);
-  }
+  // 等待 Lucide 加载后初始化图标
+  initializeLucideIcon(button);
   
   return button;
+}
+
+// 初始化 Lucide 图标的辅助函数
+function initializeLucideIcon(container) {
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    // 使用 requestAnimationFrame 确保 DOM 更新后再初始化
+    requestAnimationFrame(() => {
+      lucide.createIcons({ nameAttr: 'data-lucide' });
+    });
+  } else {
+    // 如果 Lucide 还未加载，等待加载完成
+    const handleLucideReady = () => {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        requestAnimationFrame(() => {
+          lucide.createIcons({ nameAttr: 'data-lucide' });
+        });
+      }
+      window.removeEventListener('lucide-ready', handleLucideReady);
+    };
+    window.addEventListener('lucide-ready', handleLucideReady);
+  }
 }
 
 // Play phonetic audio

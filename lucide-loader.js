@@ -7,13 +7,16 @@
   // 检查是否已经加载
   if (typeof window.lucide !== 'undefined') {
     console.log('[Lucide] Already loaded');
+    // 触发自定义事件通知已加载
+    window.dispatchEvent(new CustomEvent('lucide-ready'));
     return;
   }
 
   // 从扩展包加载 Lucide
   const script = document.createElement('script');
   script.src = chrome.runtime.getURL('lucide.min.js');
-  script.async = true;
+  // 不使用 async，确保按顺序加载
+  script.async = false;
   
   script.onload = function() {
     console.log('[Lucide] Loaded successfully from extension');
@@ -22,6 +25,9 @@
     if (typeof lucide !== 'undefined' && lucide.createIcons) {
       lucide.createIcons();
       console.log('[Lucide] Icons initialized');
+      
+      // 触发自定义事件通知加载完成
+      window.dispatchEvent(new CustomEvent('lucide-ready'));
     }
   };
   
