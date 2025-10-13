@@ -213,7 +213,14 @@ class TranslationUI {
   createAudioButton(phonetic, text, index) {
     const button = document.createElement('button');
     button.className = 'audio-play-button';
-    button.innerHTML = '🔊'; // 使用emoji作为图标
+    
+    // 使用 Lucide volume-2 图标
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', 'volume-2');
+    icon.setAttribute('width', '16');
+    icon.setAttribute('height', '16');
+    button.appendChild(icon);
+    
     const playPronunciationText = safeGetMessage('playPronunciation', null, 'Play pronunciation');
     button.title = playPronunciationText;
     button.setAttribute('aria-label', playPronunciationText);
@@ -233,6 +240,11 @@ class TranslationUI {
         button.classList.remove('playing');
       }
     });
+    
+    // 初始化 Lucide 图标
+    if (typeof lucide !== 'undefined') {
+      setTimeout(() => lucide.createIcons({ icons: { 'volume-2': lucide.Volume2 } }), 0);
+    }
 
     return button;
   }

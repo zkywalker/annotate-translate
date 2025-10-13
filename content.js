@@ -844,7 +844,14 @@ const audioCacheMaxSize = 50; // Max cached audio files
 function createAudioButton(phonetics, text) {
   const button = document.createElement('button');
   button.className = 'annotate-audio-button';
-  button.innerHTML = '🔊';
+  
+  // 使用 Lucide volume-2 图标
+  const icon = document.createElement('i');
+  icon.setAttribute('data-lucide', 'volume-2');
+  icon.setAttribute('width', '12');
+  icon.setAttribute('height', '12');
+  button.appendChild(icon);
+  
   button.title = 'Play pronunciation';
   button.setAttribute('aria-label', 'Play pronunciation');
   
@@ -859,14 +866,22 @@ function createAudioButton(phonetics, text) {
     } catch (error) {
       console.error('[Annotate-Translate] Audio playback error:', error);
       // Visual feedback for error
-      button.innerHTML = '❌';
+      button.style.color = '#d93025';
       setTimeout(() => {
-        button.innerHTML = '🔊';
+        button.style.color = '';
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons({ icons: { 'volume-2': lucide.Volume2 } });
+        }
       }, 1000);
     } finally {
       button.classList.remove('playing');
     }
   });
+  
+  // 初始化 Lucide 图标
+  if (typeof lucide !== 'undefined') {
+    setTimeout(() => lucide.createIcons({ icons: { 'volume-2': lucide.Volume2 } }), 0);
+  }
   
   return button;
 }

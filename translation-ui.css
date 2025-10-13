@@ -117,23 +117,25 @@
 
 /* 音频播放按钮 */
 .audio-play-button {
-  background: #2196F3;
+  background: transparent; /* 移除背景 */
   border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
   transition: all 0.2s ease;
   padding: 0;
   outline: none;
+  color: #5f6368;
+  margin-left: 4px;
 }
 
 .audio-play-button:hover {
-  background: #1976D2;
+  background: #e8f0fe; /* 悬停时显示淡蓝色背景 */
+  color: #1a73e8;
   transform: scale(1.1);
 }
 
@@ -143,11 +145,11 @@
 
 .audio-play-button.playing {
   animation: pulse 1s infinite;
-  background: #FF9800;
+  color: #1a73e8;
 }
 
 .audio-play-button.error {
-  background: #f44336;
+  color: #d93025;
   animation: shake 0.5s;
 }
 

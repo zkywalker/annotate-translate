@@ -30,6 +30,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+        "lucide-loader.js",
         "translation-service.js",
         "translation-ui.js",
         "content.js"

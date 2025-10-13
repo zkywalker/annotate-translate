@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Populate language select with localized options
   populateLanguageSelect();
   
+  // Populate translation provider select with localized options
+  populateProviderSelect();
+  
   // Load saved settings
   loadSettings();
 
@@ -50,6 +53,25 @@ function populateLanguageSelect() {
   });
 }
 
+// Populate translation provider select with localized options
+function populateProviderSelect() {
+  const select = document.getElementById('translation-provider');
+  if (!select) return;
+  
+  const providers = [
+    { value: 'google', labelKey: 'googleTranslate' },
+    { value: 'youdao', labelKey: 'youdaoTranslate' },
+    { value: 'deepl', labelKey: 'deeplTranslate' }
+  ];
+  
+  providers.forEach(provider => {
+    const option = document.createElement('option');
+    option.value = provider.value;
+    option.textContent = i18n(provider.labelKey);
+    select.appendChild(option);
+  });
+}
+
 // Check if the tab URL is valid for content scripts
 function isValidTabUrl(url) {
   if (!url) return false;
@@ -74,11 +96,13 @@ function loadSettings() {
   chrome.storage.sync.get({
     enableTranslate: false,  // 默认关闭翻译功能
     enableAnnotate: true,
-    targetLanguage: 'en'
+    targetLanguage: 'en',
+    translationProvider: 'google'
   }, function(items) {
     document.getElementById('enable-translate').checked = items.enableTranslate;
     document.getElementById('enable-annotate').checked = items.enableAnnotate;
     document.getElementById('target-language').value = items.targetLanguage;
+    document.getElementById('translation-provider').value = items.translationProvider;
   });
 }
 
@@ -87,7 +111,8 @@ function saveSettings() {
   const settings = {
     enableTranslate: document.getElementById('enable-translate').checked,
     enableAnnotate: document.getElementById('enable-annotate').checked,
-    targetLanguage: document.getElementById('target-language').value
+    targetLanguage: document.getElementById('target-language').value,
+    translationProvider: document.getElementById('translation-provider').value
   };
 
   chrome.storage.sync.set(settings, function() {

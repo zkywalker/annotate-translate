@@ -376,11 +376,10 @@ ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-transla
 /* Audio button in ruby annotation */
 .annotate-audio-button {
   border: none;
-  background: none;
-  padding: 0;
+  background: transparent; /* 移除背景 */
+  padding: 2px;
   margin-left: 4px;
   cursor: pointer;
-  font-size: 0.9em;
   line-height: 1;
   vertical-align: middle;
   transition: all 0.2s;
@@ -388,11 +387,15 @@ ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-transla
   align-items: center;
   justify-content: center;
   min-width: 1em;
+  color: #5f6368;
   opacity: 0.8;
+  border-radius: 3px;
 }
 
 .annotate-audio-button:hover {
   opacity: 1;
+  background: #e8f0fe; /* 悬停时显示淡蓝色背景 */
+  color: #1a73e8;
   transform: scale(1.2);
 }
 
@@ -401,6 +404,7 @@ ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-transla
 }
 
 .annotate-audio-button.playing {
+  color: #1a73e8;
   animation: audioPlaying 0.6s ease-in-out infinite;
 }
 
