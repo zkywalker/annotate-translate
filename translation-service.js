@@ -651,12 +651,9 @@ class YoudaoTranslateProvider extends TranslationProvider {
       parts.push(phonetic.text);
     }
     
-    // 添加翻译（如果是单词，使用第一个词义；如果是句子，使用完整翻译）
-    if (result.definitions.length > 0 && result.originalText.split(' ').length === 1) {
-      // 单词：使用第一个词义
-      parts.push(result.definitions[0].text);
-    } else if (result.translatedText) {
-      // 句子或短语：使用完整翻译
+    // 添加翻译文本
+    // 总是使用 translatedText 作为标注（这是主要翻译结果）
+    if (result.translatedText) {
       parts.push(result.translatedText);
     }
     
@@ -1131,12 +1128,9 @@ class TranslationService {
       parts.push(phonetic.text);
     }
     
-    // 添加翻译（如果是单词，使用第一个词义；如果是句子，使用完整翻译）
-    if (result.definitions && result.definitions.length > 0 && result.originalText.split(' ').length === 1) {
-      // 单词：使用第一个词义
-      parts.push(result.definitions[0].text);
-    } else if (result.translatedText) {
-      // 句子或短语：使用完整翻译
+    // 添加翻译文本
+    // 优先使用 translatedText（主要翻译），这适用于所有情况
+    if (result.translatedText) {
       parts.push(result.translatedText);
     }
     
