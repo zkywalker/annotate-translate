@@ -342,9 +342,17 @@
     "message": "Translating...",
     "description": "Translating loading message"
   },
+  "annotating": {
+    "message": "Annotating...",
+    "description": "Annotating loading message"
+  },
   "translationFailed": {
     "message": "Translation failed",
     "description": "Translation failed error title"
+  },
+  "annotationFailed": {
+    "message": "Annotation failed",
+    "description": "Annotation failed error title"
   },
   "cannotClearOnThisPage": {
     "message": "Cannot clear annotations on this page.",

@@ -342,9 +342,17 @@
     "message": "翻译中...",
     "description": "Translating loading message"
   },
+  "annotating": {
+    "message": "标注中...",
+    "description": "Annotating loading message"
+  },
   "translationFailed": {
     "message": "翻译失败",
     "description": "Translation failed error title"
+  },
+  "annotationFailed": {
+    "message": "标注失败",
+    "description": "Annotation failed error title"
   },
   "cannotClearOnThisPage": {
     "message": "无法在此页面清除标注。",

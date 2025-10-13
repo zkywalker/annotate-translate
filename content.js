@@ -587,6 +587,29 @@ function annotateAllMatches(matches, text, annotation) {
 
 // 批量自动翻译标注
 async function promptForBatchAnnotation(matches, text) {
+  // 创建加载提示
+  const loadingTooltip = document.createElement('div');
+  loadingTooltip.className = 'annotate-translate-tooltip loading';
+  loadingTooltip.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <span>${safeGetMessage('annotating', null, 'Annotating...')}</span>
+    </div>
+  `;
+  
+  // 在第一个匹配项附近显示loading
+  if (matches.length > 0) {
+    const firstMatch = matches[0];
+    const range = document.createRange();
+    range.setStart(firstMatch.node, firstMatch.index);
+    range.setEnd(firstMatch.node, firstMatch.index + firstMatch.text.length);
+    const rect = range.getBoundingClientRect();
+    loadingTooltip.style.left = (rect.left + window.scrollX) + 'px';
+    loadingTooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+  }
+  
+  document.body.appendChild(loadingTooltip);
+  
   try {
     // 检查翻译服务
     if (typeof translationService === 'undefined') {
@@ -602,6 +625,9 @@ async function promptForBatchAnnotation(matches, text) {
       'auto'
     );
     
+    // 移除加载提示
+    loadingTooltip.remove();
+    
     // 使用 annotationText（可能包含读音）或 translatedText 作为标注
     const annotationText = result.annotationText || result.translatedText;
     
@@ -612,12 +638,47 @@ async function promptForBatchAnnotation(matches, text) {
     
   } catch (error) {
     console.error('[Annotate-Translate] Auto-translate failed:', error);
-    alert('Auto-translation failed: ' + error.message);
+    
+    // 显示错误消息
+    loadingTooltip.className = 'annotate-translate-tooltip error';
+    loadingTooltip.innerHTML = `
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <div class="error-message">
+          <strong>${safeGetMessage('annotationFailed', null, 'Annotation failed')}</strong>
+          <p>${error.message}</p>
+        </div>
+      </div>
+    `;
+    
+    // 3秒后自动关闭错误提示
+    setTimeout(() => {
+      if (loadingTooltip.parentElement) {
+        loadingTooltip.remove();
+      }
+    }, 3000);
   }
 }
 
 // 自动翻译并标注
 async function promptAndAnnotate(range, text) {
+  // 创建加载提示
+  const loadingTooltip = document.createElement('div');
+  loadingTooltip.className = 'annotate-translate-tooltip loading';
+  loadingTooltip.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <span>${safeGetMessage('annotating', null, 'Annotating...')}</span>
+    </div>
+  `;
+  
+  // 在选中的文本附近显示loading
+  const rect = range.getBoundingClientRect();
+  loadingTooltip.style.left = (rect.left + window.scrollX) + 'px';
+  loadingTooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+  
+  document.body.appendChild(loadingTooltip);
+  
   try {
     // 检查翻译服务
     if (typeof translationService === 'undefined') {
@@ -633,6 +694,9 @@ async function promptAndAnnotate(range, text) {
       'auto'
     );
     
+    // 移除加载提示
+    loadingTooltip.remove();
+    
     // 使用 annotationText（可能包含读音）或 translatedText 作为标注
     const annotationText = result.annotationText || result.translatedText;
     
@@ -642,7 +706,25 @@ async function promptAndAnnotate(range, text) {
     
   } catch (error) {
     console.error('[Annotate-Translate] Auto-translate failed:', error);
-    alert('Auto-translation failed: ' + error.message);
+    
+    // 显示错误消息
+    loadingTooltip.className = 'annotate-translate-tooltip error';
+    loadingTooltip.innerHTML = `
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <div class="error-message">
+          <strong>${safeGetMessage('annotationFailed', null, 'Annotation failed')}</strong>
+          <p>${error.message}</p>
+        </div>
+      </div>
+    `;
+    
+    // 3秒后自动关闭错误提示
+    setTimeout(() => {
+      if (loadingTooltip.parentElement) {
+        loadingTooltip.remove();
+      }
+    }, 3000);
   }
 }
 
