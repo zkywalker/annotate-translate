@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS = {
   
   // Annotation settings
   showPhoneticInAnnotation: true,
+  enableAudio: true,
   
   // Performance settings
   enableCache: true,
@@ -57,6 +58,7 @@ const elements = {
   maxExamples: document.getElementById('maxExamples'),
   autoCloseDelay: document.getElementById('autoCloseDelay'),
   showPhoneticInAnnotation: document.getElementById('showPhoneticInAnnotation'),
+  enableAudio: document.getElementById('enableAudio'),
   enableCache: document.getElementById('enableCache'),
   cacheSize: document.getElementById('cacheSize'),
   enableDebugMode: document.getElementById('enableDebugMode'),
@@ -186,8 +188,9 @@ function loadSettings() {
     elements.maxExamples.value = settings.maxExamples;
     elements.autoCloseDelay.value = settings.autoCloseDelay;
     
-    // Annotation settings
-    elements.showPhoneticInAnnotation.checked = settings.showPhoneticInAnnotation;
+  // Annotation settings
+  elements.showPhoneticInAnnotation.checked = settings.showPhoneticInAnnotation;
+  elements.enableAudio.checked = settings.enableAudio;
     
     // Performance settings
     elements.enableCache.checked = settings.enableCache;
@@ -244,8 +247,9 @@ function saveSettings() {
     maxExamples: parseInt(elements.maxExamples.value, 10),
     autoCloseDelay: parseInt(elements.autoCloseDelay.value, 10),
     
-    // Annotation settings
-    showPhoneticInAnnotation: elements.showPhoneticInAnnotation.checked,
+  // Annotation settings
+  showPhoneticInAnnotation: elements.showPhoneticInAnnotation.checked,
+  enableAudio: elements.enableAudio.checked,
     
     // Performance settings
     enableCache: elements.enableCache.checked,

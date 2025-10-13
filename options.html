@@ -13,7 +13,6 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 40px 20px;
     }
@@ -28,7 +27,7 @@
     }
 
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1a73e8;
       color: white;
       padding: 30px;
       text-align: center;
@@ -464,20 +463,14 @@
 
       <!-- 标注设置 -->
       <div class="section">
-        <div class="section-title"><span data-i18n="annotationSettings">Annotation Settings</span> <span class="badge badge-new" data-i18n="badgeNew">New</span></div>
-        
+        <div class="section-title"><span data-i18n="annotationSettings">Annotation Settings</span></div>
         <div class="checkbox-item">
           <input type="checkbox" id="showPhoneticInAnnotation" checked>
-          <label for="showPhoneticInAnnotation" data-i18n="showPhoneticInAnnotation">Show Phonetic + Translation in Annotation</label>
+          <label for="showPhoneticInAnnotation" data-i18n="showPhoneticInAnnotation">Show Phonetic Symbols in Annotation</label>
         </div>
-        <div class="description" style="margin-top: 8px; margin-left: 12px;" data-i18n="showPhoneticInAnnotationDesc">
-          When enabled, annotations will show both phonetic symbols and translation (e.g., "/həˈloʊ/ 你好").
-          When disabled, annotations will only show the translation (e.g., "你好").
-        </div>
-
-        <div class="info-box" style="margin-top: 12px;">
-          <strong>💡</strong>
-          <span data-i18n="annotationTip">This setting affects the auto-translate feature in annotation mode. You can still manually enter any text you want for annotations.</span>
+        <div class="checkbox-item">
+          <input type="checkbox" id="enableAudio" checked>
+          <label for="enableAudio" data-i18n="enableAudio">Show Pronunciation Button in Annotation</label>
         </div>
       </div>
 
