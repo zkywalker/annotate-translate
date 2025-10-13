@@ -845,12 +845,14 @@ function createAudioButton(phonetics, text) {
   const button = document.createElement('button');
   button.className = 'annotate-audio-button';
   
-  // 使用 Lucide volume-2 图标
-  const icon = document.createElement('i');
-  icon.setAttribute('data-lucide', 'volume-2');
-  icon.setAttribute('width', '12');
-  icon.setAttribute('height', '12');
-  button.appendChild(icon);
+  // 使用内联 SVG 图标（volume-2）
+  button.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/>
+      <path d="M16 9a5 5 0 0 1 0 6"/>
+      <path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>
+    </svg>
+  `;
   
   button.title = 'Play pronunciation';
   button.setAttribute('aria-label', 'Play pronunciation');
@@ -869,39 +871,21 @@ function createAudioButton(phonetics, text) {
       button.style.color = '#d93025';
       setTimeout(() => {
         button.style.color = '';
-        // 重新初始化图标
-        initializeLucideIcon(button);
+        // 恢复图标
+        button.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/>
+            <path d="M16 9a5 5 0 0 1 0 6"/>
+            <path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>
+          </svg>
+        `;
       }, 1000);
     } finally {
       button.classList.remove('playing');
     }
   });
   
-  // 等待 Lucide 加载后初始化图标
-  initializeLucideIcon(button);
-  
   return button;
-}
-
-// 初始化 Lucide 图标的辅助函数
-function initializeLucideIcon(container) {
-  if (typeof lucide !== 'undefined' && lucide.createIcons) {
-    // 使用 requestAnimationFrame 确保 DOM 更新后再初始化
-    requestAnimationFrame(() => {
-      lucide.createIcons({ nameAttr: 'data-lucide' });
-    });
-  } else {
-    // 如果 Lucide 还未加载，等待加载完成
-    const handleLucideReady = () => {
-      if (typeof lucide !== 'undefined' && lucide.createIcons) {
-        requestAnimationFrame(() => {
-          lucide.createIcons({ nameAttr: 'data-lucide' });
-        });
-      }
-      window.removeEventListener('lucide-ready', handleLucideReady);
-    };
-    window.addEventListener('lucide-ready', handleLucideReady);
-  }
 }
 
 // Play phonetic audio

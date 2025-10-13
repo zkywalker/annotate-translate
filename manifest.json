@@ -30,7 +30,6 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "lucide-loader.js",
         "translation-service.js",
         "translation-ui.js",
         "content.js"
@@ -39,12 +38,6 @@
         "translation-ui.css",
         "content.css"
       ]
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["lucide.min.js"],
-      "matches": ["<all_urls>"]
     }
   ],
   "icons": {
