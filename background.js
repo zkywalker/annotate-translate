@@ -32,11 +32,41 @@ chrome.runtime.onInstalled.addListener((details) => {
     
     console.log('Setting default target language to:', targetLanguage);
     
-    // Set default settings with detected language
+    // Set default settings with detected language (使用新的分层结构)
     chrome.storage.sync.set({
-      enableTranslate: false,  // 默认关闭翻译功能
-      enableAnnotate: true,
-      targetLanguage: targetLanguage
+      general: {
+        enableTranslate: false,  // 默认关闭翻译功能
+        enableAnnotate: true,
+        uiLanguage: 'auto',
+        targetLanguage: targetLanguage
+      },
+      providers: {
+        current: 'google',
+        google: { enabled: true },
+        youdao: { enabled: false, appKey: '', appSecret: '', connectionStatus: null },
+        deepl: { enabled: false, apiKey: '', useFreeApi: true, connectionStatus: null },
+        openai: { enabled: false, apiKey: '', model: 'gpt-3.5-turbo', baseUrl: 'https://api.openai.com/v1', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null }
+      },
+      display: {
+        translation: {
+          enableAudio: true,
+          showPhonetics: true,
+          showDefinitions: true,
+          showExamples: true,
+          maxExamples: 3,
+          autoCloseDelay: 10,
+          enablePhoneticFallback: true
+        },
+        menu: { buttonSize: 'small' },
+        annotation: { showPhonetics: true, enableAudio: true }
+      },
+      performance: {
+        enableCache: true,
+        cacheSize: 100
+      },
+      debug: {
+        enableDebugMode: false
+      }
     });
 
     // Create context menu items

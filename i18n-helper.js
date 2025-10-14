@@ -42,10 +42,14 @@ function i18n(key, substitutions = []) {
     return message;
   }
   
-  // Fall back to Chrome i18n API
+  // Fall back to Chrome i18n API (uses default_locale from manifest)
   if (typeof chrome !== 'undefined' && chrome.i18n) {
-    return chrome.i18n.getMessage(key, substitutions) || key;
+    const message = chrome.i18n.getMessage(key, substitutions);
+    if (message) return message;
   }
+  
+  // Last resort: return the key itself (better than nothing)
+  console.warn(`[i18n] Missing translation for key: ${key}`);
   return key;
 }
 
@@ -80,9 +84,37 @@ async function loadCustomLanguage(langCode) {
  */
 async function initializeLanguage() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get({ uiLanguage: 'auto' }, async (settings) => {
-      if (settings.uiLanguage && settings.uiLanguage !== 'auto') {
-        await loadCustomLanguage(settings.uiLanguage);
+    chrome.storage.sync.get(null, async (stored) => {
+      // 使用新的分层结构
+      let uiLanguage = stored.general?.uiLanguage || 'auto';
+      
+      // 如果是 auto，尝试使用浏览器语言
+      if (uiLanguage === 'auto') {
+        const browserLang = chrome.i18n.getUILanguage();
+        console.log('[i18n] Browser language:', browserLang);
+        
+        // 将浏览器语言转换为我们支持的格式
+        if (browserLang.startsWith('zh')) {
+          uiLanguage = browserLang.includes('TW') || browserLang.includes('HK') ? 'zh-TW' : 'zh-CN';
+        } else if (browserLang.startsWith('ja')) {
+          uiLanguage = 'ja';
+        } else if (browserLang.startsWith('ko')) {
+          uiLanguage = 'ko';
+        } else if (browserLang.startsWith('es')) {
+          uiLanguage = 'es';
+        } else if (browserLang.startsWith('fr')) {
+          uiLanguage = 'fr';
+        } else if (browserLang.startsWith('de')) {
+          uiLanguage = 'de';
+        } else {
+          uiLanguage = 'en'; // 默认使用英文
+        }
+        
+        console.log('[i18n] Detected language:', uiLanguage);
+      }
+      
+      if (uiLanguage && uiLanguage !== 'auto' && uiLanguage !== 'en') {
+        await loadCustomLanguage(uiLanguage);
       }
       resolve();
     });
@@ -115,6 +147,14 @@ function localizeHtmlPage() {
     }
   });
 
+  // 本地化带 data-i18n-html 属性的元素（支持HTML内容）
+  document.querySelectorAll('[data-i18n-html]').forEach(element => {
+    const key = element.getAttribute('data-i18n-html');
+    if (key) {
+      element.innerHTML = i18n(key);
+    }
+  });
+
   // 本地化 placeholder
   document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
     const key = element.getAttribute('data-i18n-placeholder');
@@ -136,14 +176,6 @@ function localizeHtmlPage() {
     const key = element.getAttribute('data-i18n-value');
     if (key) {
       element.value = i18n(key);
-    }
-  });
-
-  // 本地化 HTML 内容（需要谨慎使用）
-  document.querySelectorAll('[data-i18n-html]').forEach(element => {
-    const key = element.getAttribute('data-i18n-html');
-    if (key) {
-      element.innerHTML = i18n(key);
     }
   });
 }

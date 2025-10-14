@@ -116,16 +116,20 @@ function isValidTabUrl(url) {
 
 // Load settings from storage
 function loadSettings() {
-  chrome.storage.sync.get({
-    enableTranslate: false,  // 默认关闭翻译功能
-    enableAnnotate: true,
-    targetLanguage: 'en',
-    translationProvider: 'google'
-  }, function(items) {
-    document.getElementById('enable-translate').checked = items.enableTranslate;
-    document.getElementById('enable-annotate').checked = items.enableAnnotate;
-    document.getElementById('target-language').value = items.targetLanguage;
-    document.getElementById('translation-provider').value = items.translationProvider;
+  chrome.storage.sync.get(null, function(items) {
+    // 使用新的分层结构
+    if (items.general) {
+      document.getElementById('enable-translate').checked = items.general.enableTranslate ?? false;
+      document.getElementById('enable-annotate').checked = items.general.enableAnnotate ?? true;
+      document.getElementById('target-language').value = items.general.targetLanguage ?? 'en';
+      document.getElementById('translation-provider').value = items.providers.current ?? 'google';
+    } else {
+      // 如果没有设置，使用默认值
+      document.getElementById('enable-translate').checked = false;
+      document.getElementById('enable-annotate').checked = true;
+      document.getElementById('target-language').value = 'en';
+      document.getElementById('translation-provider').value = 'google';
+    }
     
     // Update provider icon after loading settings
     updateProviderIcon();
@@ -134,38 +138,52 @@ function loadSettings() {
 
 // Save settings to storage
 function saveSettings() {
-  const settings = {
-    enableTranslate: document.getElementById('enable-translate').checked,
-    enableAnnotate: document.getElementById('enable-annotate').checked,
-    targetLanguage: document.getElementById('target-language').value,
-    translationProvider: document.getElementById('translation-provider').value
-  };
-
-  chrome.storage.sync.set(settings, function() {
-    // Update status to let user know settings were saved
-    const status = document.getElementById('status');
-    status.textContent = i18n('settingsSaved');
-    status.className = 'status success';
+  // 先读取现有设置
+  chrome.storage.sync.get(null, function(stored) {
+    // 使用新的分层结构
+    if (!stored.general) {
+      // 如果没有设置，初始化一个新结构
+      stored = {
+        general: {},
+        providers: {},
+        display: {},
+        performance: {},
+        debug: {}
+      };
+    }
     
-    // Send message to content script to apply new settings
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      if (tabs[0] && isValidTabUrl(tabs[0].url)) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'updateSettings',
-          settings: settings
-        }, function(response) {
-          // Handle potential errors when content script is not available
-          if (chrome.runtime.lastError) {
-            console.log('Could not update content script settings:', chrome.runtime.lastError.message);
-          }
-        });
-      }
-    });
+    // 更新设置
+    stored.general.enableTranslate = document.getElementById('enable-translate').checked;
+    stored.general.enableAnnotate = document.getElementById('enable-annotate').checked;
+    stored.general.targetLanguage = document.getElementById('target-language').value;
+    stored.providers.current = document.getElementById('translation-provider').value;
 
-    setTimeout(function() {
-      status.textContent = '';
-      status.className = 'status';
-    }, 3000);
+    chrome.storage.sync.set(stored, function() {
+      // Update status to let user know settings were saved
+      const status = document.getElementById('status');
+      status.textContent = i18n('settingsSaved');
+      status.className = 'status success';
+      
+      // Send message to content script to apply new settings
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        if (tabs[0] && isValidTabUrl(tabs[0].url)) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'updateSettings',
+            settings: stored
+          }, function(response) {
+            // Handle potential errors when content script is not available
+            if (chrome.runtime.lastError) {
+              console.log('Could not update content script settings:', chrome.runtime.lastError.message);
+            }
+          });
+        }
+      });
+
+      setTimeout(function() {
+        status.textContent = '';
+        status.className = 'status';
+      }, 3000);
+    });
   });
 }
 

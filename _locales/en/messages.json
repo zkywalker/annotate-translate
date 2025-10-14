@@ -152,6 +152,10 @@
     "message": "How to get DeepL API credentials:",
     "description": "How to get DeepL credentials title"
   },
+  "howToGetAiCredentials": {
+    "message": "How to get AI Translation API credentials:",
+    "description": "How to get AI translation credentials title"
+  },
   "deeplCredentialsStep1": {
     "message": "Visit",
     "description": "DeepL credentials step 1"
@@ -571,6 +575,388 @@
   "languageChangedReload": {
     "message": "Language changed! Reloading page...",
     "description": "Message shown when language is changed"
+  },
+  
+  "generalSettings": {
+    "message": "General Settings",
+    "description": "General settings page title"
+  },
+  "features": {
+    "message": "Features",
+    "description": "Features section title"
+  },
+  "enableTranslationDesc": {
+    "message": "Enable text translation with hover and selection",
+    "description": "Enable translation description"
+  },
+  "enableAnnotationDesc": {
+    "message": "Annotate text on the page for later review",
+    "description": "Enable annotation description"
+  },
+  "targetLanguage": {
+    "message": "Target Language",
+    "description": "Target language label"
+  },
+  "translationService": {
+    "message": "Translation Service",
+    "description": "Translation service section title"
+  },
+  "currentService": {
+    "message": "Current Service",
+    "description": "Current service label"
+  },
+  "currentServiceDesc": {
+    "message": "Select the translation service to use",
+    "description": "Current service description"
+  },
+  "quickServiceInfo": {
+    "message": "💡 Quick service selection for convenience. You can configure detailed settings for each service in their respective tabs.",
+    "description": "Quick service info message"
+  },
+  "translationServices": {
+    "message": "Translation Services",
+    "description": "Translation services nav section"
+  },
+  "googleIntro": {
+    "message": "Free translation service supporting over 100 languages, no API key required.",
+    "description": "Google Translate introduction"
+  },
+  "googleFeatures": {
+    "message": "✨ Features:",
+    "description": "Google features title"
+  },
+  "googleFeature1": {
+    "message": "✅ Completely free, no registration required",
+    "description": "Google feature 1"
+  },
+  "googleFeature2": {
+    "message": "✅ Supports 100+ languages",
+    "description": "Google feature 2"
+  },
+  "googleFeature3": {
+    "message": "✅ Fast and reliable",
+    "description": "Google feature 3"
+  },
+  "googleFeature4": {
+    "message": "✅ Ready to use immediately",
+    "description": "Google feature 4"
+  },
+  "useGoogleTranslate": {
+    "message": "Use Google Translate",
+    "description": "Use Google Translate button"
+  },
+  "useGoogleTranslateDesc": {
+    "message": "Google Translate is free and requires no configuration. Click the button below to set it as your translation service.",
+    "description": "Use Google Translate description"
+  },
+  "setAsCurrentService": {
+    "message": "Set as Current Service",
+    "description": "Set as current service button"
+  },
+  "youdaoIntro": {
+    "message": "Professional Chinese-English translation service with accurate results and rich dictionary features.",
+    "description": "Youdao introduction"
+  },
+  "youdaoStep2": {
+    "message": "Register/Login to your account",
+    "description": "Youdao step 2"
+  },
+  "youdaoStep3": {
+    "message": "Create a new application",
+    "description": "Youdao step 3"
+  },
+  "youdaoStep4": {
+    "message": "Get your App Key and App Secret",
+    "description": "Youdao step 4"
+  },
+  "youdaoStep5": {
+    "message": "Copy them to the fields above and save",
+    "description": "Youdao step 5"
+  },
+  "appKeyDesc": {
+    "message": "Your Youdao application key",
+    "description": "App key description"
+  },
+  "appSecretDesc": {
+    "message": "Your Youdao application secret (stored locally)",
+    "description": "App secret description"
+  },
+  "deeplIntro": {
+    "message": "Acclaimed as the world's most accurate translation service, providing high-quality translations.",
+    "description": "DeepL introduction"
+  },
+  "deeplStep2": {
+    "message": "Sign up for a free or pro account",
+    "description": "DeepL step 2"
+  },
+  "deeplStep3": {
+    "message": "Get your API key from the account page",
+    "description": "DeepL step 3"
+  },
+  "deeplStep4": {
+    "message": "Free tier includes 500,000 characters/month",
+    "description": "DeepL step 4"
+  },
+  "deeplStep5": {
+    "message": "Copy your API key to the field above and save",
+    "description": "DeepL step 5"
+  },
+  "deeplApiKeyDesc": {
+    "message": "Your DeepL API key (free or pro)",
+    "description": "DeepL API key description"
+  },
+  "useFreeApiDesc": {
+    "message": "Free API has usage limits but is sufficient for personal use",
+    "description": "Use free API description"
+  },
+  "openaiIntro": {
+    "message": "Use AI models for intelligent translation with context understanding and natural language processing. Supports OpenAI and OpenAI-compatible API services.",
+    "description": "OpenAI introduction"
+  },
+  "openaiStep2": {
+    "message": "Sign up and get your API key",
+    "description": "OpenAI step 2"
+  },
+  "openaiStep3": {
+    "message": "Copy your API key",
+    "description": "OpenAI step 3"
+  },
+  "openaiStep4": {
+    "message": "Optionally configure custom base URL for other compatible API services",
+    "description": "OpenAI step 4"
+  },
+  "openaiStep5": {
+    "message": "Paste your API key and save",
+    "description": "OpenAI step 5"
+  },
+  "openaiApiKeyDesc": {
+    "message": "Your AI service API key (OpenAI keys start with sk-)",
+    "description": "OpenAI API key description"
+  },
+  "model": {
+    "message": "Model",
+    "description": "Model label"
+  },
+  "modelDesc": {
+    "message": "AI model to use (e.g., gpt-3.5-turbo, gpt-4, or other compatible models)",
+    "description": "Model description"
+  },
+  "baseUrl": {
+    "message": "Base URL",
+    "description": "Base URL label"
+  },
+  "baseUrlDesc": {
+    "message": "API base URL (supports OpenAI and other compatible services)",
+    "description": "Base URL description"
+  },
+  "advancedOptions": {
+    "message": "Advanced Options",
+    "description": "Advanced options section"
+  },
+  "temperatureDesc": {
+    "message": "Controls randomness (0.0-2.0, lower = more focused)",
+    "description": "Temperature description"
+  },
+  "maxTokensDesc": {
+    "message": "Maximum tokens in response (100-4000)",
+    "description": "Max tokens description"
+  },
+  "timeout": {
+    "message": "Timeout (ms)",
+    "description": "Timeout label"
+  },
+  "timeoutDesc": {
+    "message": "Request timeout in milliseconds (5000-60000)",
+    "description": "Timeout description"
+  },
+  "openaiCompatible": {
+    "message": "🔧 Supports OpenAI and compatible API services (e.g., Azure OpenAI, local LLMs, DeepSeek, etc.)",
+    "description": "OpenAI compatible info"
+  },
+  "apiConfiguration": {
+    "message": "API Configuration",
+    "description": "API configuration section"
+  },
+  "connectionTest": {
+    "message": "Connection Test",
+    "description": "Connection test section"
+  },
+  "testConnection": {
+    "message": "Test Connection",
+    "description": "Test connection button"
+  },
+  "displaySettings": {
+    "message": "Display & Appearance",
+    "description": "Display settings page title"
+  },
+  "translationPopup": {
+    "message": "Translation Popup",
+    "description": "Translation popup section"
+  },
+  "showPhoneticsDesc": {
+    "message": "Display phonetic symbols for pronunciation",
+    "description": "Show phonetics description"
+  },
+  "enableAudioDesc": {
+    "message": "Enable audio playback for word pronunciation",
+    "description": "Enable audio description"
+  },
+  "showDefinitionsDesc": {
+    "message": "Display word definitions and explanations",
+    "description": "Show definitions description"
+  },
+  "showExamplesDesc": {
+    "message": "Display example sentences for context",
+    "description": "Show examples description"
+  },
+  "selectionMenu": {
+    "message": "Selection Menu",
+    "description": "Selection menu section"
+  },
+  "buttonSize": {
+    "message": "Button Size",
+    "description": "Button size label"
+  },
+  "buttonSizeDesc": {
+    "message": "Size of buttons in the selection menu",
+    "description": "Button size description"
+  },
+  "annotationStyle": {
+    "message": "Annotation Style",
+    "description": "Annotation style section"
+  },
+  "annotationPhoneticsDesc": {
+    "message": "Show phonetic symbols in annotations",
+    "description": "Annotation phonetics description"
+  },
+  "annotationAudioDesc": {
+    "message": "Enable audio for annotated words",
+    "description": "Annotation audio description"
+  },
+  "enableCacheDesc": {
+    "message": "Cache translations to improve performance and reduce API calls",
+    "description": "Enable cache description"
+  },
+  "enableDebugModeDesc": {
+    "message": "Enable detailed logging for troubleshooting",
+    "description": "Enable debug mode description"
+  },
+  "actions": {
+    "message": "Actions",
+    "description": "Actions section title"
+  },
+  "resetInfo": {
+    "message": "⚠️ Reset all settings to their default values",
+    "description": "Reset info message"
+  },
+  "clearCacheInfo": {
+    "message": "🗑️ Clear all cached translations to free up storage",
+    "description": "Clear cache info message"
+  },
+  "actionsInfo": {
+    "message": "💡 These actions will take effect immediately and cannot be undone.",
+    "description": "Actions info message"
+  },
+  "showAudioInAnnotation": {
+    "message": "Enable Audio in Annotation",
+    "description": "Show audio in annotation label"
+  },
+  
+  "promptSettings": {
+    "message": "Prompt Settings",
+    "description": "Prompt settings section title"
+  },
+  "promptFormat": {
+    "message": "Prompt Format",
+    "description": "Prompt format label"
+  },
+  "promptFormatDesc": {
+    "message": "Choose the data format returned by AI",
+    "description": "Prompt format description"
+  },
+  "jsonFormatOption": {
+    "message": "JSON Format (Full Info)",
+    "description": "JSON format option"
+  },
+  "simpleFormatOption": {
+    "message": "Simple Format (Translation Only)",
+    "description": "Simple format option"
+  },
+  "useContext": {
+    "message": "Use Context",
+    "description": "Use context label"
+  },
+  "useContextDesc": {
+    "message": "Provide surrounding text to improve translation accuracy",
+    "description": "Use context description"
+  },
+  "customPrompt": {
+    "message": "Custom Prompt",
+    "description": "Custom prompt label"
+  },
+  "customPromptDesc": {
+    "message": "Advanced users can customize AI prompt templates",
+    "description": "Custom prompt description"
+  },
+  "editPrompt": {
+    "message": "Edit Prompt",
+    "description": "Edit prompt button"
+  },
+  "promptEditorTitle": {
+    "message": "Prompt Editor",
+    "description": "Prompt editor modal title"
+  },
+  "promptEditorInfo": {
+    "message": "<strong>Available placeholders:</strong> <code>{text}</code> - text to translate, <code>{sourceLang}</code> - source language, <code>{targetLang}</code> - target language, <code>{context}</code> - context",
+    "description": "Prompt editor info"
+  },
+  "systemPrompt": {
+    "message": "System Prompt",
+    "description": "System prompt tab"
+  },
+  "userPrompt": {
+    "message": "User Prompt",
+    "description": "User prompt tab"
+  },
+  "contextTemplate": {
+    "message": "Context Template",
+    "description": "Context template tab"
+  },
+  "systemPromptLabel": {
+    "message": "System Prompt (Define AI's role and behavior)",
+    "description": "System prompt label"
+  },
+  "userPromptLabel": {
+    "message": "User Prompt (Specific translation instructions)",
+    "description": "User prompt label"
+  },
+  "userPromptHint": {
+    "message": "💡 Must include <code>{text}</code>, <code>{sourceLang}</code>, <code>{targetLang}</code>",
+    "description": "User prompt hint"
+  },
+  "contextTemplateLabel": {
+    "message": "Context Template (How to display context information)",
+    "description": "Context template label"
+  },
+  "contextTemplateHint": {
+    "message": "💡 Must include <code>{context}</code> placeholder",
+    "description": "Context template hint"
+  },
+  "promptPreview": {
+    "message": "Preview Example",
+    "description": "Prompt preview title"
+  },
+  "resetToDefault": {
+    "message": "Reset to Default",
+    "description": "Reset to default button"
+  },
+  "validatePrompt": {
+    "message": "Validate Template",
+    "description": "Validate prompt button"
+  },
+  "savePrompt": {
+    "message": "Save",
+    "description": "Save prompt button"
   }
 }
 
