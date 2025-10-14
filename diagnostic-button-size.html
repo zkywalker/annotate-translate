@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>按钮大小诊断工具</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .diagnostic-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #1a73e8;
+      margin-top: 0;
+    }
+    .step {
+      margin: 15px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-left: 4px solid #1a73e8;
+    }
+    .code-block {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+      margin: 10px 0;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1557b0;
+    }
+    .result {
+      background: #e8f5e9;
+      border: 1px solid #4caf50;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .error {
+      background: #ffebee;
+      border: 1px solid #f44336;
+    }
+    .warning {
+      background: #fff3e0;
+      border: 1px solid #ff9800;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 菜单按钮大小 - 诊断工具</h1>
+
+  <div class="diagnostic-section">
+    <h2>步骤1：检查当前设置</h2>
+    <button onclick="checkCurrentSetting()">检查 menuButtonSize 设置</button>
+    <div id="setting-result"></div>
+  </div>
+
+  <div class="diagnostic-section">
+    <h2>步骤2：检查 CSS 加载</h2>
+    <button onclick="checkCSSLoaded()">检查 content.css 是否加载</button>
+    <div id="css-result"></div>
+  </div>
+
+  <div class="diagnostic-section">
+    <h2>步骤3：测试按钮显示</h2>
+    <p>在下面的文本框中选择一些文字：</p>
+    <div style="padding: 20px; background: white; border: 2px dashed #ccc; border-radius: 4px;">
+      <p>This is a test paragraph. Please select some text here to trigger the menu buttons and check their size.</p>
+      <p>这是一段测试文字。请在这里选择一些文字来触发菜单按钮，并检查它们的大小。</p>
+    </div>
+    <button onclick="inspectMenuButton()">检查菜单按钮属性</button>
+    <div id="inspect-result"></div>
+  </div>
+
+  <div class="diagnostic-section">
+    <h2>步骤4：清除缓存并重新加载</h2>
+    <div class="step">
+      <strong>如果上面的检查发现问题，请执行以下操作：</strong>
+      <ol>
+        <li>硬刷新页面：<kbd>Ctrl+Shift+R</kbd> (Windows/Linux) 或 <kbd>Cmd+Shift+R</kbd> (Mac)</li>
+        <li>重新加载扩展：访问 <code>chrome://extensions/</code>，点击刷新按钮</li>
+        <li>清除浏览器缓存</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="diagnostic-section">
+    <h2>步骤5：手动设置测试</h2>
+    <button onclick="testSmall()">测试 Small</button>
+    <button onclick="testMedium()">测试 Medium</button>
+    <button onclick="testLarge()">测试 Large</button>
+    <div id="test-result"></div>
+  </div>
+
+  <div class="diagnostic-section">
+    <h2>控制台日志</h2>
+    <p>打开浏览器控制台 (F12) 查看详细日志</p>
+    <div class="code-block">
+      <div>查找以下日志：</div>
+      <div>[Annotate-Translate] Menu button size: XXX</div>
+      <div>[Annotate-Translate] Menu classes: XXX</div>
+    </div>
+  </div>
+
+  <script>
+    // 检查当前设置
+    function checkCurrentSetting() {
+      const resultDiv = document.getElementById('setting-result');
+      chrome.storage.sync.get(['menuButtonSize'], (result) => {
+        const size = result.menuButtonSize || '未设置 (默认: small)';
+        resultDiv.innerHTML = `
+          <div class="result">
+            <strong>✅ 当前设置值：</strong> <code>${size}</code>
+          </div>
+        `;
+        console.log('[诊断] menuButtonSize:', result.menuButtonSize);
+      });
+    }
+
+    // 检查 CSS 是否加载
+    function checkCSSLoaded() {
+      const resultDiv = document.getElementById('css-result');
+      const links = document.querySelectorAll('link[href*="content.css"], link[href*="content"]');
+      const styles = document.querySelectorAll('style');
+      
+      let cssFound = false;
+      let cssContent = '';
+      
+      // 检查 <link> 标签
+      links.forEach(link => {
+        console.log('[诊断] 发现 CSS link:', link.href);
+        cssFound = true;
+      });
+      
+      // 检查内联样式
+      styles.forEach(style => {
+        if (style.textContent.includes('annotate-translate-menu')) {
+          console.log('[诊断] 发现内联样式包含 annotate-translate-menu');
+          cssFound = true;
+          cssContent = style.textContent;
+        }
+      });
+      
+      // 检查是否有 size-medium 和 size-large 的定义
+      const hasSize = cssContent.includes('size-medium') && cssContent.includes('size-large');
+      
+      if (cssFound) {
+        resultDiv.innerHTML = `
+          <div class="result ${!hasSize ? 'warning' : ''}">
+            <strong>${hasSize ? '✅' : '⚠️'} CSS 已加载</strong><br>
+            ${hasSize ? 
+              '包含尺寸样式定义 (size-medium, size-large)' : 
+              '⚠️ 未找到尺寸样式定义，可能需要重新加载扩展'
+            }
+          </div>
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ 未找到 content.css</strong><br>
+            扩展的 CSS 可能未正确注入
+          </div>
+        `;
+      }
+    }
+
+    // 检查菜单按钮
+    function inspectMenuButton() {
+      const resultDiv = document.getElementById('inspect-result');
+      const menu = document.getElementById('annotate-translate-menu');
+      
+      if (!menu) {
+        resultDiv.innerHTML = `
+          <div class="result warning">
+            <strong>⚠️ 未找到菜单按钮</strong><br>
+            请先选择一些文字以显示菜单按钮
+          </div>
+        `;
+        return;
+      }
+      
+      const button = menu.querySelector('.menu-button');
+      const classes = menu.className;
+      const computedStyle = button ? window.getComputedStyle(button) : null;
+      
+      resultDiv.innerHTML = `
+        <div class="result">
+          <strong>✅ 菜单按钮信息：</strong><br>
+          <strong>CSS 类：</strong> <code>${classes}</code><br>
+          ${button ? `
+            <strong>按钮高度：</strong> <code>${computedStyle.height}</code><br>
+            <strong>按钮宽度：</strong> <code>${computedStyle.width}</code><br>
+            <strong>字体大小：</strong> <code>${computedStyle.fontSize}</code><br>
+            <strong>内边距：</strong> <code>${computedStyle.padding}</code><br>
+          ` : ''}
+        </div>
+      `;
+      
+      console.log('[诊断] 菜单元素:', menu);
+      console.log('[诊断] 按钮元素:', button);
+      console.log('[诊断] 计算样式:', computedStyle);
+    }
+
+    // 测试不同尺寸
+    function testSmall() {
+      testSize('small', 'Small (20x20px)');
+    }
+
+    function testMedium() {
+      testSize('medium', 'Medium (24x24px)');
+    }
+
+    function testLarge() {
+      testSize('large', 'Large (28x28px)');
+    }
+
+    function testSize(size, label) {
+      const resultDiv = document.getElementById('test-result');
+      chrome.storage.sync.set({ menuButtonSize: size }, () => {
+        resultDiv.innerHTML = `
+          <div class="result">
+            <strong>✅ 已设置为：</strong> ${label}<br>
+            请刷新页面 (F5) 并选择文字查看效果
+          </div>
+        `;
+        console.log('[诊断] 设置 menuButtonSize 为:', size);
+      });
+    }
+
+    // 页面加载时自动检查
+    window.addEventListener('load', () => {
+      console.log('[诊断工具] 页面已加载');
+      checkCurrentSetting();
+      checkCSSLoaded();
+    });
+  </script>
+</body>
+</html>
