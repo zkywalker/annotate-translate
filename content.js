@@ -249,6 +249,13 @@ function showContextMenu(x, y, text) {
   const menu = document.createElement('div');
   menu.id = 'annotate-translate-menu';
   menu.className = 'annotate-translate-menu';
+  
+  // Apply size class based on settings
+  const menuSize = settings.menuButtonSize || 'small';
+  if (menuSize !== 'small') {
+    menu.classList.add(`size-${menuSize}`);
+  }
+  
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
 

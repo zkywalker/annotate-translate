@@ -30,6 +30,7 @@
   }
 }
 
+/* 默认按钮样式 - Small size */
 .annotate-translate-menu .menu-button {
   padding: 3px 6px;
   border: none;
@@ -45,6 +46,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Medium size - 中等尺寸 */
+.annotate-translate-menu.size-medium {
+  padding: 2px;
+  gap: 2px;
+  border-radius: 5px;
+}
+
+.annotate-translate-menu.size-medium .menu-button {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  min-width: 24px;
+  height: 24px;
+}
+
+/* Large size - 大尺寸 */
+.annotate-translate-menu.size-large {
+  padding: 3px;
+  gap: 3px;
+  border-radius: 6px;
+}
+
+.annotate-translate-menu.size-large .menu-button {
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  min-width: 28px;
+  height: 28px;
 }
 
 .annotate-translate-menu .menu-button:hover {

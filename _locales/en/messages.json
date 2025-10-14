@@ -305,6 +305,26 @@
     "message": "When enabled, annotations will show both phonetic symbols and translation (e.g., \"/həˈloʊ/ 你好\"). When disabled, annotations will only show the translation (e.g., \"你好\").",
     "description": "Show phonetic in annotation description"
   },
+  "menuButtonSize": {
+    "message": "Selection Menu Button Size",
+    "description": "Menu button size setting label"
+  },
+  "menuButtonSizeDesc": {
+    "message": "Adjust the size of the buttons that appear when you select text",
+    "description": "Menu button size setting description"
+  },
+  "sizeSmall": {
+    "message": "Small (Compact)",
+    "description": "Small button size option"
+  },
+  "sizeMedium": {
+    "message": "Medium (Balanced)",
+    "description": "Medium button size option"
+  },
+  "sizeLarge": {
+    "message": "Large (Easy to Click)",
+    "description": "Large button size option"
+  },
   "annotationTip": {
     "message": "Tip: This setting affects the auto-translate feature in annotation mode. You can still manually enter any text you want for annotations.",
     "description": "Annotation tip"

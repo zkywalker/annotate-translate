@@ -305,6 +305,26 @@
     "message": "启用时，标注将同时显示音标和翻译（例如：\"/həˈloʊ/ 你好\"）。禁用时，标注将只显示翻译（例如：\"你好\"）。",
     "description": "Show phonetic in annotation description"
   },
+  "menuButtonSize": {
+    "message": "选择菜单按钮大小",
+    "description": "Menu button size setting label"
+  },
+  "menuButtonSizeDesc": {
+    "message": "调整划选文本后弹出按钮的大小",
+    "description": "Menu button size setting description"
+  },
+  "sizeSmall": {
+    "message": "小（紧凑）",
+    "description": "Small button size option"
+  },
+  "sizeMedium": {
+    "message": "中（平衡）",
+    "description": "Medium button size option"
+  },
+  "sizeLarge": {
+    "message": "大（易点击）",
+    "description": "Large button size option"
+  },
   "annotationTip": {
     "message": "提示：此设置影响标注模式下的自动翻译功能。您仍然可以手动输入任何文本作为标注。",
     "description": "Annotation tip"

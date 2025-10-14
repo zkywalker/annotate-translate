@@ -38,6 +38,9 @@ const DEFAULT_SETTINGS = {
   showPhoneticInAnnotation: true,
   enableAudio: true,
   
+  // Menu button size settings
+  menuButtonSize: 'small', // 'small', 'medium', 'large'
+  
   // Performance settings
   enableCache: true,
   cacheSize: 100,
@@ -67,6 +70,7 @@ const elements = {
   autoCloseDelay: document.getElementById('autoCloseDelay'),
   showPhoneticInAnnotation: document.getElementById('showPhoneticInAnnotation'),
   enableAudio: document.getElementById('enableAudio'),
+  menuButtonSize: document.getElementById('menuButtonSize'),
   enableCache: document.getElementById('enableCache'),
   cacheSize: document.getElementById('cacheSize'),
   enableDebugMode: document.getElementById('enableDebugMode'),
@@ -204,6 +208,7 @@ function loadSettings() {
   // Annotation settings
   elements.showPhoneticInAnnotation.checked = settings.showPhoneticInAnnotation;
   elements.enableAudio.checked = settings.enableAudio;
+  elements.menuButtonSize.value = settings.menuButtonSize || 'small';
     
     // Performance settings
     elements.enableCache.checked = settings.enableCache;
@@ -268,6 +273,7 @@ function saveSettings() {
   // Annotation settings
   showPhoneticInAnnotation: elements.showPhoneticInAnnotation.checked,
   enableAudio: elements.enableAudio.checked,
+  menuButtonSize: elements.menuButtonSize.value,
     
     // Performance settings
     enableCache: elements.enableCache.checked,
@@ -725,6 +731,9 @@ function setupEventListeners() {
   }
   if (elements.targetLanguage) {
     elements.targetLanguage.addEventListener('change', autoSaveSettings);
+  }
+  if (elements.menuButtonSize) {
+    elements.menuButtonSize.addEventListener('change', autoSaveSettings);
   }
   
   // Radio item click handlers
