@@ -54,6 +54,10 @@
     "message": "DeepL",
     "description": "DeepL provider name"
   },
+  "openaiTranslate": {
+    "message": "AI Translation",
+    "description": "OpenAI/AI provider name"
+  },
   "debugProviderDesc": {
     "message": "Returns fixed test data for development and debugging. No API calls required.",
     "description": "Debug provider description"

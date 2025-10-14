@@ -54,6 +54,10 @@
     "message": "DeepL翻译",
     "description": "DeepL provider name"
   },
+  "openaiTranslate": {
+    "message": "AI翻译",
+    "description": "OpenAI/AI provider name"
+  },
   "debugProviderDesc": {
     "message": "返回固定的测试数据用于开发和调试。无需API调用。",
     "description": "Debug provider description"

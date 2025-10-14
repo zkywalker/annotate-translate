@@ -1421,7 +1421,7 @@ class FreeDictionaryProvider extends TranslationProvider {
  */
 class OpenAITranslateProvider extends TranslationProvider {
   constructor(config = {}) {
-    super('OpenAI', config);
+    super('AI翻译', config);
     this.openaiProvider = null;
     this.apiKey = config.apiKey || '';
     this.model = config.model || 'gpt-3.5-turbo';
