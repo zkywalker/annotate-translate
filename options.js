@@ -761,8 +761,35 @@ function setupEventListeners() {
   if (elements.menuButtonSize) {
     elements.menuButtonSize.addEventListener('change', autoSaveSettings);
   }
+  
+  // ============ Auto-save for text inputs (with debounce) ============
   if (elements.openaiModel) {
-    elements.openaiModel.addEventListener('change', autoSaveSettings);
+    let modelInputTimeout;
+    elements.openaiModel.addEventListener('input', () => {
+      clearTimeout(modelInputTimeout);
+      modelInputTimeout = setTimeout(() => {
+        autoSaveSettings();
+      }, 1000); // 1秒延迟，避免每次输入都保存
+    });
+    // 失去焦点时立即保存
+    elements.openaiModel.addEventListener('blur', () => {
+      clearTimeout(modelInputTimeout);
+      autoSaveSettings();
+    });
+  }
+  
+  if (elements.openaiBaseUrl) {
+    let baseUrlInputTimeout;
+    elements.openaiBaseUrl.addEventListener('input', () => {
+      clearTimeout(baseUrlInputTimeout);
+      baseUrlInputTimeout = setTimeout(() => {
+        autoSaveSettings();
+      }, 1000);
+    });
+    elements.openaiBaseUrl.addEventListener('blur', () => {
+      clearTimeout(baseUrlInputTimeout);
+      autoSaveSettings();
+    });
   }
   
   // Radio item click handlers

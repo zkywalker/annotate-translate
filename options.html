@@ -696,14 +696,18 @@
 
           <div style="margin-top: 15px;">
             <label for="openaiModel" style="font-size: 13px;" data-i18n="model">Model</label>
-            <select id="openaiModel">
+            <input type="text" id="openaiModel" list="openaiModelList" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
+            <datalist id="openaiModelList">
               <option value="gpt-3.5-turbo">GPT-3.5 Turbo (推荐，性价比高)</option>
               <option value="gpt-4o-mini">GPT-4o Mini (更快，更便宜)</option>
               <option value="gpt-4o">GPT-4o (更强大)</option>
               <option value="gpt-4-turbo">GPT-4 Turbo</option>
               <option value="gpt-4">GPT-4</option>
-            </select>
-            <div class="description" data-i18n="openaiModelDesc">Choose the model for translation. GPT-3.5 Turbo is cost-effective and sufficient for most use cases.</div>
+              <option value="llama2">Llama 2 (Ollama)</option>
+              <option value="mistral">Mistral (Ollama)</option>
+              <option value="codellama">Code Llama (Ollama)</option>
+            </datalist>
+            <div class="description" data-i18n="openaiModelDesc">Enter model name or select from presets. For OpenAI: gpt-3.5-turbo, gpt-4o, etc. For local models: llama2, mistral, etc.</div>
           </div>
 
           <div style="margin-top: 15px;">

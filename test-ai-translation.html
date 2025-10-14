@@ -317,13 +317,20 @@
 
         <div class="form-group">
           <label for="model">模型</label>
-          <select id="model">
+          <input type="text" id="model" list="modelList" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
+          <datalist id="modelList">
             <option value="gpt-3.5-turbo">GPT-3.5 Turbo (推荐，性价比高)</option>
             <option value="gpt-4o-mini">GPT-4o Mini (更快，更便宜)</option>
             <option value="gpt-4o">GPT-4o (更强大)</option>
             <option value="gpt-4-turbo">GPT-4 Turbo</option>
             <option value="gpt-4">GPT-4</option>
-          </select>
+            <option value="llama2">Llama 2 (Ollama)</option>
+            <option value="mistral">Mistral (Ollama)</option>
+            <option value="codellama">Code Llama (Ollama)</option>
+          </datalist>
+          <small style="display: block; margin-top: 5px; color: #666;">
+            输入模型名称或从预设中选择。OpenAI: gpt-3.5-turbo, gpt-4o 等。本地模型: llama2, mistral 等。
+          </small>
         </div>
 
         <div class="button-group">
