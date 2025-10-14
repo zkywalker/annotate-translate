@@ -83,19 +83,57 @@ class OpenAIProvider extends BaseAIProvider {
   parseJsonResponse(rawResponse, originalText, sourceLang, targetLang) {
     const parsed = PromptTemplates.parseJsonResponse(rawResponse);
     if (parsed) {
+      // 转换音标格式：string → PhoneticInfo[]
+      const phonetics = [];
+      if (parsed.phonetic && parsed.phonetic.trim()) {
+        phonetics.push({
+          text: parsed.phonetic,
+          type: this.detectPhoneticType(parsed.phonetic, sourceLang)
+        });
+      }
+
+      // 转换释义格式：string[] → Definition[]
+      const definitions = [];
+      if (parsed.definitions && Array.isArray(parsed.definitions)) {
+        parsed.definitions.forEach((def, index) => {
+          definitions.push({
+            partOfSpeech: '', // AI 返回的简化格式没有词性
+            text: def
+          });
+        });
+      }
+
       return {
         translatedText: parsed.translation,
         originalText, sourceLang, targetLang,
         provider: this.providerName,
         model: this.model,
         timestamp: Date.now(),
-        phonetic: parsed.phonetic || '',
-        definitions: parsed.definitions || [],
+        phonetics: phonetics,
+        definitions: definitions,
         metadata: {}
       };
     }
     console.warn('[OpenAI Provider] JSON parse failed, using simple format');
     return this.parseSimpleResponse(rawResponse, originalText, sourceLang, targetLang);
+  }
+
+  /**
+   * 检测音标类型
+   * @param {string} phonetic - 音标文本
+   * @param {string} sourceLang - 源语言
+   * @returns {string} 音标类型
+   */
+  detectPhoneticType(phonetic, sourceLang) {
+    // 如果包含 IPA 符号，判断为 IPA
+    if (/[ˈˌːəɪʊɛæɔʌɑθðŋʃʒ]/.test(phonetic)) {
+      return 'ipa';
+    }
+    // 如果是中文，判断为拼音
+    if (sourceLang.startsWith('zh')) {
+      return 'pinyin';
+    }
+    return 'default';
   }
 
   parseSimpleResponse(rawResponse, originalText, sourceLang, targetLang) {

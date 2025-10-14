@@ -20,14 +20,17 @@ Always respond with valid JSON only, no additional text or explanations.`,
 
 Requirements:
 1. Provide accurate and natural translation
-2. Include phonetic transcription if applicable (IPA format for English, Pinyin for Chinese)
-3. Include brief definitions/meanings
+2. Include phonetic transcription of the SOURCE text (original text, not translation):
+   - For English: use IPA format (e.g., /ˈtʃeɪmbə(r)/)
+   - For Chinese: use Pinyin (e.g., fáng jiān)
+   - If source text has no phonetic system, use empty string
+3. Include brief definitions/meanings of the source text in the target language
 4. Respond ONLY with valid JSON in this exact format:
 
 {
   "translation": "translated text",
-  "phonetic": "phonetic transcription (if applicable, empty string if not)",
-  "definitions": ["definition 1", "definition 2"]
+  "phonetic": "phonetic transcription of SOURCE text (empty string if not applicable)",
+  "definitions": ["definition 1 in target language", "definition 2 in target language"]
 }
 
 Text to translate: {text}
