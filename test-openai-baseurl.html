@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI Base URL 快速测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+    }
+
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 25px;
+      padding-bottom: 25px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #667eea;
+      font-size: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result.error {
+      background: #fff5f5;
+      border-left-color: #e53e3e;
+      color: #c53030;
+    }
+
+    .result.success {
+      background: #f0fff4;
+      border-left-color: #38a169;
+      color: #276749;
+    }
+
+    .info-box {
+      background: #e6f2ff;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #3182ce;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 15px;
+    }
+
+    .info-box ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    .info-box code {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .preset-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .preset-btn {
+      padding: 8px;
+      background: #f0f0f0;
+      color: #333;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: #e0e0e0;
+      border-color: #667eea;
+    }
+
+    small {
+      display: block;
+      margin-top: 5px;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 OpenAI Base URL 测试</h1>
+    <div class="subtitle">快速测试自定义 Base URL 功能</div>
+
+    <div class="section">
+      <div class="section-title">⚙️ 配置</div>
+      
+      <div class="form-group">
+        <label for="baseUrl">Base URL</label>
+        <input type="text" id="baseUrl" value="https://api.openai.com/v1" placeholder="输入 API Base URL">
+        <small>OpenAI 兼容服务的 API 端点地址</small>
+      </div>
+
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="setPreset('openai')">🌐 OpenAI 官方</button>
+        <button class="preset-btn" onclick="setPreset('azure')">☁️ Azure OpenAI</button>
+        <button class="preset-btn" onclick="setPreset('ollama')">🦙 Ollama 本地</button>
+        <button class="preset-btn" onclick="setPreset('localai')">💻 LocalAI</button>
+      </div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="apiKey">API Key</label>
+        <input type="password" id="apiKey" placeholder="输入 API Key">
+        <small>您的 API 密钥（本地使用，不会上传）</small>
+      </div>
+
+      <div class="form-group">
+        <label for="model">模型</label>
+        <select id="model">
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="gpt-4o-mini">GPT-4o Mini</option>
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo</option>
+          <option value="gpt-4">GPT-4</option>
+        </select>
+      </div>
+
+      <button onclick="testConnection()">🔌 测试连接</button>
+
+      <div id="result" class="result"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📝 Base URL 预设说明</div>
+      
+      <div class="info-box">
+        <strong>🌐 OpenAI 官方：</strong>
+        <code>https://api.openai.com/v1</code>
+        <br>标准 OpenAI API 端点
+        <br><br>
+        
+        <strong>☁️ Azure OpenAI：</strong>
+        <code>https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT</code>
+        <br>需要替换 YOUR-RESOURCE 和 YOUR-DEPLOYMENT
+        <br><br>
+        
+        <strong>🦙 Ollama 本地：</strong>
+        <code>http://localhost:11434/v1</code>
+        <br>本地 Ollama 服务，支持 llama2、mistral 等模型
+        <br><br>
+        
+        <strong>💻 LocalAI：</strong>
+        <code>http://localhost:8080/v1</code>
+        <br>本地 LocalAI 服务
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">✅ 测试步骤</div>
+      <ol style="margin-left: 20px; line-height: 1.8;">
+        <li>选择一个 Base URL 预设，或输入自定义地址</li>
+        <li>输入对应服务的 API Key</li>
+        <li>选择要使用的模型（确保服务支持该模型）</li>
+        <li>点击"测试连接"按钮</li>
+        <li>查看测试结果（会尝试翻译 "hello" 到中文）</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Load AI Translation Service Scripts -->
+  <script src="ai-providers/base-ai-provider.js"></script>
+  <script src="ai-providers/openai-provider.js"></script>
+  <script src="ai-translation-service.js"></script>
+
+  <script>
+    // 预设配置
+    const presets = {
+      openai: {
+        baseUrl: 'https://api.openai.com/v1',
+        note: 'OpenAI 官方 API'
+      },
+      azure: {
+        baseUrl: 'https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT',
+        note: 'Azure OpenAI（需要替换 YOUR-RESOURCE 和 YOUR-DEPLOYMENT）'
+      },
+      ollama: {
+        baseUrl: 'http://localhost:11434/v1',
+        note: 'Ollama 本地服务'
+      },
+      localai: {
+        baseUrl: 'http://localhost:8080/v1',
+        note: 'LocalAI 本地服务'
+      }
+    };
+
+    // 设置预设
+    function setPreset(type) {
+      const preset = presets[type];
+      if (preset) {
+        document.getElementById('baseUrl').value = preset.baseUrl;
+        showResult(`已设置为: ${preset.note}`, 'success');
+      }
+    }
+
+    // 测试连接
+    async function testConnection() {
+      const baseUrl = document.getElementById('baseUrl').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+      const model = document.getElementById('model').value;
+
+      if (!baseUrl) {
+        showResult('请输入 Base URL', 'error');
+        return;
+      }
+
+      if (!apiKey) {
+        showResult('请输入 API Key', 'error');
+        return;
+      }
+
+      showResult('正在测试连接...', 'info');
+
+      try {
+        // 创建 AI 服务实例
+        const aiService = new AITranslationService();
+        
+        // 初始化
+        await aiService.initialize('openai', {
+          apiKey: apiKey,
+          model: model,
+          baseURL: baseUrl
+        });
+
+        // 测试翻译
+        const result = await aiService.translate('hello', 'en', 'zh-CN');
+
+        showResult(
+          `✅ 连接成功！\n\n` +
+          `翻译测试结果：\n` +
+          `原文: hello\n` +
+          `译文: ${result.translatedText}\n` +
+          `模型: ${result.model}\n` +
+          `Token 使用: ${result.metadata.tokensUsed}\n` +
+          `估算成本: $${result.metadata.cost.toFixed(6)}`,
+          'success'
+        );
+
+      } catch (error) {
+        showResult(
+          `❌ 连接失败\n\n` +
+          `错误信息: ${error.message}\n\n` +
+          `请检查：\n` +
+          `1. Base URL 是否正确\n` +
+          `2. API Key 是否有效\n` +
+          `3. 模型是否被服务支持\n` +
+          `4. 网络连接是否正常`,
+          'error'
+        );
+        console.error('测试错误:', error);
+      }
+    }
+
+    // 显示结果
+    function showResult(message, type = 'info') {
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = message;
+      resultDiv.className = 'result show ' + type;
+    }
+  </script>
+</body>
+</html>

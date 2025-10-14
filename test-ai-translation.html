@@ -283,6 +283,14 @@
         <div class="info-box">
           <strong>提示：</strong> 本测试页面用于验证AI翻译服务的基础功能。
           您需要提供自己的 OpenAI API 密钥。密钥仅在本地使用，不会被上传或存储。
+          <br><br>
+          <strong>🌐 Base URL 说明：</strong> 
+          <ul style="margin: 8px 0 0 20px; padding: 0;">
+            <li>默认使用 OpenAI 官方 API：<code>https://api.openai.com/v1</code></li>
+            <li>支持 Azure OpenAI：<code>https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT</code></li>
+            <li>支持本地部署（Ollama、LocalAI 等）：<code>http://localhost:11434/v1</code></li>
+            <li>支持第三方 OpenAI 兼容服务</li>
+          </ul>
         </div>
 
         <div class="form-group">
@@ -297,6 +305,14 @@
         <div class="form-group">
           <label for="apiKey">API 密钥</label>
           <input type="password" id="apiKey" placeholder="输入您的 OpenAI API 密钥">
+        </div>
+
+        <div class="form-group">
+          <label for="baseUrl">Base URL</label>
+          <input type="text" id="baseUrl" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
+          <small style="display: block; margin-top: 5px; color: #666;">
+            自定义 API 基础 URL。可用于连接 Azure OpenAI、本地部署或第三方兼容服务。
+          </small>
         </div>
 
         <div class="form-group">

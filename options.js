@@ -24,6 +24,11 @@ const DEFAULT_SETTINGS = {
   deeplApiKey: '',
   deeplUseFreeApi: true,
   
+  // OpenAI API settings
+  openaiApiKey: '',
+  openaiModel: 'gpt-3.5-turbo',
+  openaiBaseUrl: 'https://api.openai.com/v1',
+  
   enablePhoneticFallback: true, // 默认启用音标补充
   
   // UI settings
@@ -61,6 +66,10 @@ const elements = {
   deeplApiKey: document.getElementById('deeplApiKey'),
   deeplUseFreeApi: document.getElementById('deeplUseFreeApi'),
   deeplConfigSection: document.getElementById('deeplConfigSection'),
+  openaiApiKey: document.getElementById('openaiApiKey'),
+  openaiModel: document.getElementById('openaiModel'),
+  openaiBaseUrl: document.getElementById('openaiBaseUrl'),
+  openaiConfigSection: document.getElementById('openaiConfigSection'),
   enablePhoneticFallback: document.getElementById('enablePhoneticFallback'),
   enableAudio: document.getElementById('enableAudio'),
   showPhonetics: document.getElementById('showPhonetics'),
@@ -195,6 +204,11 @@ function loadSettings() {
     elements.deeplApiKey.value = settings.deeplApiKey || '';
     elements.deeplUseFreeApi.checked = settings.deeplUseFreeApi !== false;
     
+    // OpenAI API settings
+    elements.openaiApiKey.value = settings.openaiApiKey || '';
+    elements.openaiModel.value = settings.openaiModel || 'gpt-3.5-turbo';
+    elements.openaiBaseUrl.value = settings.openaiBaseUrl || 'https://api.openai.com/v1';
+    
     elements.enablePhoneticFallback.checked = settings.enablePhoneticFallback !== false;
     
     // UI settings
@@ -259,6 +273,11 @@ function saveSettings() {
     // DeepL API settings
     deeplApiKey: elements.deeplApiKey.value.trim(),
     deeplUseFreeApi: elements.deeplUseFreeApi.checked,
+    
+    // OpenAI API settings
+    openaiApiKey: elements.openaiApiKey.value.trim(),
+    openaiModel: elements.openaiModel.value,
+    openaiBaseUrl: elements.openaiBaseUrl.value.trim() || 'https://api.openai.com/v1',
     
     enablePhoneticFallback: elements.enablePhoneticFallback.checked,
     
@@ -407,6 +426,13 @@ function updateProviderSelection(provider) {
     elements.deeplConfigSection.style.display = 'block';
   } else {
     elements.deeplConfigSection.style.display = 'none';
+  }
+  
+  // Show/hide OpenAI config section
+  if (provider === 'openai') {
+    elements.openaiConfigSection.style.display = 'block';
+  } else {
+    elements.openaiConfigSection.style.display = 'none';
   }
   
   // Show/hide debug provider description
@@ -734,6 +760,9 @@ function setupEventListeners() {
   }
   if (elements.menuButtonSize) {
     elements.menuButtonSize.addEventListener('change', autoSaveSettings);
+  }
+  if (elements.openaiModel) {
+    elements.openaiModel.addEventListener('change', autoSaveSettings);
   }
   
   // Radio item click handlers

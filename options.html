@@ -602,6 +602,13 @@
                 <span data-i18n="deeplTranslate">DeepL</span>
               </span>
             </label>
+            <label class="radio-item">
+              <input type="radio" name="provider" value="openai">
+              <span class="provider-option-label">
+                🤖 <span data-i18n="openaiTranslate">OpenAI (GPT)</span>
+                <span class="badge badge-new" data-i18n="badgeNew">NEW</span>
+              </span>
+            </label>
           </div>
           <div class="description" id="debugProviderDesc" style="display: none;">
             <strong data-i18n="debugProvider">Debug Provider:</strong> <span data-i18n="debugProviderDesc">Returns fixed test data for development and debugging. No API calls required.</span>
@@ -669,6 +676,54 @@
             <span data-i18n="deeplCredentialsStep3">3. Get your API key from the account page</span><br>
             <span data-i18n="deeplCredentialsStep4">4. Free tier includes 500,000 characters/month</span><br>
             <span data-i18n="deeplCredentialsStep5">5. Copy your API key to the field above and save</span>
+          </div>
+        </div>
+
+        <!-- OpenAI API 配置 -->
+        <div class="setting-item" id="openaiConfigSection" style="display: none;">
+          <label>🤖 <span data-i18n="openaiConfig">OpenAI API Configuration</span></label>
+          
+          <div style="margin-top: 15px;">
+            <label for="openaiApiKey" style="font-size: 13px;" data-i18n="apiKey">API Key</label>
+            <input type="password" id="openaiApiKey" data-i18n-placeholder="enterApiKey">
+            <div class="description">
+              <span data-i18n="getOpenaiApiKeyFrom">Get your API Key from</span> 
+              <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" style="color: #667eea;">
+                <span data-i18n="openaiApiKeys">OpenAI Platform</span>
+              </a>
+            </div>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <label for="openaiModel" style="font-size: 13px;" data-i18n="model">Model</label>
+            <select id="openaiModel">
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo (推荐，性价比高)</option>
+              <option value="gpt-4o-mini">GPT-4o Mini (更快，更便宜)</option>
+              <option value="gpt-4o">GPT-4o (更强大)</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              <option value="gpt-4">GPT-4</option>
+            </select>
+            <div class="description" data-i18n="openaiModelDesc">Choose the model for translation. GPT-3.5 Turbo is cost-effective and sufficient for most use cases.</div>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <label for="openaiBaseUrl" style="font-size: 13px;" data-i18n="baseUrl">Base URL (Optional)</label>
+            <input type="text" id="openaiBaseUrl" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
+            <div class="description" data-i18n="openaiBaseUrlDesc">Custom API base URL. Use this to connect to OpenAI-compatible services (e.g., Azure OpenAI, local deployments, or third-party providers).</div>
+          </div>
+
+          <div class="info-box" style="margin-top: 15px;">
+            <strong>🔑 <span data-i18n="howToGetOpenaiCredentials">How to get OpenAI API credentials:</span></strong><br>
+            <span>1. <span data-i18n="openaiCredentialsStep1">Visit</span> <a href="https://platform.openai.com/signup" target="_blank" rel="noopener noreferrer" style="color: #004085; text-decoration: underline;"><span data-i18n="openaiPlatform">OpenAI Platform</span></a></span><br>
+            <span data-i18n="openaiCredentialsStep2">2. Sign up or log in to your account</span><br>
+            <span data-i18n="openaiCredentialsStep3">3. Go to API keys page and create a new API key</span><br>
+            <span data-i18n="openaiCredentialsStep4">4. Add credits to your account (pay-as-you-go)</span><br>
+            <span data-i18n="openaiCredentialsStep5">5. Copy your API key to the field above and save</span><br><br>
+            <strong>🌐 <span data-i18n="openaiCompatibleServices">OpenAI-Compatible Services:</span></strong><br>
+            <span data-i18n="openaiCompatibleDesc">You can use the Base URL field to connect to other services that implement the OpenAI API format, such as:</span><br>
+            <span>• Azure OpenAI Service</span><br>
+            <span>• LocalAI, Ollama (local models)</span><br>
+            <span>• Third-party OpenAI proxies</span>
           </div>
         </div>
       </div>

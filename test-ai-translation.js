@@ -18,6 +18,7 @@ const elements = {
   // Configuration
   provider: document.getElementById('provider'),
   apiKey: document.getElementById('apiKey'),
+  baseUrl: document.getElementById('baseUrl'),
   model: document.getElementById('model'),
   initBtn: document.getElementById('initBtn'),
   validateBtn: document.getElementById('validateBtn'),
@@ -64,6 +65,7 @@ function initEventListeners() {
 // 初始化服务
 async function handleInitialize() {
   const apiKey = elements.apiKey.value.trim();
+  const baseUrl = elements.baseUrl.value.trim() || 'https://api.openai.com/v1';
   const model = elements.model.value;
   const provider = elements.provider.value;
 
@@ -81,7 +83,8 @@ async function handleInitialize() {
     // 初始化提供商
     await aiService.initialize(provider, {
       apiKey: apiKey,
-      model: model
+      model: model,
+      baseURL: baseUrl
     });
 
     showSuccess('服务初始化成功！');
