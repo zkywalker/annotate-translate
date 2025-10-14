@@ -80,6 +80,7 @@ function init() {
     showExamples: true,
     maxExamples: 3,
     showPhoneticInAnnotation: true,
+    menuButtonSize: 'small',
     enableCache: true,
     cacheSize: 100,
     debugMode: false,
@@ -252,9 +253,11 @@ function showContextMenu(x, y, text) {
   
   // Apply size class based on settings
   const menuSize = settings.menuButtonSize || 'small';
+  console.log('[Annotate-Translate] Menu button size:', menuSize, 'Settings:', settings);
   if (menuSize !== 'small') {
     menu.classList.add(`size-${menuSize}`);
   }
+  console.log('[Annotate-Translate] Menu classes:', menu.className);
   
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
