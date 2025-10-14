@@ -1,135 +1,120 @@
 /**
  * OpenAI Provider for AI Translation
- * 
- * 使用 OpenAI API (GPT-3.5/GPT-4) 进行翻译
- * 支持直接 REST API 调用，无需 Vercel AI SDK
+ * 支持可配置的提示词模板
  */
 
 class OpenAIProvider extends BaseAIProvider {
-  /**
-   * 构造函数
-   * @param {Object} config - 配置对象
-   * @param {string} config.apiKey - OpenAI API密钥
-   * @param {string} [config.model='gpt-3.5-turbo'] - 使用的模型
-   * @param {string} [config.baseURL='https://api.openai.com/v1'] - API基础URL
-   * @param {number} [config.temperature=0.3] - 温度参数（0-2）
-   * @param {number} [config.maxTokens=1000] - 最大token数
-   */
   constructor(config) {
     super(config);
-    
     this.providerName = 'openai';
     this.apiEndpoint = `${config.baseURL || 'https://api.openai.com/v1'}/chat/completions`;
     this.model = config.model || 'gpt-3.5-turbo';
     this.temperature = config.temperature !== undefined ? config.temperature : 0.3;
     this.maxTokens = config.maxTokens || 1000;
+    this.promptFormat = config.promptFormat || 'jsonFormat';
+    this.useContext = config.useContext !== undefined ? config.useContext : true;
+    this.customTemplates = config.customTemplates || null;
     
-    console.log(`[OpenAI Provider] Initialized with model: ${this.model}`);
+    console.log(`[OpenAI Provider] Initialized - Model: ${this.model}, Format: ${this.promptFormat}`);
   }
 
-  /**
-   * 翻译文本
-   * @param {string} text - 要翻译的文本
-   * @param {string} sourceLang - 源语言代码
-   * @param {string} targetLang - 目标语言代码
-   * @returns {Promise<AITranslationResult>}
-   */
-  async translate(text, sourceLang, targetLang) {
-    console.log(`[OpenAI Provider] Translating from ${sourceLang} to ${targetLang}`);
-    console.log(`[OpenAI Provider] Text: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
+  async translate(text, sourceLang, targetLang, options = {}) {
+    console.log(`[OpenAI Provider] Translating: "${text.substring(0, 50)}..."`);
     
     try {
-      // 构建提示词
-      const prompt = this.buildTranslationPrompt(text, sourceLang, targetLang);
+      const prompts = PromptTemplates.buildPrompt({
+        text, sourceLang, targetLang,
+        format: this.promptFormat,
+        context: this.useContext ? (options.context || '') : '',
+        customTemplates: this.customTemplates
+      });
       
-      // 估算输入token数
-      const estimatedInputTokens = this.estimateTokens(prompt);
-      console.log(`[OpenAI Provider] Estimated input tokens: ${estimatedInputTokens}`);
-      
-      // 调用 OpenAI API
-      const response = await this.callAPI(prompt);
-      
-      // 解析响应
-      const translatedText = response.choices[0].message.content.trim();
+      const response = await this.callAPI(prompts);
+      const rawResponse = response.choices[0].message.content.trim();
       const tokensUsed = response.usage?.total_tokens || 0;
       
-      console.log(`[OpenAI Provider] Translation completed. Tokens used: ${tokensUsed}`);
+      console.log(`[OpenAI Provider] Completed - Tokens: ${tokensUsed}`);
       
-      // 构建结果对象
-      return {
-        translatedText: translatedText,
-        originalText: text,
-        sourceLang: sourceLang,
-        targetLang: targetLang,
-        provider: this.providerName,
-        model: this.model,
-        timestamp: Date.now(),
-        metadata: {
-          tokensUsed: tokensUsed,
-          cost: this.calculateCost(tokensUsed),
-          promptTokens: response.usage?.prompt_tokens || 0,
-          completionTokens: response.usage?.completion_tokens || 0
-        }
+      let result = this.promptFormat === 'jsonFormat' 
+        ? this.parseJsonResponse(rawResponse, text, sourceLang, targetLang)
+        : this.parseSimpleResponse(rawResponse, text, sourceLang, targetLang);
+      
+      result.metadata = {
+        ...result.metadata,
+        tokensUsed, 
+        cost: this.calculateCost(tokensUsed),
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        promptFormat: this.promptFormat
       };
       
+      return result;
     } catch (error) {
       throw this.handleAPIError(error);
     }
   }
 
-  /**
-   * 调用 OpenAI API
-   * @param {string} prompt - 提示词
-   * @returns {Promise<Object>}
-   * @private
-   */
-  async callAPI(prompt) {
-    const requestBody = {
-      model: this.model,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional translator with expertise in multiple languages. Provide accurate, natural, and contextually appropriate translations.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: this.temperature,
-      max_tokens: this.maxTokens
-    };
-
-    console.log(`[OpenAI Provider] Calling API: ${this.apiEndpoint}`);
-    
+  async callAPI(prompts) {
     const response = await fetch(this.apiEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.apiKey}`
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          { role: 'system', content: prompts.system },
+          { role: 'user', content: prompts.user }
+        ],
+        temperature: this.temperature,
+        max_tokens: this.maxTokens
+      })
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error?.message || response.statusText;
-      throw new Error(`OpenAI API error (${response.status}): ${errorMessage}`);
+      throw new Error(`OpenAI API error (${response.status}): ${errorData.error?.message || response.statusText}`);
     }
 
     return await response.json();
   }
 
-  /**
-   * 验证配置是否有效
-   * @returns {Promise<boolean>}
-   */
+  parseJsonResponse(rawResponse, originalText, sourceLang, targetLang) {
+    const parsed = PromptTemplates.parseJsonResponse(rawResponse);
+    if (parsed) {
+      return {
+        translatedText: parsed.translation,
+        originalText, sourceLang, targetLang,
+        provider: this.providerName,
+        model: this.model,
+        timestamp: Date.now(),
+        phonetic: parsed.phonetic || '',
+        definitions: parsed.definitions || [],
+        metadata: {}
+      };
+    }
+    console.warn('[OpenAI Provider] JSON parse failed, using simple format');
+    return this.parseSimpleResponse(rawResponse, originalText, sourceLang, targetLang);
+  }
+
+  parseSimpleResponse(rawResponse, originalText, sourceLang, targetLang) {
+    return {
+      translatedText: rawResponse,
+      originalText, sourceLang, targetLang,
+      provider: this.providerName,
+      model: this.model,
+      timestamp: Date.now(),
+      metadata: {}
+    };
+  }
+
   async validateConfig() {
     try {
-      console.log('[OpenAI Provider] Validating configuration...');
-      
-      // 尝试调用API进行简单的翻译测试
-      const testPrompt = 'Translate "hello" from English to Chinese. Only return the translation.';
+      const prompts = PromptTemplates.buildPrompt({
+        text: 'hello', sourceLang: 'en', targetLang: 'zh-CN',
+        format: 'simpleFormat', context: ''
+      });
       
       const response = await fetch(this.apiEndpoint, {
         method: 'POST',
@@ -140,69 +125,42 @@ class OpenAIProvider extends BaseAIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [
-            { role: 'user', content: testPrompt }
+            { role: 'system', content: prompts.system },
+            { role: 'user', content: prompts.user }
           ],
-          max_tokens: 10
+          max_tokens: 50
         })
       });
 
-      if (response.ok) {
-        console.log('[OpenAI Provider] Configuration is valid');
-        return true;
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('[OpenAI Provider] Configuration validation failed:', errorData);
-        return false;
-      }
-      
+      return response.ok;
     } catch (error) {
-      console.error('[OpenAI Provider] Configuration validation error:', error);
+      console.error('[OpenAI Provider] Validation error:', error);
       return false;
     }
   }
 
-  /**
-   * 计算使用成本（美元）
-   * 基于 2025 年的定价
-   * @param {number} tokens - 使用的token数
-   * @returns {number}
-   * @private
-   */
   calculateCost(tokens) {
-    // OpenAI 定价（每1K tokens的价格，美元）
     const pricing = {
       'gpt-3.5-turbo': 0.0015,
-      'gpt-3.5-turbo-0125': 0.0015,
       'gpt-4': 0.03,
       'gpt-4-turbo': 0.01,
-      'gpt-4-turbo-preview': 0.01,
       'gpt-4o': 0.005,
       'gpt-4o-mini': 0.00015
     };
-
-    const pricePerK = pricing[this.model] || pricing['gpt-3.5-turbo'];
-    return (tokens / 1000) * pricePerK;
+    return (tokens / 1000) * (pricing[this.model] || pricing['gpt-3.5-turbo']);
   }
 
-  /**
-   * 获取提供商信息
-   * @returns {Object}
-   */
   getProviderInfo() {
     return {
       ...super.getProviderInfo(),
       endpoint: this.apiEndpoint,
       temperature: this.temperature,
       maxTokens: this.maxTokens,
-      pricing: this.getPricingInfo()
+      promptFormat: this.promptFormat,
+      useContext: this.useContext
     };
   }
 
-  /**
-   * 获取定价信息
-   * @returns {Object}
-   * @private
-   */
   getPricingInfo() {
     const pricing = {
       'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 },
@@ -211,47 +169,9 @@ class OpenAIProvider extends BaseAIProvider {
       'gpt-4o': { input: 0.005, output: 0.015 },
       'gpt-4o-mini': { input: 0.00015, output: 0.0006 }
     };
-
     return pricing[this.model] || pricing['gpt-3.5-turbo'];
   }
-
-  /**
-   * 构建针对OpenAI优化的翻译提示词
-   * @param {string} text - 要翻译的文本
-   * @param {string} sourceLang - 源语言
-   * @param {string} targetLang - 目标语言
-   * @returns {string}
-   */
-  buildTranslationPrompt(text, sourceLang, targetLang) {
-    const sourceLanguageName = this.getLanguageName(sourceLang);
-    const targetLanguageName = this.getLanguageName(targetLang);
-    
-    // 针对短文本和长文本使用不同的提示词
-    if (text.length < 100) {
-      return `Translate from ${sourceLanguageName} to ${targetLanguageName}. Only return the translation:
-
-${text}`;
-    } else {
-      return `Translate the following text from ${sourceLanguageName} to ${targetLanguageName}.
-
-Requirements:
-- Maintain the original meaning and tone
-- Use natural and fluent ${targetLanguageName}
-- Preserve any formatting or special characters
-- Only return the translation without explanations
-
-Text:
-${text}`;
-    }
-  }
 }
 
-// 如果在浏览器环境中，导出到全局
-if (typeof window !== 'undefined') {
-  window.OpenAIProvider = OpenAIProvider;
-}
-
-// 如果在Node.js环境中，使用module.exports
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = OpenAIProvider;
-}
+if (typeof window !== 'undefined') window.OpenAIProvider = OpenAIProvider;
+if (typeof module !== 'undefined' && module.exports) module.exports = OpenAIProvider;
