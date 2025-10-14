@@ -143,6 +143,13 @@ function applyTranslationSettings() {
   
   // 设置活跃的翻译提供商
   if (settings.translationProvider) {
+    // 检查 provider 是否存在
+    if (!translationService.providers.has(settings.translationProvider)) {
+      console.warn(`[Annotate-Translate] Provider "${settings.translationProvider}" not found, falling back to google`);
+      settings.translationProvider = 'google';
+      chrome.storage.sync.set({ translationProvider: 'google' });
+    }
+    
     translationService.setActiveProvider(settings.translationProvider);
     console.log('[Annotate-Translate] Provider set to:', settings.translationProvider);
     

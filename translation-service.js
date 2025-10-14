@@ -1841,7 +1841,18 @@ translationService.registerProvider('google', new GoogleTranslateProvider());
 translationService.registerProvider('youdao', new YoudaoTranslateProvider());
 translationService.registerProvider('deepl', new DeepLTranslateProvider());
 translationService.registerProvider('freedict', new FreeDictionaryProvider());
-translationService.registerProvider('openai', new OpenAITranslateProvider());
+
+// 注册 OpenAI 提供者（如果 OpenAIProvider 类可用）
+try {
+  if (typeof OpenAIProvider !== 'undefined') {
+    translationService.registerProvider('openai', new OpenAITranslateProvider());
+    console.log('[TranslationService] OpenAI provider registered successfully');
+  } else {
+    console.warn('[TranslationService] OpenAIProvider class not found, skipping registration');
+  }
+} catch (error) {
+  console.error('[TranslationService] Failed to register OpenAI provider:', error);
+}
 
 // 设置默认提供者为 Google Translate
 translationService.setActiveProvider('google');
