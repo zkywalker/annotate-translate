@@ -62,7 +62,7 @@ function populateProviderSelect() {
     { value: 'google', labelKey: 'googleTranslate', logo: 'icons/icon_logo_google.svg' },
     { value: 'youdao', labelKey: 'youdaoTranslate', logo: 'icons/icon_logo_youdao.svg' },
     { value: 'deepl', labelKey: 'deeplTranslate', logo: 'icons/icon_logo_deepl.svg' },
-    { value: 'openai', labelKey: 'openaiTranslate', logo: '' }  // AI翻译
+    { value: 'openai', labelKey: 'openaiTranslate', logo: 'icons/icon_logo_ai.svg' }  // AI翻译
   ];
   
   providers.forEach(provider => {
