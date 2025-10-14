@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试选择菜单按钮大小</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      line-height: 1.8;
+    }
+    
+    h1 {
+      color: #1a73e8;
+      margin-bottom: 30px;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .test-text {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      margin: 10px 0;
+    }
+    
+    .instructions {
+      background: #e7f3ff;
+      border-left: 4px solid #1a73e8;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 4px;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: #1a73e8;
+    }
+    
+    .instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin: 5px 0;
+    }
+    
+    .size-preview {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    
+    .size-card {
+      flex: 1;
+      min-width: 200px;
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      text-align: center;
+    }
+    
+    .size-card h4 {
+      margin-top: 0;
+      color: #555;
+    }
+    
+    .size-card .preview {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      display: inline-flex;
+      gap: 2px;
+    }
+    
+    .btn-preview {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-small {
+      padding: 3px 6px;
+      font-size: 11px;
+      min-width: 20px;
+      height: 20px;
+    }
+    
+    .btn-medium {
+      padding: 4px 8px;
+      font-size: 12px;
+      min-width: 24px;
+      height: 24px;
+    }
+    
+    .btn-large {
+      padding: 6px 10px;
+      font-size: 13px;
+      min-width: 28px;
+      height: 28px;
+    }
+    
+    .current-setting {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .current-setting strong {
+      color: #155724;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 测试选择菜单按钮大小</h1>
+  
+  <div class="instructions">
+    <h3>📋 测试说明</h3>
+    <ol>
+      <li>打开扩展的<strong>设置页面</strong>（右键点击扩展图标 → 选项）</li>
+      <li>在<strong>"标注设置"</strong>部分找到<strong>"选择菜单按钮大小"</strong>选项</li>
+      <li>选择不同的大小：小（紧凑）/ 中（平衡）/ 大（易点击）</li>
+      <li>回到本页面，<strong>划选下面的文字</strong>，观察弹出按钮的大小变化</li>
+      <li>测试不同尺寸，找到最适合您的大小</li>
+    </ol>
+  </div>
+  
+  <div id="currentSetting" class="current-setting">
+    <strong>当前设置：</strong><span id="sizeDisplay">加载中...</span>
+  </div>
+  
+  <div class="section">
+    <h2>📏 按钮尺寸预览</h2>
+    <div class="size-preview">
+      <div class="size-card">
+        <h4>小 (Small)</h4>
+        <p>紧凑设计，不遮挡内容</p>
+        <div class="preview">
+          <button class="btn-preview btn-small">T</button>
+          <button class="btn-preview btn-small">A</button>
+        </div>
+        <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;">20x20px</p>
+      </div>
+      
+      <div class="size-card">
+        <h4>中 (Medium)</h4>
+        <p>平衡大小与易用性</p>
+        <div class="preview">
+          <button class="btn-preview btn-medium">T</button>
+          <button class="btn-preview btn-medium">A</button>
+        </div>
+        <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;">24x24px</p>
+      </div>
+      
+      <div class="size-card">
+        <h4>大 (Large)</h4>
+        <p>易于点击，适合触屏</p>
+        <div class="preview">
+          <button class="btn-preview btn-large">T</button>
+          <button class="btn-preview btn-large">A</button>
+        </div>
+        <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;">28x28px</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>✏️ 测试文本区域 1 - 英文</h2>
+    <div class="test-text">
+      <p>
+        <strong>Select this text to see the menu buttons:</strong> 
+        The quick brown fox jumps over the lazy dog. 
+        This is a test sentence to demonstrate the annotation and translation features.
+      </p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>✏️ 测试文本区域 2 - 中文</h2>
+    <div class="test-text">
+      <p>
+        <strong>划选这段文字查看菜单按钮：</strong>
+        这是一段用于测试标注和翻译功能的中文文本。
+        您可以尝试选择不同的词语或句子，观察弹出菜单按钮的大小。
+      </p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>✏️ 测试文本区域 3 - 混合内容</h2>
+    <div class="test-text">
+      <p>
+        <strong>Mixed content test:</strong> 
+        Technology 技术 is rapidly evolving 快速发展. 
+        Artificial Intelligence 人工智能 and Machine Learning 机器学习 
+        are transforming 正在改变 our world 我们的世界.
+      </p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>✏️ 测试文本区域 4 - 长文本</h2>
+    <div class="test-text">
+      <p>
+        In the realm of web development, user experience design plays a crucial role 
+        in determining the success of an application. Every element, from button sizes 
+        to color schemes, contributes to the overall usability and accessibility of 
+        the interface. When designing interactive components, it's essential to consider 
+        various factors such as target audience, device types, and usage contexts.
+      </p>
+      <p style="margin-top: 15px;">
+        在网页开发领域，用户体验设计在决定应用程序的成功方面起着至关重要的作用。
+        从按钮大小到配色方案，每个元素都有助于界面的整体可用性和可访问性。
+        在设计交互式组件时，必须考虑各种因素，如目标受众、设备类型和使用场景。
+      </p>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>💡 使用提示</h2>
+    <ul>
+      <li><strong>小尺寸：</strong>适合桌面用户，最小化遮挡，专业简洁</li>
+      <li><strong>中尺寸：</strong>适合大多数场景，平衡了美观与易用性</li>
+      <li><strong>大尺寸：</strong>适合触摸屏设备或需要更大点击目标的用户</li>
+      <li>设置会自动保存，实时生效（无需刷新页面）</li>
+      <li>可以在不同网页上测试，找到最适合您的设置</li>
+    </ul>
+  </div>
+
+  <script>
+    // 加载并显示当前设置
+    function loadCurrentSetting() {
+      chrome.storage.sync.get(['menuButtonSize'], (result) => {
+        const size = result.menuButtonSize || 'small';
+        const sizeNames = {
+          'small': '小（紧凑）',
+          'medium': '中（平衡）',
+          'large': '大（易点击）'
+        };
+        document.getElementById('sizeDisplay').textContent = sizeNames[size];
+      });
+    }
+    
+    // 监听设置变化
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'sync' && changes.menuButtonSize) {
+        loadCurrentSetting();
+      }
+    });
+    
+    // 初始加载
+    loadCurrentSetting();
+  </script>
+</body>
+</html>
