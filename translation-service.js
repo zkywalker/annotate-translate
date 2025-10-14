@@ -1416,6 +1416,180 @@ class FreeDictionaryProvider extends TranslationProvider {
 }
 
 /**
+ * OpenAI 翻译提供者适配器
+ * 将 ai-providers/openai-provider.js 的 OpenAIProvider 适配到 TranslationProvider 接口
+ */
+class OpenAITranslateProvider extends TranslationProvider {
+  constructor(config = {}) {
+    super('OpenAI', config);
+    this.openaiProvider = null;
+    this.apiKey = config.apiKey || '';
+    this.model = config.model || 'gpt-3.5-turbo';
+    this.baseURL = config.baseURL || 'https://api.openai.com/v1';
+    this.promptFormat = config.promptFormat || 'jsonFormat';
+    this.useContext = config.useContext !== undefined ? config.useContext : true;
+    this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false;
+  }
+
+  /**
+   * 初始化 OpenAI Provider
+   */
+  initializeProvider() {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+
+    if (typeof OpenAIProvider === 'undefined') {
+      throw new Error('OpenAIProvider class not loaded. Make sure ai-providers/openai-provider.js is included.');
+    }
+
+    this.openaiProvider = new OpenAIProvider({
+      apiKey: this.apiKey,
+      model: this.model,
+      baseURL: this.baseURL,
+      promptFormat: this.promptFormat,
+      useContext: this.useContext
+    });
+
+    console.log(`[OpenAI Adapter] Initialized with model: ${this.model}, baseURL: ${this.baseURL}`);
+  }
+
+  /**
+   * 更新配置
+   */
+  updateConfig(config) {
+    let changed = false;
+    
+    if (config.apiKey !== undefined && config.apiKey !== this.apiKey) {
+      this.apiKey = config.apiKey;
+      changed = true;
+    }
+    if (config.model !== undefined && config.model !== this.model) {
+      this.model = config.model;
+      changed = true;
+    }
+    if (config.baseURL !== undefined && config.baseURL !== this.baseURL) {
+      this.baseURL = config.baseURL;
+      changed = true;
+    }
+    if (config.promptFormat !== undefined && config.promptFormat !== this.promptFormat) {
+      this.promptFormat = config.promptFormat;
+      changed = true;
+    }
+    if (config.useContext !== undefined && config.useContext !== this.useContext) {
+      this.useContext = config.useContext;
+      changed = true;
+    }
+    if (config.showPhoneticInAnnotation !== undefined) {
+      this.showPhoneticInAnnotation = config.showPhoneticInAnnotation;
+    }
+
+    if (changed) {
+      console.log('[OpenAI Adapter] Configuration changed, reinitializing provider');
+      this.openaiProvider = null;
+    }
+  }
+
+  /**
+   * 翻译文本（适配 TranslationProvider 接口）
+   * @param {string} text - 待翻译文本
+   * @param {string} targetLang - 目标语言
+   * @param {string} [sourceLang='auto'] - 源语言
+   * @returns {Promise<TranslationResult>}
+   */
+  async translate(text, targetLang, sourceLang = 'auto') {
+    console.log(`[OpenAI Adapter] Translating: "${text.substring(0, 50)}..." from ${sourceLang} to ${targetLang}`);
+    
+    // 确保 provider 已初始化
+    if (!this.openaiProvider) {
+      this.initializeProvider();
+    }
+
+    try {
+      // 调用 OpenAIProvider (注意参数顺序不同)
+      const aiResult = await this.openaiProvider.translate(text, sourceLang, targetLang, {
+        context: '' // 可以从选中文本的上下文传入
+      });
+
+      // 转换为 TranslationResult 格式
+      const result = {
+        originalText: text,
+        translatedText: aiResult.translatedText || aiResult.translation || '',
+        sourceLang: sourceLang === 'auto' ? (aiResult.sourceLang || 'auto') : sourceLang,
+        targetLang: targetLang,
+        phonetics: aiResult.phonetics || [],
+        definitions: aiResult.definitions || [],
+        examples: aiResult.examples || [],
+        provider: 'openai',
+        metadata: aiResult.metadata || {},
+        timestamp: Date.now()
+      };
+
+      // 构建标注文本
+      result.annotationText = this.buildAnnotationText(result);
+
+      console.log('[OpenAI Adapter] Translation completed:', result);
+      return result;
+
+    } catch (error) {
+      console.error('[OpenAI Adapter] Translation failed:', error);
+      throw new Error(`OpenAI translation failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * 构建标注文本
+   */
+  buildAnnotationText(result) {
+    let parts = [];
+    
+    // 添加音标（如果有且设置显示）
+    if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
+      const phoneticTexts = result.phonetics.map(p => p.text).filter(t => t);
+      if (phoneticTexts.length > 0) {
+        parts.push(phoneticTexts.join(' '));
+      }
+    }
+    
+    // 添加翻译
+    parts.push(result.translatedText);
+    
+    return parts.join(' ');
+  }
+
+  async detectLanguage(text) {
+    // OpenAI 不需要单独的语言检测，翻译时会自动处理
+    // 简单判断：包含中文字符就是中文，否则是英文
+    if (/[\u4e00-\u9fa5]/.test(text)) {
+      return 'zh-CN';
+    }
+    return 'en';
+  }
+
+  async getSupportedLanguages() {
+    // OpenAI 支持大多数主流语言
+    return [
+      { code: 'auto', name: 'Auto Detect' },
+      { code: 'en', name: 'English' },
+      { code: 'zh-CN', name: 'Chinese (Simplified)' },
+      { code: 'zh-TW', name: 'Chinese (Traditional)' },
+      { code: 'ja', name: 'Japanese' },
+      { code: 'ko', name: 'Korean' },
+      { code: 'es', name: 'Spanish' },
+      { code: 'fr', name: 'French' },
+      { code: 'de', name: 'German' },
+      { code: 'it', name: 'Italian' },
+      { code: 'pt', name: 'Portuguese' },
+      { code: 'ru', name: 'Russian' },
+      { code: 'ar', name: 'Arabic' },
+      { code: 'hi', name: 'Hindi' },
+      { code: 'th', name: 'Thai' },
+      { code: 'vi', name: 'Vietnamese' }
+    ];
+  }
+}
+
+/**
  * 翻译服务管理器
  * 管理多个翻译提供者，提供统一的翻译接口
  */
@@ -1667,6 +1841,7 @@ translationService.registerProvider('google', new GoogleTranslateProvider());
 translationService.registerProvider('youdao', new YoudaoTranslateProvider());
 translationService.registerProvider('deepl', new DeepLTranslateProvider());
 translationService.registerProvider('freedict', new FreeDictionaryProvider());
+translationService.registerProvider('openai', new OpenAITranslateProvider());
 
 // 设置默认提供者为 Google Translate
 translationService.setActiveProvider('google');
@@ -1681,6 +1856,7 @@ if (typeof module !== 'undefined' && module.exports) {
     YoudaoTranslateProvider,
     DeepLTranslateProvider,
     FreeDictionaryProvider,
+    OpenAITranslateProvider,
     TranslationService,
     translationService
   };

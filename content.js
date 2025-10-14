@@ -73,6 +73,11 @@ function init() {
     youdaoAppSecret: '',
     deeplApiKey: '',
     deeplUseFreeApi: true,
+    openaiApiKey: '',
+    openaiModel: 'gpt-3.5-turbo',
+    openaiBaseUrl: 'https://api.openai.com/v1',
+    openaiPromptFormat: 'jsonFormat',
+    openaiUseContext: true,
     enablePhoneticFallback: true,
     enableAudio: true,
     showPhonetics: true,
@@ -187,6 +192,28 @@ function applyTranslationSettings() {
         console.log('  - API Key:', settings.deeplApiKey ? 'Set' : 'Not set');
         console.log('  - Use Free API:', settings.deeplUseFreeApi);
         console.log('  - showPhoneticInAnnotation:', deeplProvider.showPhoneticInAnnotation);
+      }
+    }
+    
+    // 如果是 OpenAI 提供商，更新其 API 配置
+    if (settings.translationProvider === 'openai') {
+      const openaiProvider = translationService.providers.get('openai');
+      if (openaiProvider) {
+        openaiProvider.updateConfig({
+          apiKey: settings.openaiApiKey,
+          model: settings.openaiModel,
+          baseURL: settings.openaiBaseUrl,
+          promptFormat: settings.openaiPromptFormat || 'jsonFormat',
+          useContext: settings.openaiUseContext !== undefined ? settings.openaiUseContext : true,
+          showPhoneticInAnnotation: settings.showPhoneticInAnnotation !== false
+        });
+        console.log('[Annotate-Translate] OpenAI provider configured:');
+        console.log('  - API Key:', settings.openaiApiKey ? 'Set' : 'Not set');
+        console.log('  - Model:', settings.openaiModel || 'gpt-3.5-turbo');
+        console.log('  - Base URL:', settings.openaiBaseUrl || 'https://api.openai.com/v1');
+        console.log('  - Prompt Format:', settings.openaiPromptFormat || 'jsonFormat');
+        console.log('  - Use Context:', settings.openaiUseContext !== undefined ? settings.openaiUseContext : true);
+        console.log('  - showPhoneticInAnnotation:', openaiProvider.showPhoneticInAnnotation);
       }
     }
   }

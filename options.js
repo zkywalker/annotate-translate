@@ -28,6 +28,8 @@ const DEFAULT_SETTINGS = {
   openaiApiKey: '',
   openaiModel: 'gpt-3.5-turbo',
   openaiBaseUrl: 'https://api.openai.com/v1',
+  openaiPromptFormat: 'jsonFormat',
+  openaiUseContext: true,
   
   enablePhoneticFallback: true, // 默认启用音标补充
   

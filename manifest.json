@@ -30,6 +30,9 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+        "ai-providers/prompt-templates.js",
+        "ai-providers/base-ai-provider.js",
+        "ai-providers/openai-provider.js",
         "translation-service.js",
         "translation-ui.js",
         "content.js"
