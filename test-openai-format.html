@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Response Format Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-case {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        .phonetics, .definitions {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e8f5e9;
+        }
+        .error {
+            color: red;
+            background: #ffebee;
+            padding: 10px;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 OpenAI Response Format Test</h1>
+    <p>测试 OpenAI Provider 的响应解析和数据格式转换</p>
+
+    <div id="results"></div>
+
+    <script src="ai-providers/prompt-templates.js"></script>
+    <script src="ai-providers/base-ai-provider.js"></script>
+    <script src="ai-providers/openai-provider.js"></script>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addTestCase(title, content) {
+            const div = document.createElement('div');
+            div.className = 'test-case';
+            div.innerHTML = `<h3>${title}</h3>${content}`;
+            results.appendChild(div);
+        }
+
+        function formatObject(obj) {
+            return `<pre>${JSON.stringify(obj, null, 2)}</pre>`;
+        }
+
+        // 测试用例 1: 模拟 DeepSeek 返回的响应
+        addTestCase('Test 1: 解析 DeepSeek 响应 (chamber → 房间)', '');
+        
+        const mockResponse = {
+            "translation": "房间",
+            "phonetic": "fáng jiān",  // ❌ 错误：这是中文拼音，应该是英文 IPA
+            "definitions": ["建筑物内由墙壁、地板和天花板围合的空间", "特定用途的封闭空间（如会议厅、卧室）"]
+        };
+
+        try {
+            // 创建测试 provider
+            const testProvider = new OpenAIProvider({
+                apiKey: 'test-key',
+                model: 'gpt-3.5-turbo',
+                baseURL: 'https://api.openai.com/v1'
+            });
+
+            // 解析响应
+            const rawResponse = JSON.stringify(mockResponse);
+            const parsedResult = testProvider.parseJsonResponse(
+                rawResponse,
+                'chamber',  // originalText
+                'en',       // sourceLang
+                'zh-CN'     // targetLang
+            );
+
+            let html = '<div class="result">';
+            html += '<h4>原始 AI 响应:</h4>';
+            html += formatObject(mockResponse);
+            
+            html += '<h4>解析后的 TranslationResult:</h4>';
+            html += formatObject(parsedResult);
+
+            html += '<h4>数据验证:</h4>';
+            html += '<div class="phonetics">';
+            html += `<strong>音标 (phonetics):</strong><br>`;
+            html += `- 类型: ${Array.isArray(parsedResult.phonetics) ? 'Array ✅' : 'Not Array ❌'}<br>`;
+            html += `- 长度: ${parsedResult.phonetics.length}<br>`;
+            if (parsedResult.phonetics.length > 0) {
+                html += `- phonetics[0].text: "${parsedResult.phonetics[0].text}"<br>`;
+                html += `- phonetics[0].type: "${parsedResult.phonetics[0].type}"<br>`;
+                html += `- 问题: ⚠️ 音标是中文拼音，应该是英文 IPA (如 /ˈtʃeɪmbə(r)/)<br>`;
+            }
+            html += '</div>';
+
+            html += '<div class="definitions">';
+            html += `<strong>释义 (definitions):</strong><br>`;
+            html += `- 类型: ${Array.isArray(parsedResult.definitions) ? 'Array ✅' : 'Not Array ❌'}<br>`;
+            html += `- 长度: ${parsedResult.definitions.length}<br>`;
+            parsedResult.definitions.forEach((def, i) => {
+                html += `- definitions[${i}]:<br>`;
+                html += `  · partOfSpeech: "${def.partOfSpeech}"<br>`;
+                html += `  · text: "${def.text}"<br>`;
+            });
+            html += '</div>';
+
+            html += '</div>';
+            
+            results.lastChild.innerHTML += html;
+
+        } catch (error) {
+            results.lastChild.innerHTML += `<div class="error">❌ Error: ${error.message}</div>`;
+            console.error(error);
+        }
+
+        // 测试用例 2: 正确的响应格式
+        addTestCase('Test 2: 期望的正确格式 (chamber → 房间)', '');
+        
+        const correctResponse = {
+            "translation": "房间",
+            "phonetic": "/ˈtʃeɪmbə(r)/",  // ✅ 正确：英文 IPA
+            "definitions": ["建筑物内由墙壁、地板和天花板围合的空间", "特定用途的封闭空间（如会议厅、卧室）"]
+        };
+
+        try {
+            const testProvider = new OpenAIProvider({
+                apiKey: 'test-key',
+                model: 'gpt-3.5-turbo',
+                baseURL: 'https://api.openai.com/v1'
+            });
+
+            const rawResponse = JSON.stringify(correctResponse);
+            const parsedResult = testProvider.parseJsonResponse(
+                rawResponse,
+                'chamber',
+                'en',
+                'zh-CN'
+            );
+
+            let html = '<div class="result">';
+            html += '<h4>正确的 AI 响应:</h4>';
+            html += formatObject(correctResponse);
+            
+            html += '<h4>解析后的 TranslationResult:</h4>';
+            html += formatObject(parsedResult);
+
+            html += '<h4>数据验证:</h4>';
+            html += '<div class="phonetics">';
+            html += `<strong>音标 (phonetics):</strong><br>`;
+            html += `- phonetics[0].text: "${parsedResult.phonetics[0].text}" ✅<br>`;
+            html += `- phonetics[0].type: "${parsedResult.phonetics[0].type}" ✅<br>`;
+            html += '</div>';
+
+            html += '<div class="definitions">';
+            html += `<strong>释义 (definitions):</strong><br>`;
+            html += `- 数量: ${parsedResult.definitions.length} ✅<br>`;
+            parsedResult.definitions.forEach((def, i) => {
+                html += `- definitions[${i}].text: "${def.text}" ✅<br>`;
+            });
+            html += '</div>';
+
+            html += '</div>';
+            
+            results.lastChild.innerHTML += html;
+
+        } catch (error) {
+            results.lastChild.innerHTML += `<div class="error">❌ Error: ${error.message}</div>`;
+            console.error(error);
+        }
+
+        // 测试用例 3: 中文 → 英文（拼音）
+        addTestCase('Test 3: 中文 → 英文 (房间 → room)', '');
+        
+        const chineseResponse = {
+            "translation": "room",
+            "phonetic": "fáng jiān",  // ✅ 正确：源文本（房间）的拼音
+            "definitions": ["a space enclosed by walls, floor, and ceiling", "a chamber for a specific purpose"]
+        };
+
+        try {
+            const testProvider = new OpenAIProvider({
+                apiKey: 'test-key',
+                model: 'gpt-3.5-turbo',
+                baseURL: 'https://api.openai.com/v1'
+            });
+
+            const rawResponse = JSON.stringify(chineseResponse);
+            const parsedResult = testProvider.parseJsonResponse(
+                rawResponse,
+                '房间',
+                'zh-CN',
+                'en'
+            );
+
+            let html = '<div class="result">';
+            html += '<h4>中文源文本的响应:</h4>';
+            html += formatObject(chineseResponse);
+            
+            html += '<h4>解析后:</h4>';
+            html += formatObject(parsedResult);
+
+            html += '<h4>验证:</h4>';
+            html += `- 音标类型: ${parsedResult.phonetics[0].type} (应该是 'pinyin') ✅<br>`;
+            html += `- 音标文本: ${parsedResult.phonetics[0].text} ✅<br>`;
+
+            html += '</div>';
+            
+            results.lastChild.innerHTML += html;
+
+        } catch (error) {
+            results.lastChild.innerHTML += `<div class="error">❌ Error: ${error.message}</div>`;
+            console.error(error);
+        }
+
+        // 显示提示词
+        addTestCase('📋 更新后的提示词模板', '');
+        const template = PromptTemplates.DEFAULT_TEMPLATES.jsonFormat;
+        results.lastChild.innerHTML += `
+            <div class="result">
+                <h4>System Prompt:</h4>
+                <pre>${template.system}</pre>
+                <h4>User Prompt Template:</h4>
+                <pre>${template.user}</pre>
+            </div>
+        `;
+
+        // 总结
+        addTestCase('✅ 修复说明', `
+            <div class="result">
+                <h4>问题 1: 音标错误</h4>
+                <p><strong>原因:</strong> 提示词不够明确，AI 返回了翻译结果的拼音而不是源文本的音标</p>
+                <p><strong>修复:</strong> 在提示词中明确要求 "phonetic transcription of the SOURCE text (original text, not translation)"</p>
+                
+                <h4>问题 2: 释义显示为空</h4>
+                <p><strong>原因:</strong> AI 返回的是简单的字符串数组，但 TranslationResult 需要的是 Definition 对象数组（包含 partOfSpeech 和 text）</p>
+                <p><strong>修复:</strong> 在 parseJsonResponse 中将字符串数组转换为 Definition 对象数组</p>
+                
+                <h4>数据格式转换:</h4>
+                <ul>
+                    <li>AI 返回: <code>{ phonetic: "string", definitions: ["string1", "string2"] }</code></li>
+                    <li>转换为: <code>{ phonetics: [{text: "string", type: "ipa"}], definitions: [{partOfSpeech: "", text: "string1"}, ...] }</code></li>
+                </ul>
+            </div>
+        `);
+
+    </script>
+</body>
+</html>

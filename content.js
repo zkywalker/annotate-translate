@@ -73,6 +73,11 @@ function init() {
     youdaoAppSecret: '',
     deeplApiKey: '',
     deeplUseFreeApi: true,
+    openaiApiKey: '',
+    openaiModel: 'gpt-3.5-turbo',
+    openaiBaseUrl: 'https://api.openai.com/v1',
+    openaiPromptFormat: 'jsonFormat',
+    openaiUseContext: true,
     enablePhoneticFallback: true,
     enableAudio: true,
     showPhonetics: true,
@@ -80,6 +85,7 @@ function init() {
     showExamples: true,
     maxExamples: 3,
     showPhoneticInAnnotation: true,
+    menuButtonSize: 'small',
     enableCache: true,
     cacheSize: 100,
     debugMode: false,
@@ -137,6 +143,13 @@ function applyTranslationSettings() {
   
   // 设置活跃的翻译提供商
   if (settings.translationProvider) {
+    // 检查 provider 是否存在
+    if (!translationService.providers.has(settings.translationProvider)) {
+      console.warn(`[Annotate-Translate] Provider "${settings.translationProvider}" not found, falling back to google`);
+      settings.translationProvider = 'google';
+      chrome.storage.sync.set({ translationProvider: 'google' });
+    }
+    
     translationService.setActiveProvider(settings.translationProvider);
     console.log('[Annotate-Translate] Provider set to:', settings.translationProvider);
     
@@ -186,6 +199,28 @@ function applyTranslationSettings() {
         console.log('  - API Key:', settings.deeplApiKey ? 'Set' : 'Not set');
         console.log('  - Use Free API:', settings.deeplUseFreeApi);
         console.log('  - showPhoneticInAnnotation:', deeplProvider.showPhoneticInAnnotation);
+      }
+    }
+    
+    // 如果是 OpenAI 提供商，更新其 API 配置
+    if (settings.translationProvider === 'openai') {
+      const openaiProvider = translationService.providers.get('openai');
+      if (openaiProvider) {
+        openaiProvider.updateConfig({
+          apiKey: settings.openaiApiKey,
+          model: settings.openaiModel,
+          baseURL: settings.openaiBaseUrl,
+          promptFormat: settings.openaiPromptFormat || 'jsonFormat',
+          useContext: settings.openaiUseContext !== undefined ? settings.openaiUseContext : true,
+          showPhoneticInAnnotation: settings.showPhoneticInAnnotation !== false
+        });
+        console.log('[Annotate-Translate] OpenAI provider configured:');
+        console.log('  - API Key:', settings.openaiApiKey ? 'Set' : 'Not set');
+        console.log('  - Model:', settings.openaiModel || 'gpt-3.5-turbo');
+        console.log('  - Base URL:', settings.openaiBaseUrl || 'https://api.openai.com/v1');
+        console.log('  - Prompt Format:', settings.openaiPromptFormat || 'jsonFormat');
+        console.log('  - Use Context:', settings.openaiUseContext !== undefined ? settings.openaiUseContext : true);
+        console.log('  - showPhoneticInAnnotation:', openaiProvider.showPhoneticInAnnotation);
       }
     }
   }
@@ -249,6 +284,15 @@ function showContextMenu(x, y, text) {
   const menu = document.createElement('div');
   menu.id = 'annotate-translate-menu';
   menu.className = 'annotate-translate-menu';
+  
+  // Apply size class based on settings
+  const menuSize = settings.menuButtonSize || 'small';
+  console.log('[Annotate-Translate] Menu button size:', menuSize, 'Settings:', settings);
+  if (menuSize !== 'small') {
+    menu.classList.add(`size-${menuSize}`);
+  }
+  console.log('[Annotate-Translate] Menu classes:', menu.className);
+  
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
 

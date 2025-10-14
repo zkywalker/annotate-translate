@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Translation Service Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #667eea;
+      border-left: 4px solid #667eea;
+      padding-left: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: inherit;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1;
+      min-width: 150px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    button.primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button.secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .result-box.error {
+      background: #fff5f5;
+      border-left-color: #e53e3e;
+    }
+
+    .result-box.success {
+      background: #f0fff4;
+      border-left-color: #38a169;
+    }
+
+    .result-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #667eea;
+    }
+
+    .result-box.error .result-title {
+      color: #e53e3e;
+    }
+
+    .result-box.success .result-title {
+      color: #38a169;
+    }
+
+    .result-content {
+      font-size: 16px;
+      line-height: 1.6;
+      word-wrap: break-word;
+    }
+
+    .metadata {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .metadata-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .metadata-label {
+      font-weight: 500;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .info-box {
+      background: #e6f2ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3182ce;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: #2c5282;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #providerInfo {
+      display: none;
+    }
+
+    #providerInfo.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 AI Translation Service Test</h1>
+      <p>测试基于生成式AI的翻译能力</p>
+    </div>
+
+    <div class="content">
+      <!-- Configuration Section -->
+      <div class="section">
+        <h2 class="section-title">⚙️ 配置</h2>
+        
+        <div class="info-box">
+          <strong>提示：</strong> 本测试页面用于验证AI翻译服务的基础功能。
+          您需要提供自己的 OpenAI API 密钥。密钥仅在本地使用，不会被上传或存储。
+          <br><br>
+          <strong>🌐 Base URL 说明：</strong> 
+          <ul style="margin: 8px 0 0 20px; padding: 0;">
+            <li>默认使用 OpenAI 官方 API：<code>https://api.openai.com/v1</code></li>
+            <li>支持 Azure OpenAI：<code>https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT</code></li>
+            <li>支持本地部署（Ollama、LocalAI 等）：<code>http://localhost:11434/v1</code></li>
+            <li>支持第三方 OpenAI 兼容服务</li>
+          </ul>
+        </div>
+
+        <div class="form-group">
+          <label for="provider">AI 提供商</label>
+          <select id="provider">
+            <option value="openai">OpenAI (GPT-3.5/GPT-4)</option>
+            <option value="anthropic" disabled>Anthropic Claude (即将支持)</option>
+            <option value="gemini" disabled>Google Gemini (即将支持)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="apiKey">API 密钥</label>
+          <input type="password" id="apiKey" placeholder="输入您的 OpenAI API 密钥">
+        </div>
+
+        <div class="form-group">
+          <label for="baseUrl">Base URL</label>
+          <input type="text" id="baseUrl" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
+          <small style="display: block; margin-top: 5px; color: #666;">
+            自定义 API 基础 URL。可用于连接 Azure OpenAI、本地部署或第三方兼容服务。
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="model">模型</label>
+          <input type="text" id="model" list="modelList" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
+          <datalist id="modelList">
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (推荐，性价比高)</option>
+            <option value="gpt-4o-mini">GPT-4o Mini (更快，更便宜)</option>
+            <option value="gpt-4o">GPT-4o (更强大)</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="gpt-4">GPT-4</option>
+            <option value="llama2">Llama 2 (Ollama)</option>
+            <option value="mistral">Mistral (Ollama)</option>
+            <option value="codellama">Code Llama (Ollama)</option>
+          </datalist>
+          <small style="display: block; margin-top: 5px; color: #666;">
+            输入模型名称或从预设中选择。OpenAI: gpt-3.5-turbo, gpt-4o 等。本地模型: llama2, mistral 等。
+          </small>
+        </div>
+
+        <div class="button-group">
+          <button id="initBtn" class="primary">
+            <span>初始化服务</span>
+          </button>
+          <button id="validateBtn" class="secondary" disabled>
+            <span>验证配置</span>
+          </button>
+        </div>
+
+        <div id="providerInfo" class="result-box" style="margin-top: 15px;">
+          <div class="result-title">提供商信息</div>
+          <div id="providerInfoContent"></div>
+        </div>
+      </div>
+
+      <!-- Translation Section -->
+      <div class="section">
+        <h2 class="section-title">🌍 翻译</h2>
+
+        <div class="form-group">
+          <label for="text">要翻译的文本</label>
+          <textarea id="text" placeholder="输入要翻译的文本...">Hello, how are you? I hope you're having a great day!</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="sourceLang">源语言</label>
+          <select id="sourceLang">
+            <option value="en">English</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-TW">繁体中文</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="targetLang">目标语言</label>
+          <select id="targetLang">
+            <option value="zh-CN" selected>简体中文</option>
+            <option value="en">English</option>
+            <option value="zh-TW">繁体中文</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+
+        <div class="button-group">
+          <button id="translateBtn" class="primary" disabled>
+            <span>翻译</span>
+          </button>
+          <button id="translateRetryBtn" class="secondary" disabled>
+            <span>带重试翻译</span>
+          </button>
+          <button id="clearCacheBtn" class="secondary" disabled>
+            <span>清除缓存</span>
+          </button>
+        </div>
+
+        <div id="result"></div>
+      </div>
+
+      <!-- Batch Translation Section -->
+      <div class="section">
+        <h2 class="section-title">📦 批量翻译测试</h2>
+        
+        <div class="button-group">
+          <button id="batchTranslateBtn" class="primary" disabled>
+            <span>批量翻译示例</span>
+          </button>
+        </div>
+
+        <div id="batchResult"></div>
+      </div>
+
+      <!-- Statistics Section -->
+      <div class="section">
+        <h2 class="section-title">📊 统计信息</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="statTranslations">0</div>
+            <div class="stat-label">翻译次数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statTokens">0</div>
+            <div class="stat-label">总Token数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statCost">$0.00</div>
+            <div class="stat-label">估算成本</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statCache">0</div>
+            <div class="stat-label">缓存条目</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Scripts -->
+  <script src="ai-providers/base-ai-provider.js"></script>
+  <script src="ai-providers/openai-provider.js"></script>
+  <script src="ai-translation-service.js"></script>
+  <script src="test-ai-translation.js"></script>
+</body>
+</html>

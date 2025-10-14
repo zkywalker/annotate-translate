@@ -24,6 +24,13 @@ const DEFAULT_SETTINGS = {
   deeplApiKey: '',
   deeplUseFreeApi: true,
   
+  // OpenAI API settings
+  openaiApiKey: '',
+  openaiModel: 'gpt-3.5-turbo',
+  openaiBaseUrl: 'https://api.openai.com/v1',
+  openaiPromptFormat: 'jsonFormat',
+  openaiUseContext: true,
+  
   enablePhoneticFallback: true, // 默认启用音标补充
   
   // UI settings
@@ -37,6 +44,9 @@ const DEFAULT_SETTINGS = {
   // Annotation settings
   showPhoneticInAnnotation: true,
   enableAudio: true,
+  
+  // Menu button size settings
+  menuButtonSize: 'small', // 'small', 'medium', 'large'
   
   // Performance settings
   enableCache: true,
@@ -58,6 +68,10 @@ const elements = {
   deeplApiKey: document.getElementById('deeplApiKey'),
   deeplUseFreeApi: document.getElementById('deeplUseFreeApi'),
   deeplConfigSection: document.getElementById('deeplConfigSection'),
+  openaiApiKey: document.getElementById('openaiApiKey'),
+  openaiModel: document.getElementById('openaiModel'),
+  openaiBaseUrl: document.getElementById('openaiBaseUrl'),
+  openaiConfigSection: document.getElementById('openaiConfigSection'),
   enablePhoneticFallback: document.getElementById('enablePhoneticFallback'),
   enableAudio: document.getElementById('enableAudio'),
   showPhonetics: document.getElementById('showPhonetics'),
@@ -67,6 +81,7 @@ const elements = {
   autoCloseDelay: document.getElementById('autoCloseDelay'),
   showPhoneticInAnnotation: document.getElementById('showPhoneticInAnnotation'),
   enableAudio: document.getElementById('enableAudio'),
+  menuButtonSize: document.getElementById('menuButtonSize'),
   enableCache: document.getElementById('enableCache'),
   cacheSize: document.getElementById('cacheSize'),
   enableDebugMode: document.getElementById('enableDebugMode'),
@@ -191,6 +206,11 @@ function loadSettings() {
     elements.deeplApiKey.value = settings.deeplApiKey || '';
     elements.deeplUseFreeApi.checked = settings.deeplUseFreeApi !== false;
     
+    // OpenAI API settings
+    elements.openaiApiKey.value = settings.openaiApiKey || '';
+    elements.openaiModel.value = settings.openaiModel || 'gpt-3.5-turbo';
+    elements.openaiBaseUrl.value = settings.openaiBaseUrl || 'https://api.openai.com/v1';
+    
     elements.enablePhoneticFallback.checked = settings.enablePhoneticFallback !== false;
     
     // UI settings
@@ -204,6 +224,7 @@ function loadSettings() {
   // Annotation settings
   elements.showPhoneticInAnnotation.checked = settings.showPhoneticInAnnotation;
   elements.enableAudio.checked = settings.enableAudio;
+  elements.menuButtonSize.value = settings.menuButtonSize || 'small';
     
     // Performance settings
     elements.enableCache.checked = settings.enableCache;
@@ -255,6 +276,11 @@ function saveSettings() {
     deeplApiKey: elements.deeplApiKey.value.trim(),
     deeplUseFreeApi: elements.deeplUseFreeApi.checked,
     
+    // OpenAI API settings
+    openaiApiKey: elements.openaiApiKey.value.trim(),
+    openaiModel: elements.openaiModel.value,
+    openaiBaseUrl: elements.openaiBaseUrl.value.trim() || 'https://api.openai.com/v1',
+    
     enablePhoneticFallback: elements.enablePhoneticFallback.checked,
     
     // UI settings
@@ -268,6 +294,7 @@ function saveSettings() {
   // Annotation settings
   showPhoneticInAnnotation: elements.showPhoneticInAnnotation.checked,
   enableAudio: elements.enableAudio.checked,
+  menuButtonSize: elements.menuButtonSize.value,
     
     // Performance settings
     enableCache: elements.enableCache.checked,
@@ -401,6 +428,13 @@ function updateProviderSelection(provider) {
     elements.deeplConfigSection.style.display = 'block';
   } else {
     elements.deeplConfigSection.style.display = 'none';
+  }
+  
+  // Show/hide OpenAI config section
+  if (provider === 'openai') {
+    elements.openaiConfigSection.style.display = 'block';
+  } else {
+    elements.openaiConfigSection.style.display = 'none';
   }
   
   // Show/hide debug provider description
@@ -725,6 +759,39 @@ function setupEventListeners() {
   }
   if (elements.targetLanguage) {
     elements.targetLanguage.addEventListener('change', autoSaveSettings);
+  }
+  if (elements.menuButtonSize) {
+    elements.menuButtonSize.addEventListener('change', autoSaveSettings);
+  }
+  
+  // ============ Auto-save for text inputs (with debounce) ============
+  if (elements.openaiModel) {
+    let modelInputTimeout;
+    elements.openaiModel.addEventListener('input', () => {
+      clearTimeout(modelInputTimeout);
+      modelInputTimeout = setTimeout(() => {
+        autoSaveSettings();
+      }, 1000); // 1秒延迟，避免每次输入都保存
+    });
+    // 失去焦点时立即保存
+    elements.openaiModel.addEventListener('blur', () => {
+      clearTimeout(modelInputTimeout);
+      autoSaveSettings();
+    });
+  }
+  
+  if (elements.openaiBaseUrl) {
+    let baseUrlInputTimeout;
+    elements.openaiBaseUrl.addEventListener('input', () => {
+      clearTimeout(baseUrlInputTimeout);
+      baseUrlInputTimeout = setTimeout(() => {
+        autoSaveSettings();
+      }, 1000);
+    });
+    elements.openaiBaseUrl.addEventListener('blur', () => {
+      clearTimeout(baseUrlInputTimeout);
+      autoSaveSettings();
+    });
   }
   
   // Radio item click handlers
