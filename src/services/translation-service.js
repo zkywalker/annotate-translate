@@ -1661,7 +1661,8 @@ class TranslationService {
 
     try {
       const provider = this.getActiveProvider();
-      const result = await provider.translate(text, targetLang, sourceLang);
+      console.log('[TranslationService] Calling provider.translate with options:', options);
+      const result = await provider.translate(text, targetLang, sourceLang, options);
       
       // 🆕 通用音标补充：如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
       if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
