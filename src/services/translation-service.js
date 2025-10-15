@@ -1495,10 +1495,13 @@ class OpenAITranslateProvider extends TranslationProvider {
    * @param {string} text - 待翻译文本
    * @param {string} targetLang - 目标语言
    * @param {string} [sourceLang='auto'] - 源语言
+   * @param {Object} [options={}] - 额外选项（如 context）
    * @returns {Promise<TranslationResult>}
    */
-  async translate(text, targetLang, sourceLang = 'auto') {
+  async translate(text, targetLang, sourceLang = 'auto', options = {}) {
     console.log(`[OpenAI Adapter] Translating: "${text.substring(0, 50)}..." from ${sourceLang} to ${targetLang}`);
+    console.log(`[OpenAI Adapter] Options:`, options);
+    console.log(`[OpenAI Adapter] Context:`, options.context || '(none)');
     
     // 确保 provider 已初始化
     if (!this.openaiProvider) {
@@ -1508,7 +1511,7 @@ class OpenAITranslateProvider extends TranslationProvider {
     try {
       // 调用 OpenAIProvider (注意参数顺序不同)
       const aiResult = await this.openaiProvider.translate(text, sourceLang, targetLang, {
-        context: '' // 可以从选中文本的上下文传入
+        context: options.context || '' // 从 options 中传递上下文
       });
 
       // 转换为 TranslationResult 格式
