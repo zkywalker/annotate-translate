@@ -14,6 +14,7 @@ function isExtensionContextValid() {
 
 /**
  * 安全获取 i18n 消息，避免扩展上下文失效错误
+ * 现在使用 i18n-helper.js 提供的 i18n 函数
  * @param {string} key - 消息 key
  * @param {Array|string} substitutions - 替换参数
  * @param {string} fallback - 后备文本
@@ -21,6 +22,13 @@ function isExtensionContextValid() {
  */
 function safeGetMessage(key, substitutions = null, fallback = '') {
   try {
+    // 使用 i18n-helper.js 提供的 i18n 函数
+    if (typeof i18n !== 'undefined') {
+      const subs = Array.isArray(substitutions) ? substitutions : (substitutions ? [substitutions] : []);
+      const message = i18n(key, subs);
+      return message || fallback;
+    }
+    // Fallback to chrome.i18n if i18n helper is not available
     if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
       const message = substitutions 
         ? chrome.i18n.getMessage(key, substitutions)
@@ -109,7 +117,7 @@ let currentTooltip = null; // 当前显示的翻译卡片
 // Initialize the extension
 init();
 
-function init() {
+async function init() {
   console.log('[Annotate-Translate] Content script loaded on:', window.location.href);
   
   // 检查扩展上下文
@@ -125,6 +133,12 @@ function init() {
   }
   
   console.log('[Annotate-Translate] Translation service available:', translationService);
+  
+  // 初始化语言设置（从 i18n-helper.js）
+  if (typeof initializeLanguage !== 'undefined') {
+    await initializeLanguage();
+    console.log('[Annotate-Translate] Language initialized');
+  }
   
   // Load settings from storage
   chrome.storage.sync.get(null, function(items) {

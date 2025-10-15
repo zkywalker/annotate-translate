@@ -30,6 +30,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+        "src/utils/i18n-helper.js",
         "src/providers/prompt-templates.js",
         "src/providers/base-ai-provider.js",
         "src/providers/openai-provider.js",
