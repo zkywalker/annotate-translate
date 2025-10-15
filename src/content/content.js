@@ -435,6 +435,13 @@ function hideContextMenu() {
  * @returns {string} 包含选中文本的完整上下文
  */
 function extractContext(selectionOrRange, maxLength = 300, text = '') {
+  console.log('[Annotate-Translate] extractContext called with:', {
+    type: selectionOrRange?.constructor?.name,
+    maxLength,
+    text,
+    rangeCount: selectionOrRange instanceof Selection ? selectionOrRange.rangeCount : 'N/A'
+  });
+  
   try {
     // 判断是 Selection 还是 Range
     let range;
@@ -447,15 +454,18 @@ function extractContext(selectionOrRange, maxLength = 300, text = '') {
       }
       range = selectionOrRange.getRangeAt(0);
       selectedText = selectedText || selectionOrRange.toString();
+      console.log('[Annotate-Translate] Using Selection, selectedText:', selectedText);
     } else if (selectionOrRange instanceof Range) {
       range = selectionOrRange;
       selectedText = selectedText || range.toString();
+      console.log('[Annotate-Translate] Using Range, selectedText:', selectedText);
     } else {
-      console.warn('[Annotate-Translate] extractContext: invalid parameter type');
+      console.warn('[Annotate-Translate] extractContext: invalid parameter type:', typeof selectionOrRange);
       return '';
     }
     
     const container = range.commonAncestorContainer;
+    console.log('[Annotate-Translate] Range container:', container, 'nodeType:', container.nodeType);
     
     // 获取包含选中文本的父元素
     const parentElement = container.nodeType === Node.TEXT_NODE 
@@ -466,10 +476,19 @@ function extractContext(selectionOrRange, maxLength = 300, text = '') {
       console.warn('[Annotate-Translate] extractContext: no parent element');
       return '';
     }
+    
+    console.log('[Annotate-Translate] Parent element:', parentElement.tagName, 'textLength:', parentElement.textContent?.length);
+    
+    if (!parentElement) {
+      console.warn('[Annotate-Translate] extractContext: no parent element');
+      return '';
+    }
 
     // 获取足够大的文本范围（向上查找父元素）
     let fullText = parentElement.textContent || '';
     let currentElement = parentElement;
+    
+    console.log('[Annotate-Translate] Initial fullText length:', fullText.length);
     
     // 向上查找直到获得足够的文本或到达根元素
     while (fullText.length < maxLength * 2 && currentElement.parentElement) {
@@ -477,26 +496,34 @@ function extractContext(selectionOrRange, maxLength = 300, text = '') {
       const parentText = currentElement.textContent || '';
       if (parentText.length > fullText.length) {
         fullText = parentText;
+        console.log('[Annotate-Translate] Expanded to parent, new length:', fullText.length);
       } else {
         break; // 不再增长，停止向上查找
       }
     }
 
+    console.log('[Annotate-Translate] Final fullText length:', fullText.length, 'Preview:', fullText.substring(0, 100));
+
     if (!selectedText || !fullText) {
-      console.warn('[Annotate-Translate] extractContext: no text to extract');
+      console.warn('[Annotate-Translate] extractContext: no text to extract, selectedText:', selectedText, 'fullText length:', fullText.length);
       return '';
     }
 
     // 查找选中文本在完整文本中的位置
     const selectedIndex = fullText.indexOf(selectedText);
     
+    console.log('[Annotate-Translate] Looking for selectedText:', selectedText, 'found at index:', selectedIndex);
+    
     if (selectedIndex === -1) {
       console.warn('[Annotate-Translate] extractContext: selected text not found in context');
       // 降级：返回开头部分
-      return fullText.substring(0, maxLength).trim();
+      const fallback = fullText.substring(0, maxLength).trim();
+      console.log('[Annotate-Translate] Using fallback context, length:', fallback.length);
+      return fallback;
     }
 
     // 策略：提取包含选中文本的完整句子及其前后句
+    console.log('[Annotate-Translate] Calling extractSentenceContext with selectedIndex:', selectedIndex, 'length:', selectedText.length);
     const context = extractSentenceContext(fullText, selectedIndex, selectedText.length, maxLength);
     
     console.log('[Annotate-Translate] Extracted context length:', context.length, 
@@ -782,12 +809,16 @@ async function translateText(text) {
 // Create ruby annotation for context menu action
 function annotateSelectedText(text) {
   console.log('[Annotate-Translate] Annotating selected text:', text);
+  console.log('[Annotate-Translate] lastSelection:', lastSelection);
   
   // 使用保存的Range，如果有的话
   if (lastSelection) {
     try {
       // 验证Range是否仍然有效
       const selectedText = lastSelection.toString();
+      console.log('[Annotate-Translate] lastSelection.toString():', selectedText);
+      console.log('[Annotate-Translate] lastSelection container:', lastSelection.commonAncestorContainer);
+      
       if (selectedText === text) {
         console.log('[Annotate-Translate] Using saved range');
         promptAndAnnotate(lastSelection, text);
