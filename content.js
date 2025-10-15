@@ -1,6 +1,18 @@
 // Content Script for Annotate Translate Extension
 
 /**
+ * 检查扩展上下文是否有效
+ * @returns {boolean} 如果扩展上下文有效返回 true
+ */
+function isExtensionContextValid() {
+  try {
+    return chrome.runtime && chrome.runtime.id !== undefined;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
  * 安全获取 i18n 消息，避免扩展上下文失效错误
  * @param {string} key - 消息 key
  * @param {Array|string} substitutions - 替换参数
@@ -100,6 +112,12 @@ init();
 function init() {
   console.log('[Annotate-Translate] Content script loaded on:', window.location.href);
   
+  // 检查扩展上下文
+  if (!isExtensionContextValid()) {
+    console.error('[Annotate-Translate] Extension context is invalid, script will not initialize');
+    return;
+  }
+  
   // 检查翻译服务是否可用
   if (typeof translationService === 'undefined') {
     console.error('[Annotate-Translate] Translation service not loaded!');
@@ -157,17 +175,49 @@ function applyTranslationSettings() {
     return;
   }
   
+  // 打印所有已注册的 providers
+  console.log('[Annotate-Translate] Registered providers:', Array.from(translationService.providers.keys()));
+  console.log('[Annotate-Translate] Requested provider:', $.translationProvider);
+  
   // 设置活跃的翻译提供商
   if ($.translationProvider) {
     // 检查 provider 是否存在
     if (!translationService.providers.has($.translationProvider)) {
       console.warn(`[Annotate-Translate] Provider "${$.translationProvider}" not found, falling back to google`);
       $.translationProvider = 'google';
-      chrome.storage.sync.set({ translationProvider: 'google' });
+      if (isExtensionContextValid()) {
+        try {
+          chrome.storage.sync.set({ 'providers.current': 'google' }, function() {
+            if (chrome.runtime.lastError) {
+              console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
+            }
+          });
+        } catch (error) {
+          console.warn('[Annotate-Translate] Failed to update provider:', error.message);
+        }
+      }
     }
     
-    translationService.setActiveProvider($.translationProvider);
-    console.log('[Annotate-Translate] Provider set to:', $.translationProvider);
+    try {
+      translationService.setActiveProvider($.translationProvider);
+      console.log('[Annotate-Translate] Provider set to:', $.translationProvider);
+    } catch (error) {
+      console.error('[Annotate-Translate] Failed to set provider:', error);
+      // 出错时回退到 google
+      $.translationProvider = 'google';
+      translationService.setActiveProvider('google');
+      if (isExtensionContextValid()) {
+        try {
+          chrome.storage.sync.set({ 'providers.current': 'google' }, function() {
+            if (chrome.runtime.lastError) {
+              console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
+            }
+          });
+        } catch (error) {
+          console.warn('[Annotate-Translate] Failed to update provider:', error.message);
+        }
+      }
+    }
     
     // 如果是 Google 提供商，更新其配置
     if ($.translationProvider === 'google') {
@@ -1060,16 +1110,39 @@ function getAudioCacheStats() {
 
 // Save annotation to storage
 function saveAnnotation(baseText, annotationText) {
-  chrome.storage.local.get({annotations: []}, function(result) {
-    const annotations = result.annotations;
-    annotations.push({
-      baseText: baseText,
-      annotationText: annotationText || '',
-      timestamp: Date.now(),
-      url: window.location.href
+  // Check if extension context is still valid
+  if (!isExtensionContextValid()) {
+    console.warn('[Annotate-Translate] Extension context invalidated, skipping annotation save');
+    return;
+  }
+  
+  try {
+    chrome.storage.local.get({annotations: []}, function(result) {
+      // Check for chrome.runtime.lastError
+      if (chrome.runtime.lastError) {
+        console.warn('[Annotate-Translate] Failed to save annotation:', chrome.runtime.lastError.message);
+        return;
+      }
+      
+      const annotations = result.annotations;
+      annotations.push({
+        baseText: baseText,
+        annotationText: annotationText || '',
+        timestamp: Date.now(),
+        url: window.location.href
+      });
+      
+      chrome.storage.local.set({annotations: annotations}, function() {
+        if (chrome.runtime.lastError) {
+          console.warn('[Annotate-Translate] Failed to save annotation:', chrome.runtime.lastError.message);
+        }
+      });
     });
-    chrome.storage.local.set({annotations: annotations});
-  });
+  } catch (error) {
+    // Silently handle extension context invalidation
+    // The annotation is already created in the DOM, so this is not a critical error
+    console.warn('[Annotate-Translate] Failed to save annotation:', error.message);
+  }
 }
 
 // Handle messages from popup or background
@@ -1080,14 +1153,34 @@ function handleMessage(request, sender, sendResponse) {
     // Respond to ping to confirm content script is loaded
     sendResponse({pong: true});
   } else if (request.action === 'updateSettings') {
-    // 更新设置
-    settings = request.settings || settings;
-    console.log('[Annotate-Translate] Settings updated:', settings);
+    // 从 storage 重新加载所有设置（而不是只使用消息中的部分设置）
+    if (!isExtensionContextValid()) {
+      sendResponse({success: false, error: 'Extension context invalidated'});
+      return true;
+    }
     
-    // 重新应用翻译设置
-    applyTranslationSettings();
-    
-    sendResponse({success: true});
+    try {
+      chrome.storage.sync.get(null, function(items) {
+        if (chrome.runtime.lastError) {
+          console.error('[Annotate-Translate] Failed to reload settings:', chrome.runtime.lastError.message);
+          sendResponse({success: false, error: chrome.runtime.lastError.message});
+          return;
+        }
+        
+        settings = Object.assign({}, settings, items);
+        console.log('[Annotate-Translate] Settings reloaded from storage:', settings);
+        
+        // 重新应用翻译设置
+        applyTranslationSettings();
+        
+        sendResponse({success: true});
+      });
+    } catch (error) {
+      console.error('[Annotate-Translate] Error reloading settings:', error.message);
+      sendResponse({success: false, error: error.message});
+    }
+    // 返回 true 表示异步响应
+    return true;
   } else if (request.action === 'clearCache') {
     // 清除翻译缓存
     if (typeof translationService !== 'undefined') {
@@ -1193,5 +1286,15 @@ function clearAllAnnotations() {
   annotations.clear();
   
   // Clear from storage
-  chrome.storage.local.set({annotations: []});
+  if (isExtensionContextValid()) {
+    try {
+      chrome.storage.local.set({annotations: []}, function() {
+        if (chrome.runtime.lastError) {
+          console.warn('[Annotate-Translate] Failed to clear annotations from storage:', chrome.runtime.lastError.message);
+        }
+      });
+    } catch (error) {
+      console.warn('[Annotate-Translate] Failed to clear annotations from storage:', error.message);
+    }
+  }
 }

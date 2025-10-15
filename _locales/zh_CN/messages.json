@@ -653,9 +653,25 @@
     "message": "设为当前服务",
     "description": "Set as current service button"
   },
+  "googleInfo": {
+    "message": "Google 翻译信息",
+    "description": "Google Translate information title"
+  },
+  "googleInfoDesc": {
+    "message": "Google 翻译是免费服务，无需 API 配置，可立即使用。",
+    "description": "Google Translate information description"
+  },
   "youdaoIntro": {
     "message": "专业的中英翻译服务，提供准确的翻译结果和丰富的词典功能。",
     "description": "Youdao introduction"
+  },
+  "useYoudaoTranslate": {
+    "message": "使用有道翻译",
+    "description": "Use Youdao Translate button"
+  },
+  "useYoudaoTranslateDesc": {
+    "message": "将有道翻译设为当前翻译服务",
+    "description": "Use Youdao Translate description"
   },
   "youdaoStep2": {
     "message": "注册/登录您的账号",
@@ -685,6 +701,14 @@
     "message": "号称世界上最准确的翻译服务，提供高质量的翻译结果。",
     "description": "DeepL introduction"
   },
+  "useDeeplTranslate": {
+    "message": "使用 DeepL 翻译",
+    "description": "Use DeepL Translate button"
+  },
+  "useDeeplTranslateDesc": {
+    "message": "将 DeepL 设为当前翻译服务",
+    "description": "Use DeepL Translate description"
+  },
   "deeplStep2": {
     "message": "注册免费或专业账户",
     "description": "DeepL step 2"
@@ -712,6 +736,14 @@
   "openaiIntro": {
     "message": "使用 AI 模型进行智能翻译，支持上下文理解和自然语言处理。支持 OpenAI 或 OpenAI 兼容的 API 服务。",
     "description": "OpenAI introduction"
+  },
+  "useOpenaiTranslate": {
+    "message": "使用 AI 翻译",
+    "description": "Use OpenAI Translate button"
+  },
+  "useOpenaiTranslateDesc": {
+    "message": "将 AI 翻译设为当前翻译服务",
+    "description": "Use OpenAI Translate description"
   },
   "openaiStep2": {
     "message": "注册并获取您的 API 密钥",

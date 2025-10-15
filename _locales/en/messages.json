@@ -653,9 +653,25 @@
     "message": "Set as Current Service",
     "description": "Set as current service button"
   },
+  "googleInfo": {
+    "message": "Google Translate Information",
+    "description": "Google Translate information title"
+  },
+  "googleInfoDesc": {
+    "message": "Google Translate is a free service and does not require API configuration. It is ready to use immediately.",
+    "description": "Google Translate information description"
+  },
   "youdaoIntro": {
     "message": "Professional Chinese-English translation service with accurate results and rich dictionary features.",
     "description": "Youdao introduction"
+  },
+  "useYoudaoTranslate": {
+    "message": "Use Youdao Translate",
+    "description": "Use Youdao Translate button"
+  },
+  "useYoudaoTranslateDesc": {
+    "message": "Set Youdao Translate as current translation service",
+    "description": "Use Youdao Translate description"
   },
   "youdaoStep2": {
     "message": "Register/Login to your account",
@@ -685,6 +701,14 @@
     "message": "Acclaimed as the world's most accurate translation service, providing high-quality translations.",
     "description": "DeepL introduction"
   },
+  "useDeeplTranslate": {
+    "message": "Use DeepL Translate",
+    "description": "Use DeepL Translate button"
+  },
+  "useDeeplTranslateDesc": {
+    "message": "Set DeepL as current translation service",
+    "description": "Use DeepL Translate description"
+  },
   "deeplStep2": {
     "message": "Sign up for a free or pro account",
     "description": "DeepL step 2"
@@ -712,6 +736,14 @@
   "openaiIntro": {
     "message": "Use AI models for intelligent translation with context understanding and natural language processing. Supports OpenAI and OpenAI-compatible API services.",
     "description": "OpenAI introduction"
+  },
+  "useOpenaiTranslate": {
+    "message": "Use AI Translate",
+    "description": "Use OpenAI Translate button"
+  },
+  "useOpenaiTranslateDesc": {
+    "message": "Set AI Translate as current translation service",
+    "description": "Use OpenAI Translate description"
   },
   "openaiStep2": {
     "message": "Sign up and get your API key",

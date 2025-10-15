@@ -71,8 +71,11 @@ const elements = {
   // 调试设置
   enableDebugMode: document.getElementById('enableDebugMode'),
   
-  // Google 服务按钮
+  // 服务提供者按钮
   setGoogleAsProvider: document.getElementById('setGoogleAsProvider'),
+  setYoudaoAsProvider: document.getElementById('setYoudaoAsProvider'),
+  setDeeplAsProvider: document.getElementById('setDeeplAsProvider'),
+  setOpenaiAsProvider: document.getElementById('setOpenaiAsProvider'),
   
   // 操作按钮
   resetButton: document.getElementById('resetButton'),
@@ -299,6 +302,9 @@ function applySettingsToUI() {
   
   // 更新快速配置区域
   updateQuickProviderConfig();
+  
+  // 更新设为当前服务按钮状态
+  updateSetProviderButtons();
 }
 
 /**
@@ -468,6 +474,30 @@ function getProviderName(provider) {
     openai: 'AI翻译'
   };
   return names[provider] || provider;
+}
+
+/**
+ * 更新"设为当前服务"按钮状态
+ */
+function updateSetProviderButtons(activeProvider) {
+  const currentProvider = activeProvider || settings.providers.current;
+  
+  document.querySelectorAll('.set-provider-btn').forEach(btn => {
+    const btnProvider = btn.getAttribute('data-provider');
+    const btnText = btn.querySelector('.btn-text');
+    
+    if (btnProvider === currentProvider) {
+      btn.classList.add('active');
+      if (btnText) {
+        btnText.textContent = i18n('currentService');
+      }
+    } else {
+      btn.classList.remove('active');
+      if (btnText) {
+        btnText.textContent = i18n('setAsCurrentService');
+      }
+    }
+  });
 }
 
 /**
@@ -665,6 +695,7 @@ function setupEventListeners() {
   if (elements.currentProvider) {
     elements.currentProvider.addEventListener('change', () => {
       updateQuickProviderConfig();
+      updateSetProviderButtons();
     });
   }
   
@@ -687,7 +718,7 @@ function setupEventListeners() {
     });
   }
   
-  // Google 服务按钮
+  // 服务提供者按钮
   if (elements.setGoogleAsProvider) {
     elements.setGoogleAsProvider.addEventListener('click', () => {
       if (elements.currentProvider) {
@@ -695,6 +726,61 @@ function setupEventListeners() {
         settings.providers.current = 'google';
         saveSettings();
         showSaveIndicator();
+        updateSetProviderButtons('google');
+        
+        // 跳转到通用设置页
+        setTimeout(() => {
+          const generalNav = document.querySelector('.nav-item[data-page="general"]');
+          if (generalNav) generalNav.click();
+        }, 500);
+      }
+    });
+  }
+  
+  if (elements.setYoudaoAsProvider) {
+    elements.setYoudaoAsProvider.addEventListener('click', () => {
+      if (elements.currentProvider) {
+        elements.currentProvider.value = 'youdao';
+        settings.providers.current = 'youdao';
+        saveSettings();
+        showSaveIndicator();
+        updateSetProviderButtons('youdao');
+        
+        // 跳转到通用设置页
+        setTimeout(() => {
+          const generalNav = document.querySelector('.nav-item[data-page="general"]');
+          if (generalNav) generalNav.click();
+        }, 500);
+      }
+    });
+  }
+  
+  if (elements.setDeeplAsProvider) {
+    elements.setDeeplAsProvider.addEventListener('click', () => {
+      if (elements.currentProvider) {
+        elements.currentProvider.value = 'deepl';
+        settings.providers.current = 'deepl';
+        saveSettings();
+        showSaveIndicator();
+        updateSetProviderButtons('deepl');
+        
+        // 跳转到通用设置页
+        setTimeout(() => {
+          const generalNav = document.querySelector('.nav-item[data-page="general"]');
+          if (generalNav) generalNav.click();
+        }, 500);
+      }
+    });
+  }
+  
+  if (elements.setOpenaiAsProvider) {
+    elements.setOpenaiAsProvider.addEventListener('click', () => {
+      if (elements.currentProvider) {
+        elements.currentProvider.value = 'openai';
+        settings.providers.current = 'openai';
+        saveSettings();
+        showSaveIndicator();
+        updateSetProviderButtons('openai');
         
         // 跳转到通用设置页
         setTimeout(() => {

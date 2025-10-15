@@ -398,6 +398,51 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+/* Set Provider Button - 设为当前服务按钮 */
+.set-provider-btn {
+  padding: 10px 20px;
+  border: 2px solid var(--primary-color);
+  border-radius: 6px;
+  background: white;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-provider-btn:hover:not(.active) {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.set-provider-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  cursor: default;
+  pointer-events: none;
+}
+
+.set-provider-btn.active .btn-icon {
+  display: inline-block;
+  animation: checkPulse 0.5s ease;
+}
+
+.set-provider-btn:not(.active) .btn-icon {
+  display: none;
+}
+
+@keyframes checkPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
