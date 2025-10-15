@@ -254,8 +254,8 @@
             <div class="service-info">
               <h3>有道翻译</h3>
               <p data-i18n="youdaoIntro">专业的中英翻译服务，提供准确的翻译结果和丰富的词典功能。</p>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <h3 class="section-title" data-i18n="apiConfiguration">API 配置</h3>
 
@@ -263,11 +263,11 @@
             <div class="setting-info">
               <label class="setting-label" data-i18n="appKey">应用 ID (App Key)</label>
               <p class="setting-desc" data-i18n="appKeyDesc">从有道智云获取的应用 ID</p>
-          </div>
+            </div>
             <div class="setting-control">
               <input type="text" id="youdaoAppKey" class="text-input" placeholder="请输入 App Key">
+            </div>
           </div>
-        </div>
 
           <div class="setting-row">
             <div class="setting-info">
@@ -295,7 +295,7 @@
               <i data-lucide="info" width="16" height="16"></i>
               <strong data-i18n="howToGetCredentials">如何获取 API 凭据？</strong>
             </button>
-                        <div id="youdao-help" class="info-content collapsed">
+            <div id="youdao-help" class="info-content collapsed">
               <ol>
                 <li>访问 <a href="https://ai.youdao.com/" target="_blank" rel="noopener">有道智云</a></li>
                 <li data-i18n="youdaoStep2">注册并登录账号</li>
@@ -305,38 +305,8 @@
               </ol>
             </div>
           </div>
-
-          <!-- 设为当前服务按钮 -->
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="setAsCurrentService">设为当前服务</label>
-              <p class="setting-desc">将有道翻译设为当前使用的翻译服务</p>
-            </div>
-            <div class="setting-control">
-              <button class="set-provider-btn" data-provider="youdao" id="setYoudaoAsProvider">
-                <span class="btn-icon">✓</span>
-                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
-              </button>
-            </div>
-          </div>
         </section>
-          </div>
-        </div>
-
-          <!-- 设为当前服务按钮 -->
-          <div class="setting-row" style="margin-top: 20px;">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="useYoudaoTranslate">使用有道翻译</label>
-              <p class="setting-desc" data-i18n="useYoudaoTranslateDesc">将有道翻译设为当前翻译服务</p>
-            </div>
-            <div class="setting-control">
-              <button class="btn btn-primary" id="setYoudaoAsProvider">
-                <span data-i18n="setAsCurrentService">设为当前服务</span>
-              </button>
-            </div>
-          </div>
-        </section>
-          </div>
+      </div>
 
       <!-- DeepL 页面 -->
       <div id="page-deepl" class="page">
@@ -359,11 +329,11 @@
             <div class="setting-info">
               <label class="setting-label" data-i18n="apiKey">API 密钥</label>
               <p class="setting-desc" data-i18n="deeplApiKeyDesc">从 DeepL 获取的 API 密钥</p>
-          </div>
+            </div>
             <div class="setting-control">
               <input type="password" id="deeplApiKey" class="text-input" placeholder="请输入 API Key">
+            </div>
           </div>
-        </div>
 
           <div class="setting-row">
             <div class="setting-info">
@@ -372,9 +342,9 @@
             </div>
             <div class="setting-control">
               <label class="switch">
-              <input type="checkbox" id="deeplUseFreeApi" checked>
+                <input type="checkbox" id="deeplUseFreeApi" checked>
                 <span class="slider"></span>
-            </label>
+              </label>
             </div>
           </div>
 
@@ -404,22 +374,8 @@
               </ol>
             </div>
           </div>
-
-          <!-- 设为当前服务按钮 -->
-          <div class="setting-row" style="margin-top: 20px;">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="useDeeplTranslate">使用 DeepL 翻译</label>
-              <p class="setting-desc" data-i18n="useDeeplTranslateDesc">将 DeepL 设为当前翻译服务</p>
-            </div>
-            <div class="setting-control">
-              <button class="set-provider-btn" data-provider="deepl" id="setDeeplAsProvider">
-                <span class="btn-icon">✓</span>
-                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
-              </button>
-            </div>
-          </div>
         </section>
-          </div>
+      </div>
 
       <!-- AI翻译 页面 -->
       <div id="page-openai" class="page">
@@ -429,12 +385,12 @@
           <div class="service-intro">
             <div class="service-icon">
               <img src="../../assets/icons/icon_logo_ai.svg" width="48" height="48" alt="AI翻译">
-          </div>
+            </div>
             <div class="service-info">
               <h3>AI翻译</h3>
               <p data-i18n="openaiIntro">使用 AI 模型进行智能翻译，支持上下文理解和自然语言处理。支持 OpenAI 或 OpenAI 兼容的 API 服务。</p>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <h3 class="section-title" data-i18n="apiConfiguration">API 配置</h3>
 
@@ -446,7 +402,7 @@
             <div class="setting-control">
               <input type="password" id="openaiApiKey" class="text-input" placeholder="sk-...">
             </div>
-        </div>
+          </div>
         
           <div class="setting-row">
             <div class="setting-info">
@@ -455,24 +411,24 @@
             </div>
             <div class="setting-control">
               <input type="text" id="openaiModel" class="text-input" list="openaiModelList" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
-            <datalist id="openaiModelList">
+              <datalist id="openaiModelList">
                 <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                 <option value="gpt-4o-mini">GPT-4o Mini</option>
                 <option value="gpt-4o">GPT-4o</option>
-              <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            </datalist>
-        </div>
-      </div>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              </datalist>
+            </div>
+          </div>
 
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="baseUrl">Base URL</label>
               <p class="setting-desc" data-i18n="baseUrlDesc">API 端点 URL（支持兼容服务）</p>
-          </div>
+            </div>
             <div class="setting-control">
               <input type="text" id="openaiBaseUrl" class="text-input" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
-        </div>
-        </div>
+            </div>
+          </div>
 
           <!-- 连接测试 -->
           <div class="test-section">
@@ -482,7 +438,7 @@
               <span data-i18n="testConnection">测试连接</span>
             </button>
             <div id="openaiTestResult" class="test-result"></div>
-        </div>
+          </div>
 
           <!-- 高级选项 -->
           <details class="advanced-section">
@@ -492,21 +448,21 @@
               <div class="setting-info">
                 <label class="setting-label">Temperature</label>
                 <p class="setting-desc" data-i18n="temperatureDesc">控制翻译的创造性（0-1，越低越准确）</p>
-        </div>
+              </div>
               <div class="setting-control">
                 <input type="number" id="openaiTemperature" class="number-input" min="0" max="1" step="0.1" value="0.3">
-        </div>
-        </div>
+              </div>
+            </div>
 
             <div class="setting-row">
               <div class="setting-info">
                 <label class="setting-label">Max Tokens</label>
                 <p class="setting-desc" data-i18n="maxTokensDesc">单次翻译的最大 token 数量</p>
-        </div>
+              </div>
               <div class="setting-control">
                 <input type="number" id="openaiMaxTokens" class="number-input" min="100" max="4000" value="500">
-        </div>
-      </div>
+              </div>
+            </div>
 
             <div class="setting-row">
               <div class="setting-info">
@@ -516,7 +472,7 @@
               <div class="setting-control">
                 <input type="number" id="openaiTimeout" class="number-input" min="5" max="60" value="30">
               </div>
-        </div>
+            </div>
 
             <!-- 提示词配置 -->
             <div class="setting-group">
@@ -579,23 +535,9 @@
               </ol>
               <p data-i18n="openaiCompatible">💡 Base URL 支持其他兼容 OpenAI API 的服务（如 Azure OpenAI、Ollama 等）</p>
             </div>
-        </div>
-
-          <!-- 设为当前服务按钮 -->
-          <div class="setting-row" style="margin-top: 20px;">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="useOpenaiTranslate">使用 AI 翻译</label>
-              <p class="setting-desc" data-i18n="useOpenaiTranslateDesc">将 AI 翻译设为当前翻译服务</p>
-            </div>
-            <div class="setting-control">
-              <button class="set-provider-btn" data-provider="openai" id="setOpenaiAsProvider">
-                <span class="btn-icon">✓</span>
-                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
-              </button>
-            </div>
           </div>
         </section>
-        </div>
+      </div>
         
       <!-- 显示与外观页面 -->
       <div id="page-display" class="page">

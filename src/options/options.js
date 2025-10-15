@@ -477,6 +477,93 @@ function getProviderName(provider) {
 }
 
 /**
+ * 检查服务提供商配置是否完整
+ */
+function validateProviderConfig(provider) {
+  // 获取当前UI中的配置（而不是settings中的，因为可能用户正在输入）
+  const config = collectSettingsFromUI();
+  
+  switch (provider) {
+    case 'google':
+      // Google 翻译不需要配置
+      return { valid: true };
+      
+    case 'youdao':
+      const youdaoConfig = config.providers.youdao;
+      if (!youdaoConfig.appKey || !youdaoConfig.appKey.trim()) {
+        return { 
+          valid: false, 
+          message: '请先配置有道翻译的 App Key' 
+        };
+      }
+      if (!youdaoConfig.appSecret || !youdaoConfig.appSecret.trim()) {
+        return { 
+          valid: false, 
+          message: '请先配置有道翻译的 App Secret' 
+        };
+      }
+      return { valid: true };
+      
+    case 'deepl':
+      const deeplConfig = config.providers.deepl;
+      if (!deeplConfig.apiKey || !deeplConfig.apiKey.trim()) {
+        return { 
+          valid: false, 
+          message: '请先配置 DeepL 的 API Key' 
+        };
+      }
+      return { valid: true };
+      
+    case 'openai':
+      const openaiConfig = config.providers.openai;
+      if (!openaiConfig.apiKey || !openaiConfig.apiKey.trim()) {
+        return { 
+          valid: false, 
+          message: '请先配置 AI 翻译的 API Key' 
+        };
+      }
+      return { valid: true };
+      
+    default:
+      return { valid: false, message: '未知的服务提供商' };
+  }
+}
+
+/**
+ * 设置当前服务提供商（带配置检查）
+ */
+function setCurrentProvider(provider) {
+  // 验证配置
+  const validation = validateProviderConfig(provider);
+  
+  if (!validation.valid) {
+    // 显示警告提示
+    alert(`⚠️ 无法切换服务\n\n${validation.message}\n\n请在当前页面填写必要的配置信息后再试。`);
+    return false;
+  }
+  
+  // 配置完整，执行切换
+  if (elements.currentProvider) {
+    elements.currentProvider.value = provider;
+    settings.providers.current = provider;
+    saveSettings();
+    showSaveIndicator();
+    updateSetProviderButtons(provider);
+    updateQuickProviderConfig();
+    
+    // 跳转到通用设置页
+    setTimeout(() => {
+      const generalNav = document.querySelector('.nav-item[data-page="general"]');
+      if (generalNav) generalNav.click();
+    }, 500);
+    
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * 更新"设为当前服务"按钮状态
  */
 function updateSetProviderButtons(activeProvider) {
@@ -721,73 +808,25 @@ function setupEventListeners() {
   // 服务提供者按钮
   if (elements.setGoogleAsProvider) {
     elements.setGoogleAsProvider.addEventListener('click', () => {
-      if (elements.currentProvider) {
-        elements.currentProvider.value = 'google';
-        settings.providers.current = 'google';
-        saveSettings();
-        showSaveIndicator();
-        updateSetProviderButtons('google');
-        
-        // 跳转到通用设置页
-        setTimeout(() => {
-          const generalNav = document.querySelector('.nav-item[data-page="general"]');
-          if (generalNav) generalNav.click();
-        }, 500);
-      }
+      setCurrentProvider('google');
     });
   }
   
   if (elements.setYoudaoAsProvider) {
     elements.setYoudaoAsProvider.addEventListener('click', () => {
-      if (elements.currentProvider) {
-        elements.currentProvider.value = 'youdao';
-        settings.providers.current = 'youdao';
-        saveSettings();
-        showSaveIndicator();
-        updateSetProviderButtons('youdao');
-        
-        // 跳转到通用设置页
-        setTimeout(() => {
-          const generalNav = document.querySelector('.nav-item[data-page="general"]');
-          if (generalNav) generalNav.click();
-        }, 500);
-      }
+      setCurrentProvider('youdao');
     });
   }
   
   if (elements.setDeeplAsProvider) {
     elements.setDeeplAsProvider.addEventListener('click', () => {
-      if (elements.currentProvider) {
-        elements.currentProvider.value = 'deepl';
-        settings.providers.current = 'deepl';
-        saveSettings();
-        showSaveIndicator();
-        updateSetProviderButtons('deepl');
-        
-        // 跳转到通用设置页
-        setTimeout(() => {
-          const generalNav = document.querySelector('.nav-item[data-page="general"]');
-          if (generalNav) generalNav.click();
-        }, 500);
-      }
+      setCurrentProvider('deepl');
     });
   }
   
   if (elements.setOpenaiAsProvider) {
     elements.setOpenaiAsProvider.addEventListener('click', () => {
-      if (elements.currentProvider) {
-        elements.currentProvider.value = 'openai';
-        settings.providers.current = 'openai';
-        saveSettings();
-        showSaveIndicator();
-        updateSetProviderButtons('openai');
-        
-        // 跳转到通用设置页
-        setTimeout(() => {
-          const generalNav = document.querySelector('.nav-item[data-page="general"]');
-          if (generalNav) generalNav.click();
-        }, 500);
-      }
+      setCurrentProvider('openai');
     });
   }
   
