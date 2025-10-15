@@ -427,6 +427,65 @@ function hideContextMenu() {
 }
 
 // Translate selected text
+/**
+ * 提取选中文本周围的上下文
+ * @param {Selection} selection - 浏览器的 Selection 对象
+ * @param {number} maxLength - 上下文最大长度
+ * @returns {string} 包含选中文本的完整上下文
+ */
+function extractContext(selection, maxLength = 500) {
+  if (!selection || selection.rangeCount === 0) {
+    return '';
+  }
+
+  try {
+    const range = selection.getRangeAt(0);
+    const container = range.commonAncestorContainer;
+    
+    // 获取包含选中文本的父元素
+    const parentElement = container.nodeType === Node.TEXT_NODE 
+      ? container.parentElement 
+      : container;
+    
+    if (!parentElement) {
+      return '';
+    }
+
+    // 获取父元素的纯文本内容
+    let contextText = parentElement.textContent || '';
+    
+    // 如果父元素太小，尝试获取更大范围的上下文
+    if (contextText.length < maxLength && parentElement.parentElement) {
+      contextText = parentElement.parentElement.textContent || contextText;
+    }
+
+    // 如果上下文过长，进行截取
+    if (contextText.length > maxLength) {
+      const selectedText = selection.toString();
+      const selectedIndex = contextText.indexOf(selectedText);
+      
+      if (selectedIndex !== -1) {
+        // 计算前后文本的截取位置
+        const beforeLength = Math.floor((maxLength - selectedText.length) / 2);
+        const afterLength = maxLength - selectedText.length - beforeLength;
+        
+        const start = Math.max(0, selectedIndex - beforeLength);
+        const end = Math.min(contextText.length, selectedIndex + selectedText.length + afterLength);
+        
+        contextText = contextText.substring(start, end).trim();
+      } else {
+        // 如果找不到选中文本，只截取开头
+        contextText = contextText.substring(0, maxLength).trim();
+      }
+    }
+
+    return contextText.trim();
+  } catch (error) {
+    console.warn('[Annotate-Translate] Failed to extract context:', error);
+    return '';
+  }
+}
+
 async function translateText(text) {
   hideContextMenu();
   
@@ -467,11 +526,19 @@ async function translateText(text) {
       console.log('[Annotate-Translate] Translating:', text, 'to', $.targetLanguage);
     }
     
-    // 调用翻译服务
+    // 提取上下文信息
+    const context = extractContext(selection, 500);
+    
+    if ($.debugMode && $.showConsoleLogs && context) {
+      console.log('[Annotate-Translate] Context:', context);
+    }
+    
+    // 调用翻译服务，传递上下文
     const result = await translationService.translate(
       text,
       $.targetLanguage || 'zh-CN',
-      'auto'
+      'auto',
+      { context }  // 传递上下文作为 options
     );
     
     if ($.debugMode && $.showConsoleLogs) {
@@ -776,11 +843,32 @@ async function promptForBatchAnnotation(matches, text) {
     
     console.log('[Annotate-Translate] Batch auto-annotating:', text, `(${matches.length} occurrences)`);
     
-    // 调用翻译服务
+    // 提取第一个匹配项的上下文
+    let context = '';
+    if (matches.length > 0) {
+      const firstMatch = matches[0];
+      const range = document.createRange();
+      range.setStart(firstMatch.node, firstMatch.index);
+      range.setEnd(firstMatch.node, firstMatch.index + firstMatch.text.length);
+      
+      // 创建临时 selection 来提取上下文
+      const tempSelection = window.getSelection();
+      tempSelection.removeAllRanges();
+      tempSelection.addRange(range);
+      context = extractContext(tempSelection, 500);
+      tempSelection.removeAllRanges();
+      
+      if ($.debugMode && $.showConsoleLogs && context) {
+        console.log('[Annotate-Translate] Context (batch):', context);
+      }
+    }
+    
+    // 调用翻译服务，传递上下文
     const result = await translationService.translate(
       text,
       $.targetLanguage || 'zh-CN',
-      'auto'
+      'auto',
+      { context }
     );
     
     // 移除加载提示
@@ -845,11 +933,23 @@ async function promptAndAnnotate(range, text) {
     
     console.log('[Annotate-Translate] Auto-annotating:', text);
     
-    // 调用翻译服务
+    // 提取上下文
+    const tempSelection = window.getSelection();
+    tempSelection.removeAllRanges();
+    tempSelection.addRange(range);
+    const context = extractContext(tempSelection, 500);
+    tempSelection.removeAllRanges();
+    
+    if ($.debugMode && $.showConsoleLogs && context) {
+      console.log('[Annotate-Translate] Context (annotate):', context);
+    }
+    
+    // 调用翻译服务，传递上下文
     const result = await translationService.translate(
       text,
       $.targetLanguage || 'zh-CN',
-      'auto'
+      'auto',
+      { context }
     );
     
     // 移除加载提示

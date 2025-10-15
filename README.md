@@ -170,42 +170,11 @@ Access the settings page by:
 6. **Performance**: Cache settings and auto-close delay
 7. **Debug Settings**: Enable debug mode and console logs
 
-## File Structure
-
-```
-annotate-translate/
-├── manifest.json                      # Extension configuration (v3)
-├── popup.html                         # Extension popup UI
-├── popup.js                           # Popup logic
-├── styles.css                         # Popup styles
-├── content.js                         # Content script for page interaction
-├── content.css                        # Content script styles
-├── background.js                      # Background service worker
-├── options.html                       # Settings page HTML
-├── options.js                         # Settings page logic
-├── translation-service.js             # Translation service abstraction
-├── translation-ui.js                  # UI rendering component
-├── translation-ui.css                 # UI styles
-├── translation-integration.js         # Integration examples
-├── translation-test.html              # Browser test page
-├── icons/                             # Extension icons
-│   ├── icon16.png
-│   ├── icon32.png
-│   ├── icon48.png
-│   └── icon128.png
-└── docs/                              # Documentation files
-    ├── AUDIO_FEATURE.md               # Audio feature guide
-    ├── PHONETIC_FALLBACK_FEATURE.md   # Phonetic fallback guide
-    ├── YOUDAO_SETUP_GUIDE.md          # Youdao setup guide
-    └── ...                            # Other documentation files
-```
-
 ## Documentation 📚
 
-### Available Guides
-- 📖 **[Youdao Setup Guide](YOUDAO_SETUP_GUIDE.md)** - How to configure Youdao translation
-- 🔊 **[Audio Feature Guide](AUDIO_FEATURE.md)** - Audio playback in annotations
-- 📢 **[Phonetic Fallback Guide](PHONETIC_FALLBACK_FEATURE.md)** - Phonetic fallback strategy
+### Register Translate providers
+
+// TODO
 
 ## Architecture 🏗️
 
@@ -274,77 +243,6 @@ TranslationUI.render()
 Display to User
 ```
 
-## Development
-
-### Technology Stack
-- **Manifest V3**: Latest Chrome extension manifest version
-- **Vanilla JavaScript**: No frameworks required
-- **Chrome Storage API**: For persisting user data
-- **Chrome Extension APIs**: tabs, runtime, storage, scripting
-- **Web Audio API**: For audio playback
-- **Speech Synthesis API**: For TTS fallback
-
-### Development Workflow
-
-#### Integration Testing
-```javascript
-// Test integration points
-// - Content script injection
-// - Message passing
-// - Storage sync
-// - Configuration updates
-```
-
-#### API Testing
-```javascript
-// Switch between providers
-translationProvider: 'google' // or 'youdao'
-
-// Test with real data
-// - Various language pairs
-// - Long texts
-// - Special characters
-// - Error handling
-```
-
-### Quick Development Commands
-
-```bash
-# Start local server (optional)
-python -m http.server 8000
-
-# Open test page
-open http://localhost:8000/translation-test.html
-
-# Run all tests (in browser console)
-# Open translation-test.html and click "Test All Providers"
-```
-
-### Debug Tips
-
-**Enable verbose logging**:
-1. Open Settings (options.html)
-2. Check "Enable Debug Mode"
-3. Check "Show Console Logs"
-4. Open DevTools Console (F12)
-
-**Check configuration**:
-```javascript
-// In any page console
-chrome.storage.sync.get(null, console.log);
-```
-
-**Test translation**:
-```javascript
-// In page with content.js
-translationService.translate('hello', 'zh-CN').then(console.log);
-```
-
-**Clear cache**:
-```javascript
-// In options page or content script
-translationService.clearCache();
-```
 
 ## Browser Compatibility
 
@@ -366,36 +264,8 @@ This extension requires the following permissions:
 
 **Privacy**: All data is stored locally. No data is sent to external servers except for translation API calls to selected providers.
 
-## Performance
-
-| Metric | Value |
-|--------|-------|
-| First Translation | 1-3s |
-| Cached Translation | <10ms |
-| Memory Usage | <50MB |
-| Cache Hit Rate | >90% |
-| API Rate Limit | Provider dependent |
 
 ## Known Limitations
-
-### Content Script Restrictions
-
-Content scripts cannot run on certain browser pages and URLs. The extension will gracefully handle these cases:
-
-**Unsupported pages include:**
-- Browser internal pages (chrome://, edge://, about:, etc.)
-- Chrome Web Store pages
-- View source pages (view-source://)
-- Browser extension pages (chrome-extension://)
-- Data URLs (data:)
-- JavaScript URLs (javascript:)
-- Local file URLs (file://) - unless specifically enabled in extension settings
-
-When attempting to use features on these pages, you may see error messages like:
-- "Cannot clear annotations on this page."
-- "Content script not available on this page."
-
-This is normal browser behavior for security reasons. The extension will work normally on regular web pages (http:// and https:// URLs).
 
 ### Translation Provider Limitations
 
@@ -413,14 +283,8 @@ This is normal browser behavior for security reasons. The extension will work no
 ## Roadmap 🗺️
 
 ### Future Plans
-- [ ] Voice input support
 - [ ] OCR text recognition
-- [ ] Batch translation
-- [ ] Export/import settings
-- [ ] Custom provider support
-- [ ] Offline dictionary expansion
-- [ ] Multi-language UI
-- [ ] Mobile optimization
+- [ ] Frequency-based batch translation
 
 ## Contributing 🤝
 
@@ -440,51 +304,6 @@ Contributions are welcome! Here's how you can help:
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
 
-### Development Guidelines
-- Follow existing code style
-- Add JSDoc comments for public APIs
-- Include tests for new features
-- Update documentation
-
-## Testing ✅
-
-### Manual Testing
-1. Load the extension in Chrome
-2. Visit any webpage
-3. Select some text
-4. Click "Translate" or "Annotate"
-5. Verify the results are displayed correctly
-6. Test audio playback if available
-7. Try different providers in settings
-
-## FAQ ❓
-
-### Q: How to switch translation providers?
-**A**: Open Settings page (right-click extension icon → Options), select a provider, and save. For Youdao, you also need to configure API keys - see [Youdao Setup Guide](YOUDAO_SETUP_GUIDE.md).
-
-### Q: Where is my data stored?
-**A**: Settings are stored in `chrome.storage.sync` (synced across devices), annotations are stored in `chrome.storage.local`.
-
-### Q: Does it work offline?
-**A**: No. All translation providers require internet connection to work.
-
-### Q: How to configure Youdao translation?
-**A**: See the detailed [Youdao Setup Guide](YOUDAO_SETUP_GUIDE.md). You need to:
-1. Register at [Youdao AI Platform](https://ai.youdao.com/)
-2. Create an application and get App Key & App Secret
-3. Enter them in the Settings page when Youdao is selected
-4. Save settings and start translating!
-
-### Q: Why isn't audio working?
-**A**: Check if:
-1. Audio is enabled in settings
-2. Provider supports audio data
-3. Browser allows audio playback
-4. TTS is available (for fallback)
-
-### Q: How to clear cache?
-**A**: Settings page → "Clear Cache" button, or run `translationService.clearCache()` in console.
-
 ## Support 💬
 
 - **Issues**: GitHub Issues
@@ -492,22 +311,12 @@ Contributions are welcome! Here's how you can help:
 
 ## Changelog 📝
 
-### Current Version
-- ✨ Translation service abstraction layer
-- ✨ Multiple translation providers (Google, Youdao)
-- ✨ Settings page with configuration sections
-- ✨ Rich UI with audio/phonetics/definitions/examples
-- ✨ Smart caching system
-- ✨ Comprehensive documentation
-- 🐛 Fixed audio playback issues
-- 🎨 Improved UI responsiveness
-- ⚡ Performance improvements
 
 ## License 📄
 
 MIT License
 
-Copyright (c) 2024
+Copyright (c) 2025
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

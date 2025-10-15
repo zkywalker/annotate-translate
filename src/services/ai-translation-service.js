@@ -92,8 +92,8 @@ class AITranslationService {
     try {
       console.log(`[AI Translation Service] Translating: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
       
-      // 调用提供商进行翻译
-      const result = await this.provider.translate(text, sourceLang, targetLang);
+      // 调用提供商进行翻译，传递 options（包含 context）
+      const result = await this.provider.translate(text, sourceLang, targetLang, options);
       
       // 缓存结果
       this.cacheResult(cacheKey, result);
