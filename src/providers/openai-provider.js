@@ -20,6 +20,9 @@ class OpenAIProvider extends BaseAIProvider {
 
   async translate(text, sourceLang, targetLang, options = {}) {
     console.log(`[OpenAI Provider] Translating: "${text.substring(0, 50)}..."`);
+    console.log(`[OpenAI Provider] Options received:`, options);
+    console.log(`[OpenAI Provider] Context:`, options.context || '(none)');
+    console.log(`[OpenAI Provider] useContext setting:`, this.useContext);
     
     try {
       const prompts = PromptTemplates.buildPrompt({
@@ -28,6 +31,8 @@ class OpenAIProvider extends BaseAIProvider {
         context: this.useContext ? (options.context || '') : '',
         customTemplates: this.customTemplates
       });
+      
+      console.log(`[OpenAI Provider] Generated prompt preview:`, prompts.user.substring(0, 200) + '...');
       
       const response = await this.callAPI(prompts);
       const rawResponse = response.choices[0].message.content.trim();
