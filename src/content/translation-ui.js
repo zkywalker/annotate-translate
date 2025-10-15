@@ -534,9 +534,9 @@ class TranslationUI {
     // 添加 logo 图标
     const providerName = result.provider ? result.provider.toLowerCase() : 'unknown';
     const logoMap = {
-      'google': 'icons/icon_logo_google.svg',
-      'youdao': 'icons/icon_logo_youdao.svg',
-      'deepl': 'icons/icon_logo_deepl.svg'
+      'google': 'assets/icons/icon_logo_google.svg',
+      'youdao': 'assets/icons/icon_logo_youdao.svg',
+      'deepl': 'assets/icons/icon_logo_deepl.svg'
     };
     
     if (logoMap[providerName]) {

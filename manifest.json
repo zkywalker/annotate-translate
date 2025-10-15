@@ -14,48 +14,48 @@
     "<all_urls>"
   ],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
     }
   },
-  "options_page": "options.html",
+  "options_page": "src/options/options.html",
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background/background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
-        "ai-providers/prompt-templates.js",
-        "ai-providers/base-ai-provider.js",
-        "ai-providers/openai-provider.js",
-        "translation-service.js",
-        "translation-ui.js",
-        "content.js"
+        "src/providers/prompt-templates.js",
+        "src/providers/base-ai-provider.js",
+        "src/providers/openai-provider.js",
+        "src/services/translation-service.js",
+        "src/content/translation-ui.js",
+        "src/content/content.js"
       ],
       "css": [
-        "translation-ui.css",
-        "content.css"
+        "src/styles/translation-ui.css",
+        "src/content/content.css"
       ]
     }
   ],
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
   },
   "web_accessible_resources": [
     {
       "resources": [
-        "icons/icon_logo_google.svg",
-        "icons/icon_logo_youdao.svg",
-        "icons/icon_logo_deepl.svg",
-        "icons/icon_logo_ai.svg"
+        "assets/icons/icon_logo_google.svg",
+        "assets/icons/icon_logo_youdao.svg",
+        "assets/icons/icon_logo_deepl.svg",
+        "assets/icons/icon_logo_ai.svg"
       ],
       "matches": ["<all_urls>"]
     }

@@ -30,6 +30,65 @@ A Chrome extension for annotating and translating text on web pages.
 - 💾 **Smart Cache**: Reduce API calls, improve speed
 - 🎨 **Responsive UI**: Desktop and mobile support, dark mode ready
 
+## Project Structure
+
+```
+annotate-translate/
+├── manifest.json              # Extension manifest
+├── README.md
+│
+├── src/                       # Source code
+│   ├── background/            # Background service worker
+│   │   └── background.js
+│   │
+│   ├── content/               # Content scripts
+│   │   ├── content.js         # Main content script
+│   │   ├── content.css        # Content styles
+│   │   ├── translation-integration.js
+│   │   └── translation-ui.js  # Translation UI components
+│   │
+│   ├── popup/                 # Extension popup
+│   │   ├── popup.html
+│   │   ├── popup.js
+│   │   └── styles.css
+│   │
+│   ├── options/               # Settings page
+│   │   ├── options.html
+│   │   ├── options.js
+│   │   └── options.css
+│   │
+│   ├── services/              # Business logic
+│   │   ├── ai-translation-service.js
+│   │   └── translation-service.js
+│   │
+│   ├── providers/             # AI providers
+│   │   ├── base-ai-provider.js
+│   │   ├── openai-provider.js
+│   │   └── prompt-templates.js
+│   │
+│   ├── utils/                 # Utility functions
+│   │   ├── i18n-helper.js
+│   │   └── settings-schema.js
+│   │
+│   ├── lib/                   # Third-party libraries
+│   │   ├── lucide.min.js
+│   │   ├── lucide-loader.js
+│   │   └── lucide-init.js
+│   │
+│   └── styles/                # Shared styles
+│       └── translation-ui.css
+│
+├── assets/                    # Static resources
+│   └── icons/                 # Extension icons and logos
+│
+├── _locales/                  # i18n translations
+│   ├── en/
+│   ├── zh_CN/
+│   └── ...
+│
+└── test/                      # Test files
+```
+
 ## Installation
 
 ### Install from Source
