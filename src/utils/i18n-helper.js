@@ -113,8 +113,13 @@ async function initializeLanguage() {
         console.log('[i18n] Detected language:', uiLanguage);
       }
       
-      if (uiLanguage && uiLanguage !== 'auto' && uiLanguage !== 'en') {
+      // 加载自定义语言（包括英文）
+      // 注意：即使是英文也需要显式加载，以确保不受浏览器默认语言影响
+      if (uiLanguage && uiLanguage !== 'auto') {
         await loadCustomLanguage(uiLanguage);
+      } else {
+        // 如果是 auto 但已检测到语言，也需要加载
+        customMessages = null;
       }
       resolve();
     });
