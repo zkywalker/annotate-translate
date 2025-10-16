@@ -63,6 +63,7 @@ const elements = {
   menuButtonSize: document.getElementById('menuButtonSize'),
   showPhoneticInAnnotation: document.getElementById('showPhoneticInAnnotation'),
   enableAudioInAnnotation: document.getElementById('enableAudioInAnnotation'),
+  hidePhoneticForMultipleWords: document.getElementById('hidePhoneticForMultipleWords'),
   
   // 性能设置
   enableCache: document.getElementById('enableCache'),
@@ -292,6 +293,7 @@ function applySettingsToUI() {
   if (elements.menuButtonSize) elements.menuButtonSize.value = settings.display.menu.buttonSize;
   if (elements.showPhoneticInAnnotation) elements.showPhoneticInAnnotation.checked = settings.display.annotation.showPhonetics;
   if (elements.enableAudioInAnnotation) elements.enableAudioInAnnotation.checked = settings.display.annotation.enableAudio;
+  if (elements.hidePhoneticForMultipleWords) elements.hidePhoneticForMultipleWords.checked = settings.display.annotation.hidePhoneticForMultipleWords ?? false;
   
   // 性能设置
   if (elements.enableCache) elements.enableCache.checked = settings.performance.enableCache;
@@ -358,7 +360,8 @@ function collectSettingsFromUI() {
       },
       annotation: {
         showPhonetics: elements.showPhoneticInAnnotation?.checked ?? settings.display.annotation.showPhonetics,
-        enableAudio: elements.enableAudioInAnnotation?.checked ?? settings.display.annotation.enableAudio
+        enableAudio: elements.enableAudioInAnnotation?.checked ?? settings.display.annotation.enableAudio,
+        hidePhoneticForMultipleWords: elements.hidePhoneticForMultipleWords?.checked ?? settings.display.annotation.hidePhoneticForMultipleWords ?? false
       }
     },
     performance: {
@@ -734,6 +737,7 @@ function setupEventListeners() {
     'currentProvider', 'deeplUseFreeApi', 'showPhonetics', 'enableAudio',
     'showDefinitions', 'showExamples', 'enablePhoneticFallback', 
     'menuButtonSize', 'showPhoneticInAnnotation', 'enableAudioInAnnotation',
+    'hidePhoneticForMultipleWords',
     'enableCache', 'enableDebugMode', 'openaiPromptFormat', 'openaiUseContext'
   ];
   

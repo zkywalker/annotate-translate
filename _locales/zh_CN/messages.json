@@ -893,6 +893,14 @@
     "message": "在标注中启用音频",
     "description": "Show audio in annotation label"
   },
+  "hidePhoneticForMultipleWords": {
+    "message": "多个单词时隐藏读音",
+    "description": "Hide phonetics for multiple words label"
+  },
+  "hidePhoneticForMultipleWordsDesc": {
+    "message": "选取多个英语单词时，不显示读音标注",
+    "description": "Hide phonetics for multiple words description"
+  },
   
   "promptSettings": {
     "message": "提示词设置",

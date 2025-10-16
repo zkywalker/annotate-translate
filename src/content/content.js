@@ -69,7 +69,11 @@ let settings = {
       enablePhoneticFallback: true
     },
     menu: { buttonSize: 'small' },
-    annotation: { showPhonetics: true, enableAudio: true }
+    annotation: { 
+      showPhonetics: true, 
+      enableAudio: true,
+      hidePhoneticForMultipleWords: false  // 多个单词时隐藏读音
+    }
   },
   performance: {
     enableCache: true,
@@ -102,6 +106,8 @@ const $ = {
   get autoCloseDelay() { return settings.display.translation.autoCloseDelay; },
   get enablePhoneticFallback() { return settings.display.translation.enablePhoneticFallback; },
   get showPhoneticInAnnotation() { return settings.display.annotation.showPhonetics; },
+  get enableAudioInAnnotation() { return settings.display.annotation.enableAudio; },
+  get hidePhoneticForMultipleWords() { return settings.display.annotation.hidePhoneticForMultipleWords; },
   get menuButtonSize() { return settings.display.menu.buttonSize; },
   get enableCache() { return settings.performance.enableCache; },
   get cacheSize() { return settings.performance.cacheSize; },
@@ -1120,8 +1126,20 @@ async function promptAndAnnotate(range, text) {
     // 移除加载提示
     loadingTooltip.remove();
     
+    // 判断是否应该隐藏读音
+    const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(text);
+    
     // 使用 annotationText（可能包含读音）或 translatedText 作为标注
-    const annotationText = result.annotationText || result.translatedText;
+    // 如果设置为隐藏多个单词的读音，则只使用翻译文本
+    let annotationText;
+    if (shouldHidePhonetic) {
+      // 多个单词且启用隐藏读音，只显示翻译
+      annotationText = result.translatedText;
+      console.log('[Annotate-Translate] Multiple words detected, hiding phonetics');
+    } else {
+      // 单个单词或未启用隐藏读音，可以显示读音
+      annotationText = result.annotationText || result.translatedText;
+    }
     
     createRubyAnnotation(range, text, annotationText, result);
     
@@ -1151,6 +1169,33 @@ async function promptAndAnnotate(range, text) {
   }
 }
 
+/**
+ * 检查文本是否包含多个英语单词
+ * @param {string} text - 要检查的文本
+ * @returns {boolean} 如果包含多个英语单词返回 true
+ */
+function isMultipleEnglishWords(text) {
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+  
+  // 去除首尾空格
+  const trimmedText = text.trim();
+  
+  // 检查是否包含英文字符
+  const hasEnglish = /[a-zA-Z]/.test(trimmedText);
+  if (!hasEnglish) {
+    return false;
+  }
+  
+  // 分割单词（按空格、标点等分割）
+  // 匹配连续的字母（可能包含连字符和撇号）
+  const words = trimmedText.match(/[a-zA-Z]+(?:[-'][a-zA-Z]+)*/g);
+  
+  // 如果找到多于一个单词，返回 true
+  return words && words.length > 1;
+}
+
 // Create ruby tag annotation
 function createRubyAnnotation(range, baseText, annotationText, result = null) {
   try {
@@ -1169,13 +1214,18 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
     const rt = document.createElement('rt');
     rt.className = 'annotate-translate-rt';
     
+    // 检查是否应该隐藏读音（当文本为多个英语单词且设置启用时）
+    const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(baseText);
+    
     // Add annotation text
     const textSpan = document.createElement('span');
     textSpan.textContent = annotationText;
     rt.appendChild(textSpan);
     
-    // Add audio button if phonetics available
-    if (result && result.phonetics && result.phonetics.length > 0 && $.enableAudio) {
+    // Add audio button if phonetics available and annotation audio is enabled
+    // 如果设置为隐藏多个单词的读音，则不显示音频按钮
+    if (result && result.phonetics && result.phonetics.length > 0 && 
+        $.enableAudioInAnnotation && !shouldHidePhonetic) {
       const audioButton = createAudioButton(result.phonetics, baseText);
       rt.appendChild(audioButton);
     }

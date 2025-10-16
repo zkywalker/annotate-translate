@@ -893,6 +893,14 @@
     "message": "Enable Audio in Annotation",
     "description": "Show audio in annotation label"
   },
+  "hidePhoneticForMultipleWords": {
+    "message": "Hide Phonetics for Multiple Words",
+    "description": "Hide phonetics for multiple words label"
+  },
+  "hidePhoneticForMultipleWordsDesc": {
+    "message": "Don't show phonetic annotation when multiple English words are selected",
+    "description": "Hide phonetics for multiple words description"
+  },
   
   "promptSettings": {
     "message": "Prompt Settings",

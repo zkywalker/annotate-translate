@@ -58,7 +58,11 @@ chrome.runtime.onInstalled.addListener((details) => {
           enablePhoneticFallback: true
         },
         menu: { buttonSize: 'small' },
-        annotation: { showPhonetics: true, enableAudio: true }
+        annotation: { 
+          showPhonetics: true, 
+          enableAudio: true,
+          hidePhoneticForMultipleWords: false
+        }
       },
       performance: {
         enableCache: true,
