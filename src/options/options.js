@@ -409,6 +409,44 @@ function showSaveIndicator() {
 }
 
 /**
+ * 显示验证消息
+ */
+function showValidationMessage(messageKey) {
+  if (elements.saveIndicator) {
+    const originalContent = elements.saveIndicator.innerHTML;
+    const messageSpan = elements.saveIndicator.querySelector('span');
+    
+    // 临时改为错误样式和文本
+    elements.saveIndicator.classList.add('show', 'error');
+    if (messageSpan) {
+      messageSpan.setAttribute('data-i18n', messageKey);
+      localizeElement(messageSpan);
+    }
+    
+    setTimeout(() => {
+      elements.saveIndicator.classList.remove('show', 'error');
+      // 恢复原始内容
+      setTimeout(() => {
+        elements.saveIndicator.innerHTML = originalContent;
+      }, 300);
+    }, 3000);
+  }
+}
+
+/**
+ * 本地化单个元素
+ */
+function localizeElement(element) {
+  const key = element.getAttribute('data-i18n');
+  if (key) {
+    const message = chrome.i18n.getMessage(key);
+    if (message) {
+      element.textContent = message;
+    }
+  }
+}
+
+/**
  * 通知 content scripts
  */
 function notifyContentScripts() {
@@ -745,6 +783,19 @@ function setupEventListeners() {
     const el = elements[id];
     if (el) {
       el.addEventListener('change', () => {
+        // 验证悬浮按钮设置：至少保留一个
+        if (id === 'enableTranslate' || id === 'enableAnnotate') {
+          const translateEnabled = elements.enableTranslate.checked;
+          const annotateEnabled = elements.enableAnnotate.checked;
+          
+          // 如果两个都被关闭，阻止本次操作
+          if (!translateEnabled && !annotateEnabled) {
+            el.checked = true; // 恢复当前复选框
+            showValidationMessage('atLeastOneButtonRequired');
+            return;
+          }
+        }
+        
         saveSettings();
       });
     }

@@ -21,14 +21,6 @@
     "message": "Feature Toggles",
     "description": "Feature toggles section title"
   },
-  "enableTranslation": {
-    "message": "Enable Translation Feature",
-    "description": "Enable translation checkbox label"
-  },
-  "enableAnnotation": {
-    "message": "Enable Annotation Feature",
-    "description": "Enable annotation checkbox label"
-  },
   
   "translationProvider": {
     "message": "Translation Provider",
@@ -578,19 +570,27 @@
   },
   
   "generalSettings": {
-    "message": "General Settings",
-    "description": "General settings page title"
+    "message": "Basic Settings",
+    "description": "Basic settings page title"
   },
   "features": {
-    "message": "Features",
-    "description": "Features section title"
+    "message": "Floating Buttons",
+    "description": "Floating buttons section title"
+  },
+  "enableTranslation": {
+    "message": "Show Translation Button (T)",
+    "description": "Enable translation button label"
   },
   "enableTranslationDesc": {
-    "message": "Enable text translation with hover and selection",
+    "message": "Show floating translation button (T) after text selection, click to view translation",
     "description": "Enable translation description"
   },
+  "enableAnnotation": {
+    "message": "Show Annotation Button (A)",
+    "description": "Enable annotation button label"
+  },
   "enableAnnotationDesc": {
-    "message": "Annotate text on the page for later review",
+    "message": "Show floating annotation button (A) after text selection, click to add translation annotation",
     "description": "Enable annotation description"
   },
   "targetLanguage": {
@@ -600,6 +600,10 @@
   "translationService": {
     "message": "Translation Service",
     "description": "Translation service section title"
+  },
+  "floatingButtons": {
+    "message": "Floating Buttons",
+    "description": "Floating buttons section title"
   },
   "currentService": {
     "message": "Current Service",
@@ -845,6 +849,14 @@
     "message": "Selection Menu",
     "description": "Selection menu section"
   },
+  "floatingButtonSize": {
+    "message": "Floating Button Size",
+    "description": "Floating button size label"
+  },
+  "floatingButtonSizeDesc": {
+    "message": "Size of floating buttons shown after text selection",
+    "description": "Floating button size description"
+  },
   "buttonSize": {
     "message": "Button Size",
     "description": "Button size label"
@@ -898,8 +910,12 @@
     "description": "Hide phonetics for multiple words label"
   },
   "hidePhoneticForMultipleWordsDesc": {
-    "message": "Don't show phonetic annotation when multiple English words are selected",
+    "message": "Hide phonetic annotations when multiple English words are selected",
     "description": "Hide phonetics for multiple words description"
+  },
+  "atLeastOneButtonRequired": {
+    "message": "⚠️ At least one floating button must be shown",
+    "description": "Validation message for at least one button required"
   },
   
   "promptSettings": {

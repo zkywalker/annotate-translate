@@ -21,14 +21,6 @@
     "message": "功能开关",
     "description": "Feature toggles section title"
   },
-  "enableTranslation": {
-    "message": "启用翻译功能",
-    "description": "Enable translation checkbox label"
-  },
-  "enableAnnotation": {
-    "message": "启用标注功能",
-    "description": "Enable annotation checkbox label"
-  },
   
   "translationProvider": {
     "message": "翻译提供商",
@@ -578,19 +570,27 @@
   },
   
   "generalSettings": {
-    "message": "通用设置",
-    "description": "General settings page title"
+    "message": "基础设置",
+    "description": "Basic settings page title"
   },
   "features": {
-    "message": "功能",
-    "description": "Features section title"
+    "message": "悬浮按钮",
+    "description": "Floating buttons section title"
+  },
+  "enableTranslation": {
+    "message": "显示翻译按钮(T)",
+    "description": "Enable translation button label"
   },
   "enableTranslationDesc": {
-    "message": "启用文本悬停和选择翻译功能",
+    "message": "选择文本后显示翻译悬浮按钮(T)，点击可查看翻译结果",
     "description": "Enable translation description"
   },
+  "enableAnnotation": {
+    "message": "显示标注按钮(A)",
+    "description": "Enable annotation button label"
+  },
   "enableAnnotationDesc": {
-    "message": "为页面上的文本添加标注以便后续查看",
+    "message": "选择文本后显示标注悬浮按钮(A)，点击可为文本添加翻译标注",
     "description": "Enable annotation description"
   },
   "targetLanguage": {
@@ -600,6 +600,10 @@
   "translationService": {
     "message": "翻译服务",
     "description": "Translation service section title"
+  },
+  "floatingButtons": {
+    "message": "悬浮按钮",
+    "description": "Floating buttons section title"
   },
   "currentService": {
     "message": "当前服务",
@@ -845,6 +849,14 @@
     "message": "选择菜单",
     "description": "Selection menu section"
   },
+  "floatingButtonSize": {
+    "message": "悬浮按钮尺寸",
+    "description": "Floating button size label"
+  },
+  "floatingButtonSizeDesc": {
+    "message": "选择文本后显示的悬浮按钮大小",
+    "description": "Floating button size description"
+  },
   "buttonSize": {
     "message": "按钮大小",
     "description": "Button size label"
@@ -900,6 +912,10 @@
   "hidePhoneticForMultipleWordsDesc": {
     "message": "选取多个英语单词时，不显示读音标注",
     "description": "Hide phonetics for multiple words description"
+  },
+  "atLeastOneButtonRequired": {
+    "message": "⚠️ 至少需要显示一个悬浮按钮",
+    "description": "Validation message for at least one button required"
   },
   
   "promptSettings": {

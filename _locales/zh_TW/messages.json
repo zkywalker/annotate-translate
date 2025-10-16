@@ -21,14 +21,6 @@
     "message": "功能開關",
     "description": "Feature toggles section title"
   },
-  "enableTranslation": {
-    "message": "啟用翻譯功能",
-    "description": "Enable translation checkbox label"
-  },
-  "enableAnnotation": {
-    "message": "啟用標注功能",
-    "description": "Enable annotation checkbox label"
-  },
   
   "translationProvider": {
     "message": "翻譯提供商",

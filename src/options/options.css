@@ -733,6 +733,10 @@ body {
   transform: translateY(0);
 }
 
+.save-indicator.error {
+  background: var(--danger-color);
+}
+
 /* ========== 响应式设计 ========== */
 @media (max-width: 768px) {
   .sidebar {

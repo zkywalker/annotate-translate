@@ -12,16 +12,8 @@
     "description": "Settings title"
   },
   "featureToggles": {
-    "message": "Basculer les Fonctionnalités",
+    "message": "Interrupteurs de fonctionnalités",
     "description": "Feature toggles section title"
-  },
-  "enableTranslation": {
-    "message": "Activer la Fonction de Traduction",
-    "description": "Enable translation checkbox label"
-  },
-  "enableAnnotation": {
-    "message": "Activer la Fonction d'Annotation",
-    "description": "Enable annotation checkbox label"
   },
   "languageSettings": {
     "message": "Paramètres de Langue",

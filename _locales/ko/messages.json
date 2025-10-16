@@ -19,14 +19,6 @@
     "message": "기능 전환",
     "description": "Feature toggles section title"
   },
-  "enableTranslation": {
-    "message": "번역 기능 활성화",
-    "description": "Enable translation checkbox label"
-  },
-  "enableAnnotation": {
-    "message": "주석 기능 활성화",
-    "description": "Enable annotation checkbox label"
-  },
   "translationProvider": {
     "message": "번역 제공자",
     "description": "Translation provider section title"

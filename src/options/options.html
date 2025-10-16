@@ -148,6 +148,38 @@
           <div id="quickProviderConfig" class="provider-config-box"></div>
         </section>
 
+        <!-- 悬浮按钮设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="floatingButtons">悬浮按钮</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="floatingButtonSize">悬浮按钮尺寸</label>
+              <p class="setting-desc" data-i18n="floatingButtonSizeDesc">选择文本后显示的悬浮按钮大小</p>
+            </div>
+            <div class="setting-control">
+              <select id="menuButtonSize" class="select-input">
+                <option value="small" data-i18n="sizeSmall">小</option>
+                <option value="medium" data-i18n="sizeMedium">中</option>
+                <option value="large" data-i18n="sizeLarge">大</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enablePhoneticFallback">音标补充功能</label>
+              <p class="setting-desc" data-i18n="phoneticFallbackDesc">当翻译服务未返回音标时，自动从其他来源获取</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enablePhoneticFallback" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
         <!-- 性能设置 -->
         <section class="section">
           <h3 class="section-title" data-i18n="performanceSettings">性能</h3>
@@ -657,38 +689,6 @@
               <input type="number" id="autoCloseDelay" class="number-input" min="0" max="60" value="10">
         </div>
       </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="enablePhoneticFallback">音标补充功能</label>
-              <p class="setting-desc" data-i18n="phoneticFallbackDesc">当翻译服务未返回音标时，自动从其他来源获取</p>
-            </div>
-            <div class="setting-control">
-              <label class="switch">
-                <input type="checkbox" id="enablePhoneticFallback" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-        </section>
-
-        <!-- 选择菜单设置 -->
-        <section class="section">
-          <h3 class="section-title" data-i18n="selectionMenu">选择菜单</h3>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="buttonSize">按钮尺寸</label>
-              <p class="setting-desc" data-i18n="buttonSizeDesc">选择文本后出现的按钮大小</p>
-            </div>
-            <div class="setting-control">
-              <select id="menuButtonSize" class="select-input">
-                <option value="small" data-i18n="sizeSmall">小</option>
-                <option value="medium" data-i18n="sizeMedium">中</option>
-                <option value="large" data-i18n="sizeLarge">大</option>
-              </select>
-            </div>
-        </div>
         </section>
 
         <!-- 标注设置 -->

@@ -19,14 +19,6 @@
     "message": "機能切り替え",
     "description": "Feature toggles section title"
   },
-  "enableTranslation": {
-    "message": "翻訳機能を有効にする",
-    "description": "Enable translation checkbox label"
-  },
-  "enableAnnotation": {
-    "message": "注釈機能を有効にする",
-    "description": "Enable annotation checkbox label"
-  },
   "translationProvider": {
     "message": "翻訳プロバイダー",
     "description": "Translation provider section title"
