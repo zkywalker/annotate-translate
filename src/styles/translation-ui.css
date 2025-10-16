@@ -1,0 +1,578 @@
+/**
+ * Translation UI Styles
+ * 翻译结果UI的样式定义
+ */
+
+/* 翻译结果容器 */
+.translation-result-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  max-width: 450px;
+  min-width: 280px;
+  color: #333;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* 区域标题 */
+.translation-section {
+  margin-bottom: 0;
+  padding: 12px 16px;
+}
+
+.translation-section:not(:last-of-type) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 原文区域 - 浅灰背景 */
+.translation-section.original-text {
+  background: #f8f9fa;
+}
+
+/* 译文区域 - 突出显示 */
+.translation-section.translated-text {
+  background: #ffffff;
+  padding: 16px;
+}
+
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  background: #1a73e8;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* 文本内容 */
+.text-content {
+  font-size: 14px;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.text-content.original {
+  color: #5f6368;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.text-content.translated {
+  font-size: 18px;
+  font-weight: 500;
+  color: #202124;
+  line-height: 1.5;
+}
+
+/* 读音部分 */
+.phonetic-section {
+  background: #f8f9fa;
+  padding: 12px 16px;
+}
+
+.phonetic-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phonetic-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.phonetic-type {
+  display: inline-block;
+  background: #4CAF50;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.phonetic-text {
+  font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', Arial, sans-serif;
+  font-size: 14px;
+  color: #444;
+  flex: 1;
+}
+
+/* 音频播放按钮 */
+.audio-play-button {
+  background: transparent; /* 移除背景 */
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  outline: none;
+  color: #5f6368;
+  margin-left: 4px;
+}
+
+.audio-play-button:hover {
+  background: #e8f0fe; /* 悬停时显示淡蓝色背景 */
+  color: #1a73e8;
+  transform: scale(1.1);
+}
+
+.audio-play-button:active {
+  transform: scale(0.95);
+}
+
+.audio-play-button.playing {
+  animation: pulse 1s infinite;
+  color: #1a73e8;
+}
+
+.audio-play-button.error {
+  color: #d93025;
+  animation: shake 0.5s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* 词义部分 */
+.definition-section {
+  padding: 12px 16px;
+  background: #ffffff;
+}
+
+.definition-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.definition-item {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.definition-item:hover {
+  background: #f1f3f4;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.part-of-speech {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: #1a73e8;
+  padding: 3px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(26, 115, 232, 0.2);
+  margin-top: 2px;
+}
+
+.definition-text {
+  font-size: 15px;
+  color: #202124;
+  line-height: 1.6;
+  font-weight: 400;
+  flex: 1;
+}
+
+.synonyms {
+  margin-top: 2px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #5f6368;
+  line-height: 1.4;
+  background: rgba(26, 115, 232, 0.05);
+  border-radius: 6px;
+}
+
+.synonyms .label {
+  font-weight: 600;
+  color: #1a73e8;
+  margin-right: 6px;
+}
+
+/* 例句部分 */
+.example-section {
+  padding: 12px 16px;
+  background: #fafbfc;
+}
+
+.example-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.example-item {
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.example-item:hover {
+  background: #f1f3f4;
+}
+
+.example-source {
+  font-size: 13px;
+  color: #202124;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+.example-source::before {
+  content: '"';
+  color: #5f6368;
+  margin-right: 2px;
+}
+
+.example-source::after {
+  content: '"';
+  color: #5f6368;
+  margin-left: 2px;
+}
+
+/* 例句中的富文本格式 */
+.example-source b,
+.example-source strong {
+  font-weight: 700;
+  color: #1a73e8;
+}
+
+.example-source i,
+.example-source em {
+  font-style: italic;
+  color: #d32f2f;
+}
+
+.example-source u {
+  text-decoration: underline;
+  text-decoration-color: #1a73e8;
+  text-decoration-thickness: 2px;
+}
+
+.example-source mark {
+  background-color: #fff176;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.example-translation {
+  font-size: 12px;
+  color: #5f6368;
+  line-height: 1.4;
+  padding-left: 12px;
+}
+
+/* 译文中的富文本格式 */
+.example-translation b,
+.example-translation strong {
+  font-weight: 700;
+  color: #1a73e8;
+}
+
+.example-translation i,
+.example-translation em {
+  font-style: italic;
+}
+
+.example-translation u {
+  text-decoration: underline;
+  text-decoration-color: #1a73e8;
+}
+
+.example-translation mark {
+  background-color: #fff176;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* 页脚 */
+.translation-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f8f9fa;
+  font-size: 11px;
+  color: #999;
+  border-top: 1px solid #f0f0f0;
+}
+
+.provider-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-style: italic;
+}
+
+.provider-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.time-info {
+  font-family: monospace;
+}
+
+/* 简化版UI */
+.translation-simple-container {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 14px 18px;
+  max-width: 320px;
+  min-width: 200px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.simple-translation {
+  font-size: 17px;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.simple-phonetic-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.simple-phonetic-text {
+  font-size: 13px;
+  color: #666;
+  font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', Arial, sans-serif;
+}
+
+.simple-audio-button {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .translation-result-container {
+    max-width: 100%;
+    border-radius: 0;
+  }
+  
+  .text-content.translated {
+    font-size: 15px;
+  }
+  
+  .phonetic-item {
+    flex-wrap: wrap;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .translation-result-container {
+    background: #292a2d;
+    color: #e8eaed;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  
+  .translation-section {
+    border-bottom-color: #3c4043;
+  }
+  
+  .translation-section.original-text {
+    background: #202124;
+  }
+  
+  .translation-section.translated-text {
+    background: #292a2d;
+  }
+  
+  .section-title {
+    color: #9aa0a6;
+  }
+  
+  .section-title::before {
+    background: #8ab4f8;
+  }
+  
+  .text-content.original {
+    color: #9aa0a6;
+  }
+  
+  .text-content.translated {
+    color: #e8eaed;
+  }
+  
+  .phonetic-section {
+    background: #202124;
+  }
+  
+  .phonetic-text {
+    color: #bdc1c6;
+  }
+  
+  .definition-section {
+    background: #292a2d;
+  }
+  
+  .definition-item {
+    background: #292a2d;
+  }
+  
+  .definition-item:hover {
+    background: #303134;
+  }
+  
+  .part-of-speech {
+    color: #202124;
+    background: #8ab4f8;
+    box-shadow: 0 1px 2px rgba(138, 180, 248, 0.2);
+  }
+  
+  .definition-text {
+    color: #e8eaed;
+  }
+  
+  .synonyms {
+    color: #9aa0a6;
+    background: rgba(138, 180, 248, 0.08);
+  }
+  
+  .synonyms .label {
+    color: #8ab4f8;
+  }
+  
+  .example-section {
+    background: #202124;
+  }
+  
+  .example-item {
+    background: #35363a;
+  }
+  
+  .example-item:hover {
+    background: #3c4043;
+  }
+  
+  .example-source {
+    color: #e8eaed;
+  }
+  
+  .example-source::before,
+  .example-source::after {
+    color: #9aa0a6;
+  }
+  
+  .example-translation {
+    color: #9aa0a6;
+  }
+  
+  .translation-footer {
+    background: #202124;
+    border-top-color: #3c4043;
+    color: #9aa0a6;
+  }
+  
+  .translation-simple-container {
+    background: #292a2d;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  
+  .simple-translation {
+    color: #e8eaed;
+  }
+  
+  .simple-phonetic-text {
+    color: #9aa0a6;
+  }
+}
+
+/* 动画效果 */
+.translation-result-container,
+.translation-simple-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .translation-result-container {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  
+  .audio-play-button {
+    display: none;
+  }
+  
+  .translation-footer {
+    display: none;
+  }
+}

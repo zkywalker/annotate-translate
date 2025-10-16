@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page for Annotate Translate Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #1a73e8;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        .test-text {
+            font-size: 18px;
+            line-height: 2;
+        }
+        .instructions {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #1a73e8;
+            margin: 20px 0;
+        }
+        code {
+            background-color: #263238;
+            color: #aed581;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔖 Annotate Translate Extension - Test Page</h1>
+    
+    <div class="instructions">
+        <h3>📋 测试说明：</h3>
+        <ol>
+            <li>打开 Chrome DevTools（按 <code>F12</code>）</li>
+            <li>切换到 <code>Console</code> 标签查看调试日志</li>
+            <li><strong>悬浮窗方式：</strong>选中文字后会出现小巧的悬浮窗，显示 <code>T</code>（翻译）和 <code>A</code>（标注）按钮</li>
+            <li><strong>右键菜单方式：</strong>右键点击选中的文字，选择 <code>Annotate "..."</code></li>
+            <li>在弹出的对话框中输入标注（如拼音、翻译等）</li>
+            <li>观察文字上方是否出现标注</li>
+        </ol>
+        <p><strong>💡 提示：</strong>悬浮窗现在更小巧，不会影响阅读！按钮只显示单字母，悬停时会显示完整说明。</p>
+    </div>
+
+    <div class="test-section">
+        <h2>英文测试文本</h2>
+        <p class="test-text">
+            The quick brown fox jumps over the lazy dog. This sentence contains every letter of the English alphabet.
+            Programming is the art of telling another human what one wants the computer to do.
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>中文测试文本</h2>
+        <p class="test-text">
+            这是一个测试页面，用于测试Chrome扩展程序的标注功能。请选择任意文字进行标注。
+            标注可以用来添加拼音、翻译或者其他注释信息。
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>混合文本</h2>
+        <p class="test-text">
+            Hello 世界！This is a mixed language text for testing purposes.
+            你可以测试选择 English words 或者 中文词汇 来添加标注。
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>单个单词测试</h2>
+        <p class="test-text">
+            <span style="font-size: 24px; margin: 10px;">Apple</span>
+            <span style="font-size: 24px; margin: 10px;">Banana</span>
+            <span style="font-size: 24px; margin: 10px;">Cherry</span>
+            <span style="font-size: 24px; margin: 10px;">Date</span>
+            <span style="font-size: 24px; margin: 10px;">Elderberry</span>
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>成语和短语</h2>
+        <p class="test-text">
+            一日千里 · 水滴石穿 · 马到成功 · 龙飞凤舞 · 虎虎生威
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>技术词汇</h2>
+        <p class="test-text">
+            JavaScript · React · Vue · Angular · TypeScript · Node.js · MongoDB · PostgreSQL
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>重复单词测试</h2>
+        <p class="test-text">
+            The word "test" appears multiple times in this test sentence. 
+            When you select and annotate "test", you will be asked whether to annotate 
+            only the first "test" or all occurrences of "test".
+        </p>
+        <p class="test-text">
+            同样的，单词 word 在这个句子中出现了多次。word 这个 word 可以用来测试批量标注功能。
+        </p>
+    </div>
+
+    <div class="instructions" style="background-color: #fff3e0; border-left-color: #ff9800;">
+        <h3>🔍 调试提示：</h3>
+        <ul>
+            <li>查看 Console 中的日志输出，日志前缀为 <code>[Annotate-Translate]</code></li>
+            <li>如果没有看到右键菜单，检查插件是否已加载</li>
+            <li>如果标注没有显示，打开 Elements 标签搜索 <code>ruby.annotate-translate-ruby</code></li>
+            <li>每次修改代码后记得重新加载插件并刷新此页面</li>
+        </ul>
+    </div>
+
+        <div class="test-section" style="background-color: #e8f5e9;">
+        <h2>✅ 预期效果演示</h2>
+        <p class="test-text">
+            正常情况下，标注应该显示在文字上方，类似这样的效果：
+        </p>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>短标注（不改变原文宽度）：</h3>
+            <ruby style="ruby-align: center;">
+                世界
+                <rt style="color: #1a73e8; font-size: 0.5em;">world</rt>
+            </ruby>
+            的力量是
+            <ruby style="ruby-align: center;">
+                强大
+                <rt style="color: #1a73e8; font-size: 0.5em;">big</rt>
+            </ruby>
+            的。
+        </div>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>长标注（标注比原文长）：</h3>
+            This is a 
+            <ruby style="ruby-align: center;">
+                oauth
+                <rt style="color: #1a73e8; font-size: 0.5em;">一个特殊的 oauth</rt>
+            </ruby>
+            system.
+        </div>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>中文拼音标注：</h3>
+            <ruby style="ruby-align: center;">
+                验证
+                <rt style="color: #1a73e8; font-size: 0.5em;">yàn zhèng</rt>
+            </ruby>
+            这个
+            <ruby style="ruby-align: center;">
+                功能
+                <rt style="color: #1a73e8; font-size: 0.5em;">gōng néng</rt>
+            </ruby>
+            是否正常。
+        </div>
+        
+        <div style="font-size: 20px; margin: 20px 0; line-height: 3;">
+            <h3>英文翻译标注：</h3>
+            The 
+            <ruby style="ruby-align: center;">
+                authentication
+                <rt style="color: #1a73e8; font-size: 0.5em;">认证</rt>
+            </ruby>
+            process is 
+            <ruby style="ruby-align: center;">
+                secure
+                <rt style="color: #1a73e8; font-size: 0.5em;">安全的</rt>
+            </ruby>
+            .
+        </div>
+    </div>
+
+    <div class="instructions" style="background-color: #fff3e0; border-left-color: #ff9800;">
+        <h3>🔍 调试提示：</h3>
+        <ul>
+            <li>查看 Console 中的日志输出，日志前缀为 <code>[Annotate-Translate]</code></li>
+            <li>如果没有看到右键菜单，检查插件是否已加载</li>
+            <li>如果标注没有显示，打开 Elements 标签搜索 <code>ruby.annotate-translate-ruby</code></li>
+            <li>每次修改代码后记得重新加载插件并刷新此页面</li>
+            <li><strong>注意观察：</strong>标注应该居中对齐，短标注不应该改变原文宽度</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('📄 Test page loaded successfully');
+        console.log('🔍 Open DevTools (F12) to see debug messages');
+        console.log('🔖 Select text and right-click to annotate');
+    </script>
+</body>
+</html>

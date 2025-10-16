@@ -1,0 +1,176 @@
+{
+  "extName": {
+    "message": "注釈と翻訳",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Webページ上でテキストに注釈を付けたり翻訳したりするChrome拡張機能",
+    "description": "Extension description"
+  },
+  "settings": {
+    "message": "設定",
+    "description": "Settings title"
+  },
+  "configureExtension": {
+    "message": "注釈と翻訳拡張機能を設定する",
+    "description": "Settings subtitle"
+  },
+  "featureToggles": {
+    "message": "機能切り替え",
+    "description": "Feature toggles section title"
+  },
+  "translationProvider": {
+    "message": "翻訳プロバイダー",
+    "description": "Translation provider section title"
+  },
+  "selectTranslationService": {
+    "message": "翻訳サービスを選択",
+    "description": "Select translation service label"
+  },
+  "debugProvider": {
+    "message": "デバッグ",
+    "description": "Debug provider name"
+  },
+  "googleTranslate": {
+    "message": "Google翻訳",
+    "description": "Google Translate provider name"
+  },
+  "youdaoTranslate": {
+    "message": "Youdao",
+    "description": "Youdao provider name"
+  },
+  "languageSettings": {
+    "message": "言語設定",
+    "description": "Language settings section title"
+  },
+  "defaultTargetLanguage": {
+    "message": "デフォルトのターゲット言語",
+    "description": "Default target language label"
+  },
+  "langChineseSimplified": {
+    "message": "中国語（簡体字）",
+    "description": "Chinese Simplified language name"
+  },
+  "langChineseTraditional": {
+    "message": "中国語（繁体字）",
+    "description": "Chinese Traditional language name"
+  },
+  "langEnglish": {
+    "message": "英語",
+    "description": "English language name"
+  },
+  "langJapanese": {
+    "message": "日本語",
+    "description": "Japanese language name"
+  },
+  "langKorean": {
+    "message": "韓国語",
+    "description": "Korean language name"
+  },
+  "saveSettings": {
+    "message": "設定を保存",
+    "description": "Save settings button"
+  },
+  "translate": {
+    "message": "翻訳",
+    "description": "Translate button tooltip"
+  },
+  "annotate": {
+    "message": "注釈",
+    "description": "Annotate button tooltip"
+  },
+  "openSettings": {
+    "message": "設定を開く",
+    "description": "Open settings button tooltip"
+  },
+  "translating": {
+    "message": "翻訳中...",
+    "description": "Translating loading message"
+  },
+  "close": {
+    "message": "閉じる",
+    "description": "Close button tooltip"
+  },
+  "cancel": {
+    "message": "キャンセル",
+    "description": "Cancel button"
+  },
+  "phoneticSettings": {
+    "message": "音声記号と発音の設定",
+    "description": "Phonetic settings section title"
+  },
+  "enablePhoneticFallback": {
+    "message": "音声記号の補完を有効にする",
+    "description": "Enable phonetic supplement label"
+  },
+  "phoneticFallbackDesc": {
+    "message": "翻訳プロバイダーが音声記号情報を返さない場合、外部ソースから自動的に取得します。現在は英語の音声記号をサポートしています（FreeDictionary API経由）。中国語のピンインや他の言語のサポートを予定しています。",
+    "description": "Phonetic supplement description"
+  },
+  "phoneticFallbackHow": {
+    "message": "仕組み:",
+    "description": "How it works title"
+  },
+  "phoneticFallbackStep1": {
+    "message": "翻訳プロバイダーが単語を処理 → 翻訳と定義を返す",
+    "description": "Phonetic supplement step 1"
+  },
+  "phoneticFallbackStep2": {
+    "message": "音声記号が返されない場合 → 自動的に外部APIにクエリ → 音声記号を取得",
+    "description": "Phonetic supplement step 2"
+  },
+  "phoneticFallbackStep3": {
+    "message": "結果：翻訳 + 定義 + 音声記号の完全な情報",
+    "description": "Phonetic supplement step 3"
+  },
+  "phoneticFallbackCurrentSupport": {
+    "message": "現在のサポート：英語の音声記号（単語のみ、FreeDictionary API経由 - 無料、登録不要）",
+    "description": "Phonetic supplement current support"
+  },
+  "phoneticFallbackFutureSupport": {
+    "message": "予定：中国語のピンイン、その他の言語",
+    "description": "Phonetic supplement future support"
+  },
+  
+  "original": {
+    "message": "原文",
+    "description": "Original text label"
+  },
+  "translation": {
+    "message": "翻訳",
+    "description": "Translation label"
+  },
+  "pronunciation": {
+    "message": "発音",
+    "description": "Pronunciation label"
+  },
+  "definitions": {
+    "message": "定義",
+    "description": "Definitions label"
+  },
+  "examples": {
+    "message": "例文",
+    "description": "Examples label"
+  },
+  "synonyms": {
+    "message": "同義語",
+    "description": "Synonyms label"
+  },
+  "playPronunciation": {
+    "message": "発音を再生",
+    "description": "Play pronunciation button tooltip"
+  },
+  "poweredBy": {
+    "message": "提供元",
+    "description": "Powered by label"
+  },
+  "translationFailed": {
+    "message": "翻訳に失敗しました",
+    "description": "Translation failed error title"
+  },
+  "clickToViewDetails": {
+    "message": "クリックして詳細な翻訳を表示",
+    "description": "Tooltip for clickable annotations"
+  }
+}
+

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="extName">Annotate Translate</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons -->
+    <script src="../lib/lucide.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 data-i18n="extName">Annotate Translate</h1>
+            <button id="open-settings" class="settings-icon-button" data-i18n-title="openSettings" aria-label="Open Settings">
+                <i data-lucide="settings" width="20" height="20"></i>
+            </button>
+        </div>
+        <div class="settings">
+            <h2 data-i18n="settings">Settings</h2>
+            <div class="setting-item">
+                <label for="enable-translate">
+                    <input type="checkbox" id="enable-translate" checked>
+                    <span data-i18n="enableTranslation">Enable Translation</span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="enable-annotate">
+                    <input type="checkbox" id="enable-annotate" checked>
+                    <span data-i18n="enableAnnotation">Enable Annotation</span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="translation-provider" data-i18n="selectTranslationService">Translation Service:</label>
+                <div class="provider-select-container">
+                    <img id="provider-select-icon" class="provider-select-icon" src="" alt="" style="display: none;">
+                    <select id="translation-provider">
+                        <!-- Options will be populated by JavaScript with i18n -->
+                    </select>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label for="target-language" data-i18n="defaultTargetLanguage">Target Language:</label>
+                <select id="target-language">
+                    <!-- Options will be populated by JavaScript with i18n -->
+                </select>
+            </div>
+        </div>
+        <div class="actions">
+            <button id="save-settings" data-i18n="saveSettings">Save Settings</button>
+            <button id="clear-annotations" data-i18n="clearAllAnnotations">Clear All Annotations</button>
+        </div>
+        <div id="status" class="status"></div>
+    </div>
+    <script src="../utils/i18n-helper.js"></script>
+    <script src="popup.js"></script>
+    <!-- Initialize Lucide Icons -->
+    <script src="../lib/lucide-init.js"></script>
+</body>
+</html>

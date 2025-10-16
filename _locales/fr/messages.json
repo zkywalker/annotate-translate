@@ -1,0 +1,124 @@
+{
+  "extName": {
+    "message": "Annoter et Traduire",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Une extension Chrome pour annoter et traduire du texte sur des pages web",
+    "description": "Extension description"
+  },
+  "settings": {
+    "message": "Paramètres",
+    "description": "Settings title"
+  },
+  "featureToggles": {
+    "message": "Interrupteurs de fonctionnalités",
+    "description": "Feature toggles section title"
+  },
+  "languageSettings": {
+    "message": "Paramètres de Langue",
+    "description": "Language settings section title"
+  },
+  "saveSettings": {
+    "message": "Enregistrer les Paramètres",
+    "description": "Save settings button"
+  },
+  "translate": {
+    "message": "Traduire",
+    "description": "Translate button tooltip"
+  },
+  "annotate": {
+    "message": "Annoter",
+    "description": "Annotate button tooltip"
+  },
+  "close": {
+    "message": "Fermer",
+    "description": "Close button tooltip"
+  },
+  "cancel": {
+    "message": "Annuler",
+    "description": "Cancel button"
+  },
+  "phoneticSettings": {
+    "message": "Paramètres de Phonétique et Prononciation",
+    "description": "Phonetic settings section title"
+  },
+  "enablePhoneticFallback": {
+    "message": "Activer le Supplément Phonétique",
+    "description": "Enable phonetic supplement label"
+  },
+  "phoneticFallbackDesc": {
+    "message": "Lorsque le fournisseur de traduction ne renvoie pas d'informations phonétiques, elles sont automatiquement récupérées à partir de sources externes. Prend actuellement en charge la phonétique anglaise (via l'API FreeDictionary). Support futur prévu pour le Pinyin chinois et d'autres langues.",
+    "description": "Phonetic supplement description"
+  },
+  "phoneticFallbackHow": {
+    "message": "Comment ça marche:",
+    "description": "How it works title"
+  },
+  "phoneticFallbackStep1": {
+    "message": "Le fournisseur de traduction traite le mot → Renvoie la traduction et les définitions",
+    "description": "Phonetic supplement step 1"
+  },
+  "phoneticFallbackStep2": {
+    "message": "Si aucune phonétique n'est renvoyée → Interroge automatiquement l'API externe → Obtient la phonétique",
+    "description": "Phonetic supplement step 2"
+  },
+  "phoneticFallbackStep3": {
+    "message": "Résultat: Informations complètes avec traduction + définitions + phonétique",
+    "description": "Phonetic supplement step 3"
+  },
+  "phoneticFallbackCurrentSupport": {
+    "message": "Support actuel: Phonétique anglaise (mots simples, via FreeDictionary API - gratuit, sans inscription)",
+    "description": "Phonetic supplement current support"
+  },
+  "phoneticFallbackFutureSupport": {
+    "message": "Prévu: Pinyin chinois et plus de langues",
+    "description": "Phonetic supplement future support"
+  },
+  
+  "original": {
+    "message": "Original",
+    "description": "Original text label"
+  },
+  "translation": {
+    "message": "Traduction",
+    "description": "Translation label"
+  },
+  "pronunciation": {
+    "message": "Prononciation",
+    "description": "Pronunciation label"
+  },
+  "definitions": {
+    "message": "Définitions",
+    "description": "Definitions label"
+  },
+  "examples": {
+    "message": "Exemples",
+    "description": "Examples label"
+  },
+  "synonyms": {
+    "message": "Synonymes",
+    "description": "Synonyms label"
+  },
+  "playPronunciation": {
+    "message": "Écouter la prononciation",
+    "description": "Play pronunciation button tooltip"
+  },
+  "poweredBy": {
+    "message": "Propulsé par",
+    "description": "Powered by label"
+  },
+  "translationFailed": {
+    "message": "Échec de la traduction",
+    "description": "Translation failed error title"
+  },
+  "translating": {
+    "message": "Traduction en cours...",
+    "description": "Translating loading message"
+  },
+  "clickToViewDetails": {
+    "message": "Cliquez pour voir la traduction détaillée",
+    "description": "Tooltip for clickable annotations"
+  }
+}
+

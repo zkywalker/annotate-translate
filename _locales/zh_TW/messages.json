@@ -1,0 +1,499 @@
+{
+  "extName": {
+    "message": "標注翻譯",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "一個用於在網頁上標注和翻譯文字的Chrome擴充功能",
+    "description": "Extension description"
+  },
+  
+  "settings": {
+    "message": "設定",
+    "description": "Settings title"
+  },
+  "configureExtension": {
+    "message": "配置您的標注翻譯擴充功能",
+    "description": "Settings subtitle"
+  },
+  
+  "featureToggles": {
+    "message": "功能開關",
+    "description": "Feature toggles section title"
+  },
+  
+  "translationProvider": {
+    "message": "翻譯提供商",
+    "description": "Translation provider section title"
+  },
+  "selectTranslationService": {
+    "message": "選擇翻譯服務",
+    "description": "Select translation service label"
+  },
+  "debugProvider": {
+    "message": "除錯",
+    "description": "Debug provider name"
+  },
+  "googleTranslate": {
+    "message": "Google翻譯",
+    "description": "Google Translate provider name"
+  },
+  "youdaoTranslate": {
+    "message": "有道翻譯",
+    "description": "Youdao provider name"
+  },
+  "debugProviderDesc": {
+    "message": "返回固定的測試資料用於開發和除錯。無需API呼叫。",
+    "description": "Debug provider description"
+  },
+  
+  "youdaoConfig": {
+    "message": "有道API配置",
+    "description": "Youdao API configuration section title"
+  },
+  "appKey": {
+    "message": "應用金鑰",
+    "description": "App Key label"
+  },
+  "appSecret": {
+    "message": "應用密鑰Secret",
+    "description": "App Secret label"
+  },
+  "enterAppKey": {
+    "message": "輸入您的有道應用金鑰",
+    "description": "App Key placeholder"
+  },
+  "enterAppSecret": {
+    "message": "輸入您的有道應用Secret",
+    "description": "App Secret placeholder"
+  },
+  "getAppKeyFrom": {
+    "message": "從以下網址取得應用金鑰",
+    "description": "Get App Key instruction"
+  },
+  "youdaoOpenPlatform": {
+    "message": "有道智雲開放平台",
+    "description": "Youdao platform name"
+  },
+  "keepSecretSecure": {
+    "message": "請妥善保管您的應用Secret。它將被本地儲存。",
+    "description": "Security warning for App Secret"
+  },
+  "howToGetCredentials": {
+    "message": "如何取得有道API憑證：",
+    "description": "How to get credentials title"
+  },
+  "credentialsStep1": {
+    "message": "造訪有道智雲開放平台",
+    "description": "Credentials step 1"
+  },
+  "credentialsStep2": {
+    "message": "註冊/登入您的帳戶",
+    "description": "Credentials step 2"
+  },
+  "credentialsStep3": {
+    "message": "建立一個新應用",
+    "description": "Credentials step 3"
+  },
+  "credentialsStep4": {
+    "message": "取得您的應用金鑰和Secret",
+    "description": "Credentials step 4"
+  },
+  "credentialsStep5": {
+    "message": "將它們複製到上面的欄位並儲存",
+    "description": "Credentials step 5"
+  },
+  
+  "phoneticSettings": {
+    "message": "音標與注音設定",
+    "description": "Phonetic settings section title"
+  },
+  "enablePhoneticFallback": {
+    "message": "啟用音標補充",
+    "description": "Enable phonetic supplement label"
+  },
+  "phoneticFallbackDesc": {
+    "message": "當翻譯提供商沒有返回音標資訊時，自動從外部來源取得。當前支援英語音標（透過 FreeDictionary API）。未來計劃支援漢語拼音和其他語言。",
+    "description": "Phonetic supplement description"
+  },
+  "phoneticFallbackHow": {
+    "message": "工作原理：",
+    "description": "How it works title"
+  },
+  "phoneticFallbackStep1": {
+    "message": "翻譯提供商處理單字 → 返回翻譯和釋義",
+    "description": "Phonetic supplement step 1"
+  },
+  "phoneticFallbackStep2": {
+    "message": "如果沒有返回音標 → 自動查詢外部 API → 取得音標",
+    "description": "Phonetic supplement step 2"
+  },
+  "phoneticFallbackStep3": {
+    "message": "結果：完整資訊 = 翻譯 + 釋義 + 音標",
+    "description": "Phonetic supplement step 3"
+  },
+  "phoneticFallbackCurrentSupport": {
+    "message": "當前支援：英語音標（單個單字，透過 FreeDictionary API - 免費，無需註冊）",
+    "description": "Phonetic supplement current support"
+  },
+  "phoneticFallbackFutureSupport": {
+    "message": "計劃支援：漢語拼音及更多語言",
+    "description": "Phonetic supplement future support"
+  },
+  
+  "languageSettings": {
+    "message": "語言設定",
+    "description": "Language settings section title"
+  },
+  "defaultTargetLanguage": {
+    "message": "預設目標語言",
+    "description": "Default target language label"
+  },
+  "targetLanguageDesc": {
+    "message": "翻譯文字的預設目標語言",
+    "description": "Target language description"
+  },
+  
+  "langChineseSimplified": {
+    "message": "中文（簡體）",
+    "description": "Chinese Simplified language name"
+  },
+  "langChineseTraditional": {
+    "message": "中文（繁體）",
+    "description": "Chinese Traditional language name"
+  },
+  "langEnglish": {
+    "message": "英語",
+    "description": "English language name"
+  },
+  "langJapanese": {
+    "message": "日語",
+    "description": "Japanese language name"
+  },
+  "langKorean": {
+    "message": "韓語",
+    "description": "Korean language name"
+  },
+  "langSpanish": {
+    "message": "西班牙語",
+    "description": "Spanish language name"
+  },
+  "langFrench": {
+    "message": "法語",
+    "description": "French language name"
+  },
+  "langGerman": {
+    "message": "德語",
+    "description": "German language name"
+  },
+  "langRussian": {
+    "message": "俄語",
+    "description": "Russian language name"
+  },
+  
+  "uiSettings": {
+    "message": "介面設定",
+    "description": "UI settings section title"
+  },
+  "enableAudio": {
+    "message": "啟用語音發音",
+    "description": "Enable audio label"
+  },
+  "showPhonetics": {
+    "message": "顯示音標",
+    "description": "Show phonetics label"
+  },
+  "showDefinitions": {
+    "message": "顯示詞義",
+    "description": "Show definitions label"
+  },
+  "showExamples": {
+    "message": "顯示例句",
+    "description": "Show examples label"
+  },
+  "maxExamples": {
+    "message": "最大例句數量",
+    "description": "Max examples label"
+  },
+  "maxExamplesDesc": {
+    "message": "顯示的例句數量（1-10）",
+    "description": "Max examples description"
+  },
+  "autoCloseDelay": {
+    "message": "自動關閉延遲（秒）",
+    "description": "Auto-close delay label"
+  },
+  "autoCloseDelayDesc": {
+    "message": "在指定秒數後自動關閉翻譯彈窗（0 = 永不關閉）",
+    "description": "Auto-close delay description"
+  },
+  
+  "annotationSettings": {
+    "message": "標注設定",
+    "description": "Annotation settings section title"
+  },
+  "showPhoneticInAnnotation": {
+    "message": "在標注中顯示音標 + 翻譯",
+    "description": "Show phonetic in annotation label"
+  },
+  "showPhoneticInAnnotationDesc": {
+    "message": "啟用時，標注將同時顯示音標和翻譯（例如：\"/həˈloʊ/ 你好\"）。停用時，標注將只顯示翻譯（例如：\"你好\"）。",
+    "description": "Show phonetic in annotation description"
+  },
+  "menuButtonSize": {
+    "message": "選擇選單按鈕大小",
+    "description": "Menu button size setting label"
+  },
+  "menuButtonSizeDesc": {
+    "message": "調整劃選文字後彈出按鈕的大小",
+    "description": "Menu button size setting description"
+  },
+  "sizeSmall": {
+    "message": "小（緊湊）",
+    "description": "Small button size option"
+  },
+  "sizeMedium": {
+    "message": "中（平衡）",
+    "description": "Medium button size option"
+  },
+  "sizeLarge": {
+    "message": "大（易點擊）",
+    "description": "Large button size option"
+  },
+  "annotationTip": {
+    "message": "提示：此設定影響標注模式下的自動翻譯功能。您仍然可以手動輸入任何文字作為標注。",
+    "description": "Annotation tip"
+  },
+  
+  "performanceSettings": {
+    "message": "效能設定",
+    "description": "Performance settings section title"
+  },
+  "enableCache": {
+    "message": "啟用翻譯快取",
+    "description": "Enable cache label"
+  },
+  "cacheSize": {
+    "message": "快取大小",
+    "description": "Cache size label"
+  },
+  "cacheSizeDesc": {
+    "message": "快取翻譯的最大數量（10-500）",
+    "description": "Cache size description"
+  },
+  "cacheTip": {
+    "message": "提示：快取透過本地儲存最近的翻譯來提高效能。更大的快取使用更多記憶體但減少API呼叫。",
+    "description": "Cache tip"
+  },
+  
+  "debugSettings": {
+    "message": "除錯設定",
+    "description": "Debug settings section title"
+  },
+  "enableDebugMode": {
+    "message": "啟用除錯模式",
+    "description": "Enable debug mode label"
+  },
+  "showConsoleLog": {
+    "message": "顯示控制台日誌",
+    "description": "Show console log label"
+  },
+  "debugTip": {
+    "message": "除錯模式：啟用後，將在瀏覽器控制台列印詳細日誌。使用除錯提供商可以在不呼叫API的情況下進行測試。",
+    "description": "Debug tip"
+  },
+  
+  "saveSettings": {
+    "message": "儲存設定",
+    "description": "Save settings button"
+  },
+  "resetToDefaults": {
+    "message": "恢復預設",
+    "description": "Reset to defaults button"
+  },
+  "clearCache": {
+    "message": "清除快取",
+    "description": "Clear cache button"
+  },
+  
+  "settingsSaved": {
+    "message": "設定儲存成功！",
+    "description": "Settings saved message"
+  },
+  "settingsReset": {
+    "message": "設定已恢復為預設值！",
+    "description": "Settings reset message"
+  },
+  "cacheCleared": {
+    "message": "翻譯快取已成功清除！",
+    "description": "Cache cleared message"
+  },
+  
+  "translate": {
+    "message": "翻譯",
+    "description": "Translate button tooltip"
+  },
+  "annotate": {
+    "message": "標注",
+    "description": "Annotate button tooltip"
+  },
+  "clearAllAnnotations": {
+    "message": "清除所有標注",
+    "description": "Clear all annotations button"
+  },
+  "allAnnotationsCleared": {
+    "message": "所有標注已清除！",
+    "description": "All annotations cleared message"
+  },
+  "openSettings": {
+    "message": "開啟設定",
+    "description": "Open settings button tooltip"
+  },
+  
+  "translating": {
+    "message": "翻譯中...",
+    "description": "Translating loading message"
+  },
+  "translationFailed": {
+    "message": "翻譯失敗",
+    "description": "Translation failed error title"
+  },
+  "cannotClearOnThisPage": {
+    "message": "無法在此頁面清除標注。",
+    "description": "Cannot clear annotations error"
+  },
+  "contentScriptNotAvailable": {
+    "message": "此頁面上的內容指令碼不可用。",
+    "description": "Content script not available error"
+  },
+  "failedToClear": {
+    "message": "清除標注失敗。",
+    "description": "Failed to clear error"
+  },
+  
+  "original": {
+    "message": "原文",
+    "description": "Original text label"
+  },
+  "translation": {
+    "message": "翻譯",
+    "description": "Translation label"
+  },
+  "pronunciation": {
+    "message": "發音",
+    "description": "Pronunciation label"
+  },
+  "definitions": {
+    "message": "釋義",
+    "description": "Definitions label"
+  },
+  "examples": {
+    "message": "例句",
+    "description": "Examples label"
+  },
+  "synonyms": {
+    "message": "同義詞",
+    "description": "Synonyms label"
+  },
+  "playPronunciation": {
+    "message": "播放發音",
+    "description": "Play pronunciation button tooltip"
+  },
+  "close": {
+    "message": "關閉",
+    "description": "Close button tooltip"
+  },
+  "poweredBy": {
+    "message": "技術支援",
+    "description": "Powered by label"
+  },
+  "clickToViewDetails": {
+    "message": "點擊查看詳細翻譯",
+    "description": "Tooltip for clickable annotations"
+  },
+  
+  "multipleMatchesFound": {
+    "message": "找到多個匹配",
+    "description": "Multiple matches dialog title"
+  },
+  "foundOccurrences": {
+    "message": "找到 $COUNT$ 處 \"$TEXT$\"",
+    "description": "Found occurrences message",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      },
+      "text": {
+        "content": "$2",
+        "example": "hello"
+      }
+    }
+  },
+  "annotateFirstOnly": {
+    "message": "僅標注第一個",
+    "description": "Annotate first only button"
+  },
+  "annotateAll": {
+    "message": "標注全部（$COUNT$個）",
+    "description": "Annotate all button",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "cancel": {
+    "message": "取消",
+    "description": "Cancel button"
+  },
+  
+  "badgeNew": {
+    "message": "新",
+    "description": "New badge"
+  },
+  "badgeBeta": {
+    "message": "測試版",
+    "description": "Beta badge"
+  },
+  "badgeDebug": {
+    "message": "除錯",
+    "description": "Debug badge"
+  },
+  "badgeAdvanced": {
+    "message": "進階",
+    "description": "Advanced badge"
+  },
+  
+  "confirmReset": {
+    "message": "確定要將所有設定恢復為預設值嗎？",
+    "description": "Confirmation message for resetting settings"
+  },
+  "confirmClearCache": {
+    "message": "確定要清除翻譯快取嗎？",
+    "description": "Confirmation message for clearing cache"
+  },
+  "failedToClearCache": {
+    "message": "清除快取失敗",
+    "description": "Error message when cache clearing fails"
+  },
+  
+  "uiLanguage": {
+    "message": "介面語言",
+    "description": "UI language setting label"
+  },
+  "uiLanguageDesc": {
+    "message": "擴充功能介面的語言（需要重新整理頁面）",
+    "description": "UI language setting description"
+  },
+  "autoDetect": {
+    "message": "🌐 自動偵測",
+    "description": "Auto detect language option"
+  },
+  "languageChangedReload": {
+    "message": "語言已變更！正在重新載入頁面...",
+    "description": "Message shown when language is changed"
+  }
+}
+

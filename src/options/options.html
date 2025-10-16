@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annotate Translate - Settings</title>
+  <!-- Lucide Icons -->
+  <script src="../lib/lucide.min.js"></script>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <!-- 顶部标题栏 -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="header-title">
+        <i data-lucide="settings" class="header-icon" width="24" height="24"></i>
+        <span data-i18n="settings">设置</span>
+      </h1>
+    </div>
+  </header>
+
+  <!-- 主容器 -->
+  <div class="container">
+    <!-- 左侧导航 -->
+    <nav class="sidebar">
+      <a href="#general" class="nav-item active" data-page="general">
+        <i data-lucide="home" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="generalSettings">通用设置</span>
+      </a>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section-title" data-i18n="translationServices">翻译服务</div>
+
+      <a href="#google" class="nav-item" data-page="google">
+        <img src="../../assets/icons/icon_logo_google.svg" class="nav-icon" width="20" height="20" alt="Google">
+        <span>Google 翻译</span>
+      </a>
+
+      <a href="#youdao" class="nav-item" data-page="youdao">
+        <img src="../../assets/icons/icon_logo_youdao.svg" class="nav-icon" width="20" height="20" alt="Youdao">
+        <span>有道翻译</span>
+      </a>
+
+      <a href="#deepl" class="nav-item" data-page="deepl">
+        <img src="../../assets/icons/icon_logo_deepl.svg" class="nav-icon" width="20" height="20" alt="DeepL">
+        <span>DeepL</span>
+      </a>
+
+      <a href="#openai" class="nav-item" data-page="openai">
+        <img src="../../assets/icons/icon_logo_ai.svg" class="nav-icon" width="20" height="20" alt="AI翻译">
+        <span>AI翻译</span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a href="#display" class="nav-item" data-page="display">
+        <i data-lucide="monitor" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="displaySettings">显示与外观</span>
+      </a>
+    </nav>
+
+    <!-- 右侧内容区 -->
+    <main class="content">
+      <!-- 通用设置页面 -->
+      <div id="page-general" class="page active">
+        <h2 class="page-title" data-i18n="generalSettings">通用设置</h2>
+
+        <!-- 功能开关 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="features">悬浮按钮</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableTranslation">启用翻译功能</label>
+              <p class="setting-desc" data-i18n="enableTranslationDesc">选择文本后显示翻译选项</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableTranslate" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableAnnotation">启用标注功能</label>
+              <p class="setting-desc" data-i18n="enableAnnotationDesc">为选中的文本添加翻译标注</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableAnnotate" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="floatingButtonSize">悬浮按钮尺寸</label>
+              <p class="setting-desc" data-i18n="floatingButtonSizeDesc">选择文本后显示的悬浮按钮大小</p>
+            </div>
+            <div class="setting-control">
+              <select id="menuButtonSize" class="select-input">
+                <option value="small" data-i18n="sizeSmall">小</option>
+                <option value="medium" data-i18n="sizeMedium">中</option>
+                <option value="large" data-i18n="sizeLarge">大</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enablePhoneticFallback">音标补充功能</label>
+              <p class="setting-desc" data-i18n="phoneticFallbackDesc">当翻译服务未返回音标时，自动从其他来源获取</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enablePhoneticFallback" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 语言设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="languageSettings">语言设置</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="uiLanguage">界面语言</label>
+              <p class="setting-desc" data-i18n="uiLanguageDesc">选择扩展的显示语言（需要重新加载）</p>
+            </div>
+            <div class="setting-control">
+              <select id="uiLanguage" class="select-input">
+                <!-- Options will be populated by JS -->
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="targetLanguage">默认翻译语言</label>
+              <p class="setting-desc" data-i18n="targetLanguageDesc">文本将被翻译成的目标语言</p>
+            </div>
+            <div class="setting-control">
+              <select id="targetLanguage" class="select-input">
+                <!-- Options will be populated by JS -->
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 翻译服务快速选择 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="translationService">翻译服务</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="currentService">当前服务</label>
+              <p class="setting-desc" data-i18n="currentServiceDesc">选择要使用的翻译服务</p>
+            </div>
+            <div class="setting-control">
+              <select id="currentProvider" class="select-input provider-select">
+                <option value="google">Google 翻译</option>
+                <option value="youdao">有道翻译</option>
+                <option value="deepl">DeepL</option>
+                <option value="openai">AI翻译</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 服务配置快捷链接 -->
+          <div id="quickProviderConfig" class="provider-config-box"></div>
+        </section>
+
+        <!-- 性能设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="performanceSettings">性能</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableCache">启用翻译缓存</label>
+              <p class="setting-desc" data-i18n="enableCacheDesc">缓存翻译结果以提高性能并减少 API 调用</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableCache" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="cacheSize">缓存大小</label>
+              <p class="setting-desc" data-i18n="cacheSizeDesc">最多缓存的翻译条目数量</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="cacheSize" class="number-input" min="10" max="500" value="100">
+            </div>
+          </div>
+        </section>
+
+        <!-- 调试设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="debugSettings">调试</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableDebugMode">调试模式</label>
+              <p class="setting-desc" data-i18n="enableDebugModeDesc">启用详细日志输出（仅用于开发）</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableDebugMode">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 操作按钮 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="actions">操作</h3>
+          
+          <div class="button-group">
+            <button class="btn btn-secondary" id="resetButton">
+              <i data-lucide="refresh-cw" width="18" height="18"></i>
+              <span data-i18n="resetToDefaults">重置到默认值</span>
+            </button>
+            <button class="btn btn-danger" id="clearCacheButton">
+              <i data-lucide="trash-2" width="18" height="18"></i>
+              <span data-i18n="clearCache">清除缓存</span>
+            </button>
+          </div>
+          
+        </section>
+      </div>
+
+      <!-- Google 翻译页面 -->
+      <div id="page-google" class="page">
+        <h2 class="page-title">Google 翻译</h2>
+
+        <section class="section">
+          <div class="service-intro">
+            <div class="service-icon">
+              <img src="../../assets/icons/icon_logo_google.svg" width="48" height="48" alt="Google Translate">
+            </div>
+            <div class="service-info">
+              <h3>Google 翻译</h3>
+              <p data-i18n="googleIntro">免费的翻译服务，支持超过 100 种语言，无需 API 密钥即可使用。</p>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="useGoogleTranslate">使用 Google 翻译</label>
+              <p class="setting-desc" data-i18n="useGoogleTranslateDesc">将 Google 翻译设为当前翻译服务</p>
+            </div>
+            <div class="setting-control">
+              <button class="set-provider-btn" data-provider="google" id="setGoogleAsProvider">
+                <span class="btn-icon">✓</span>
+                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
+              </button>
+            </div>
+          </div>
+        </section>
+        </div>
+
+      <!-- 有道翻译页面 -->
+      <div id="page-youdao" class="page">
+        <h2 class="page-title">有道翻译</h2>
+
+        <section class="section">
+          <div class="service-intro">
+            <div class="service-icon">
+              <img src="../../assets/icons/icon_logo_youdao.svg" width="48" height="48" alt="Youdao Translate">
+            </div>
+            <div class="service-info">
+              <h3>有道翻译</h3>
+              <p data-i18n="youdaoIntro">专业的中英翻译服务，提供准确的翻译结果和丰富的词典功能。</p>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="useYoudaoTranslate">使用有道翻译</label>
+              <p class="setting-desc" data-i18n="useYoudaoTranslateDesc">将有道翻译设为当前翻译服务</p>
+            </div>
+            <div class="setting-control">
+              <button class="set-provider-btn" data-provider="youdao" id="setYoudaoAsProvider">
+                <span class="btn-icon">✓</span>
+                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
+              </button>
+            </div>
+          </div>
+
+          <h3 class="section-title" data-i18n="apiConfiguration">API 配置</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="appKey">应用 ID (App Key)</label>
+              <p class="setting-desc" data-i18n="appKeyDesc">从有道智云获取的应用 ID</p>
+            </div>
+            <div class="setting-control">
+              <input type="text" id="youdaoAppKey" class="text-input" placeholder="请输入 App Key">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="appSecret">应用密钥 (App Secret)</label>
+              <p class="setting-desc" data-i18n="appSecretDesc">从有道智云获取的应用密钥</p>
+            </div>
+            <div class="setting-control">
+              <input type="password" id="youdaoAppSecret" class="text-input" placeholder="请输入 App Secret">
+            </div>
+          </div>
+
+          <!-- 连接测试 -->
+          <div class="test-section">
+            <h3 class="section-title" data-i18n="connectionTest">连接测试</h3>
+            <button class="btn btn-secondary" id="testYoudaoConnection">
+              <i data-lucide="check-circle" width="16" height="16"></i>
+              <span data-i18n="testConnection">测试连接</span>
+            </button>
+            <div id="youdaoTestResult" class="test-result"></div>
+          </div>
+
+          <!-- 帮助信息 -->
+          <div class="info-box">
+            <button class="info-toggle" data-target="youdao-help">
+              <i data-lucide="info" width="16" height="16"></i>
+              <strong data-i18n="howToGetCredentials">如何获取 API 凭据？</strong>
+            </button>
+            <div id="youdao-help" class="info-content collapsed">
+              <ol>
+                <li>访问 <a href="https://ai.youdao.com/" target="_blank" rel="noopener">有道智云</a></li>
+                <li data-i18n="youdaoStep2">注册并登录账号</li>
+                <li data-i18n="youdaoStep3">创建新应用</li>
+                <li data-i18n="youdaoStep4">获取 App Key 和 App Secret</li>
+                <li data-i18n="youdaoStep5">将凭据填入上方并测试</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- DeepL 页面 -->
+      <div id="page-deepl" class="page">
+        <h2 class="page-title">DeepL</h2>
+
+        <section class="section">
+          <div class="service-intro">
+            <div class="service-icon">
+              <img src="../../assets/icons/icon_logo_deepl.svg" width="48" height="48" alt="DeepL">
+            </div>
+            <div class="service-info">
+              <h3>DeepL</h3>
+              <p data-i18n="deeplIntro">号称世界上最准确的翻译服务，提供高质量的翻译结果。</p>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="useDeeplTranslate">使用 DeepL 翻译</label>
+              <p class="setting-desc" data-i18n="useDeeplTranslateDesc">将 DeepL 设为当前翻译服务</p>
+            </div>
+            <div class="setting-control">
+              <button class="set-provider-btn" data-provider="deepl" id="setDeeplAsProvider">
+                <span class="btn-icon">✓</span>
+                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
+              </button>
+            </div>
+          </div>
+
+          <h3 class="section-title" data-i18n="apiConfiguration">API 配置</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="apiKey">API 密钥</label>
+              <p class="setting-desc" data-i18n="deeplApiKeyDesc">从 DeepL 获取的 API 密钥</p>
+            </div>
+            <div class="setting-control">
+              <input type="password" id="deeplApiKey" class="text-input" placeholder="请输入 API Key">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="useFreeApi">使用免费 API</label>
+              <p class="setting-desc" data-i18n="useFreeApiDesc">免费 API 有使用限制，但足够个人使用</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="deeplUseFreeApi" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 连接测试 -->
+          <div class="test-section">
+            <h3 class="section-title" data-i18n="connectionTest">连接测试</h3>
+            <button class="btn btn-secondary" id="testDeeplConnection">
+              <i data-lucide="check-circle" width="16" height="16"></i>
+              <span data-i18n="testConnection">测试连接</span>
+            </button>
+            <div id="deeplTestResult" class="test-result"></div>
+          </div>
+
+          <!-- 帮助信息 -->
+          <div class="info-box">
+            <button class="info-toggle" data-target="deepl-help">
+              <i data-lucide="info" width="16" height="16"></i>
+              <strong data-i18n="howToGetDeeplCredentials">如何获取 API 凭据？</strong>
+            </button>
+            <div id="deepl-help" class="info-content collapsed">
+              <ol>
+                <li>访问 <a href="https://www.deepl.com/pro-api" target="_blank" rel="noopener">DeepL Pro API</a></li>
+                <li data-i18n="deeplStep2">注册免费或专业账号</li>
+                <li data-i18n="deeplStep3">从账号页面获取 API 密钥</li>
+                <li data-i18n="deeplStep4">免费套餐包含每月 500,000 字符</li>
+                <li data-i18n="deeplStep5">将 API Key 填入上方并测试</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- AI翻译 页面 -->
+      <div id="page-openai" class="page">
+        <h2 class="page-title">AI翻译</h2>
+
+        <section class="section">
+          <div class="service-intro">
+            <div class="service-icon">
+              <img src="../../assets/icons/icon_logo_ai.svg" width="48" height="48" alt="AI翻译">
+            </div>
+            <div class="service-info">
+              <h3>AI翻译</h3>
+              <p data-i18n="openaiIntro">使用 AI 模型进行智能翻译，支持上下文理解和自然语言处理。支持 OpenAI 或 OpenAI 兼容的 API 服务。</p>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="useOpenaiTranslate">使用 AI 翻译</label>
+              <p class="setting-desc" data-i18n="useOpenaiTranslateDesc">将 AI 翻译设为当前翻译服务</p>
+            </div>
+            <div class="setting-control">
+              <button class="set-provider-btn" data-provider="openai" id="setOpenaiAsProvider">
+                <span class="btn-icon">✓</span>
+                <span class="btn-text" data-i18n="setAsCurrentService">设为当前服务</span>
+              </button>
+            </div>
+          </div>
+
+          <h3 class="section-title" data-i18n="apiConfiguration">API 配置</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="apiKey">API 密钥</label>
+              <p class="setting-desc" data-i18n="openaiApiKeyDesc">从 OpenAI 平台获取的 API 密钥</p>
+            </div>
+            <div class="setting-control">
+              <input type="password" id="openaiApiKey" class="text-input" placeholder="sk-...">
+            </div>
+          </div>
+        
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="model">模型</label>
+              <p class="setting-desc" data-i18n="modelDesc">选择或输入要使用的模型名称</p>
+            </div>
+            <div class="setting-control">
+              <input type="text" id="openaiModel" class="text-input" list="openaiModelList" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
+              <datalist id="openaiModelList">
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                <option value="gpt-4o">GPT-4o</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="baseUrl">Base URL</label>
+              <p class="setting-desc" data-i18n="baseUrlDesc">API 端点 URL（支持兼容服务）</p>
+            </div>
+            <div class="setting-control">
+              <input type="text" id="openaiBaseUrl" class="text-input" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
+            </div>
+          </div>
+
+          <!-- 连接测试 -->
+          <div class="test-section">
+            <h3 class="section-title" data-i18n="connectionTest">连接测试</h3>
+            <button class="btn btn-secondary" id="testOpenaiConnection">
+              <i data-lucide="check-circle" width="16" height="16"></i>
+              <span data-i18n="testConnection">测试连接</span>
+            </button>
+            <div id="openaiTestResult" class="test-result"></div>
+          </div>
+
+          <!-- 高级选项 -->
+          <details class="advanced-section">
+            <summary data-i18n="advancedOptions">高级选项</summary>
+            
+            <div class="setting-row">
+              <div class="setting-info">
+                <label class="setting-label">Temperature</label>
+                <p class="setting-desc" data-i18n="temperatureDesc">控制翻译的创造性（0-1，越低越准确）</p>
+              </div>
+              <div class="setting-control">
+                <input type="number" id="openaiTemperature" class="number-input" min="0" max="1" step="0.1" value="0.3">
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <label class="setting-label">Max Tokens</label>
+                <p class="setting-desc" data-i18n="maxTokensDesc">单次翻译的最大 token 数量</p>
+              </div>
+              <div class="setting-control">
+                <input type="number" id="openaiMaxTokens" class="number-input" min="100" max="4000" value="500">
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <label class="setting-label" data-i18n="timeout">超时时间</label>
+                <p class="setting-desc" data-i18n="timeoutDesc">API 请求超时时间（秒）</p>
+              </div>
+              <div class="setting-control">
+                <input type="number" id="openaiTimeout" class="number-input" min="5" max="60" value="30">
+              </div>
+            </div>
+
+            <!-- 提示词配置 -->
+            <div class="setting-group">
+              <h4 class="setting-group-title" data-i18n="promptSettings">提示词设置</h4>
+              
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label class="setting-label" data-i18n="promptFormat">提示词格式</label>
+                  <p class="setting-desc" data-i18n="promptFormatDesc">选择AI返回的数据格式</p>
+                </div>
+                <div class="setting-control">
+                  <select id="openaiPromptFormat" class="select-input">
+                    <option value="jsonFormat" data-i18n="jsonFormatOption">JSON格式（完整信息）</option>
+                    <option value="simpleFormat" data-i18n="simpleFormatOption">简单格式（仅翻译）</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label class="setting-label" data-i18n="useContext">使用上下文</label>
+                  <p class="setting-desc" data-i18n="useContextDesc">提供周围文本以提高翻译准确性</p>
+                </div>
+                <div class="setting-control">
+                  <label class="switch">
+                    <input type="checkbox" id="openaiUseContext" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label class="setting-label" data-i18n="customPrompt">自定义提示词</label>
+                  <p class="setting-desc" data-i18n="customPromptDesc">高级用户可自定义AI提示词模板</p>
+                </div>
+                <div class="setting-control">
+                  <button class="btn btn-secondary" id="openPromptEditor">
+                    <i data-lucide="edit" width="16" height="16"></i>
+                    <span data-i18n="editPrompt">编辑提示词</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- 帮助信息 -->
+          <div class="info-box">
+            <button class="info-toggle" data-target="openai-help">
+              <i data-lucide="info" width="16" height="16"></i>
+              <strong data-i18n="howToGetAiCredentials">如何获取 API 凭据？</strong>
+            </button>
+            <div id="openai-help" class="info-content collapsed">
+              <ol>
+                <li>访问 <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI Platform</a></li>
+                <li data-i18n="openaiStep2">注册并登录账号</li>
+                <li data-i18n="openaiStep3">前往 API Keys 页面创建新密钥</li>
+                <li data-i18n="openaiStep4">为账号充值（按使用量付费）</li>
+                <li data-i18n="openaiStep5">将 API Key 填入上方并测试</li>
+              </ol>
+              <p data-i18n="openaiCompatible">💡 Base URL 支持其他兼容 OpenAI API 的服务（如 Azure OpenAI、Ollama 等）</p>
+            </div>
+          </div>
+        </section>
+      </div>
+        
+      <!-- 显示与外观页面 -->
+      <div id="page-display" class="page">
+        <h2 class="page-title" data-i18n="displaySettings">显示与外观</h2>
+
+        <!-- 翻译弹窗设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="translationPopup">翻译弹窗</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showPhonetics">显示音标</label>
+              <p class="setting-desc" data-i18n="showPhoneticsDesc">在翻译结果中显示发音音标</p>
+        </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showPhonetics" checked>
+                <span class="slider"></span>
+              </label>
+        </div>
+      </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableAudio">显示发音按钮</label>
+              <p class="setting-desc" data-i18n="enableAudioDesc">显示音频发音按钮</p>
+        </div>
+            <div class="setting-control">
+              <label class="switch">
+          <input type="checkbox" id="enableAudio" checked>
+                <span class="slider"></span>
+              </label>
+        </div>
+      </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showDefinitions">显示词义</label>
+              <p class="setting-desc" data-i18n="showDefinitionsDesc">显示单词的详细释义</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showDefinitions" checked>
+                <span class="slider"></span>
+              </label>
+        </div>
+        </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showExamples">显示例句</label>
+              <p class="setting-desc" data-i18n="showExamplesDesc">显示单词的使用例句</p>
+        </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showExamples" checked>
+                <span class="slider"></span>
+              </label>
+        </div>
+        </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="maxExamples">最大例句数量</label>
+              <p class="setting-desc" data-i18n="maxExamplesDesc">最多显示的例句数量</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="maxExamples" class="number-input" min="1" max="10" value="3">
+        </div>
+      </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="autoCloseDelay">自动关闭延迟</label>
+              <p class="setting-desc" data-i18n="autoCloseDelayDesc">翻译弹窗自动关闭的延迟时间（秒，0=不关闭）</p>
+        </div>
+            <div class="setting-control">
+              <input type="number" id="autoCloseDelay" class="number-input" min="0" max="60" value="10">
+        </div>
+      </div>
+        </section>
+
+        <!-- 标注设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="annotationStyle">标注样式</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showPhoneticInAnnotation">显示音标</label>
+              <p class="setting-desc" data-i18n="annotationPhoneticsDesc">在标注中显示音标</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showPhoneticInAnnotation" checked>
+                <span class="slider"></span>
+              </label>
+        </div>
+      </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showAudioInAnnotation">显示发音按钮</label>
+              <p class="setting-desc" data-i18n="annotationAudioDesc">在标注中显示发音按钮</p>
+      </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableAudioInAnnotation" checked>
+                <span class="slider"></span>
+              </label>
+      </div>
+    </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="hidePhoneticForMultipleWords">多个单词时隐藏读音</label>
+              <p class="setting-desc" data-i18n="hidePhoneticForMultipleWordsDesc">选取多个英语单词时，不显示读音标注</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="hidePhoneticForMultipleWords">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- 浮动保存提示 -->
+  <div id="saveIndicator" class="save-indicator">
+    <i data-lucide="check-circle" width="16" height="16"></i>
+    <span data-i18n="settingsSaved">设置已保存</span>
+  </div>
+
+  <!-- 脚本加载 -->
+  <!-- 提示词编辑器模态框 -->
+  <div id="promptEditorModal" class="modal" style="display: none;">
+    <div class="modal-content prompt-editor-modal">
+      <div class="modal-header">
+        <h3 data-i18n="promptEditorTitle">提示词编辑器</h3>
+        <button class="modal-close" id="closePromptEditor">
+          <i data-lucide="x" width="20" height="20"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="prompt-editor-info">
+          <div class="info-box">
+            <p data-i18n-html="promptEditorInfo">
+              <strong>可用占位符：</strong>
+              <code>{text}</code> - 待翻译文本，
+              <code>{sourceLang}</code> - 源语言，
+              <code>{targetLang}</code> - 目标语言，
+              <code>{context}</code> - 上下文
+            </p>
+          </div>
+        </div>
+
+        <div class="prompt-editor-tabs">
+          <button class="tab-btn active" data-tab="system">
+            <span data-i18n="systemPrompt">系统提示词</span>
+          </button>
+          <button class="tab-btn" data-tab="user">
+            <span data-i18n="userPrompt">用户提示词</span>
+          </button>
+          <button class="tab-btn" data-tab="context">
+            <span data-i18n="contextTemplate">上下文模板</span>
+          </button>
+        </div>
+
+        <div class="prompt-editor-content">
+          <div class="tab-content active" data-content="system">
+            <label data-i18n="systemPromptLabel">系统提示词（定义AI的角色和行为）</label>
+            <textarea id="promptSystemText" class="prompt-textarea" rows="8"></textarea>
+          </div>
+
+          <div class="tab-content" data-content="user">
+            <label data-i18n="userPromptLabel">用户提示词（具体的翻译指令）</label>
+            <textarea id="promptUserText" class="prompt-textarea" rows="12"></textarea>
+            <p class="prompt-hint" data-i18n-html="userPromptHint">
+              💡 必须包含 <code>{text}</code>, <code>{sourceLang}</code>, <code>{targetLang}</code>
+            </p>
+          </div>
+
+          <div class="tab-content" data-content="context">
+            <label data-i18n="contextTemplateLabel">上下文模板（如何展示上下文信息）</label>
+            <textarea id="promptContextText" class="prompt-textarea" rows="6"></textarea>
+            <p class="prompt-hint" data-i18n-html="contextTemplateHint">
+              💡 必须包含 <code>{context}</code> 占位符
+            </p>
+          </div>
+        </div>
+
+        <div class="prompt-editor-preview">
+          <h4 data-i18n="promptPreview">预览示例</h4>
+          <div class="preview-box">
+            <div class="preview-section">
+              <strong>System:</strong>
+              <div id="previewSystem" class="preview-text"></div>
+            </div>
+            <div class="preview-section">
+              <strong>User:</strong>
+              <div id="previewUser" class="preview-text"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="resetPromptToDefault">
+          <i data-lucide="refresh-cw" width="16" height="16"></i>
+          <span data-i18n="resetToDefault">恢复默认</span>
+        </button>
+        <button class="btn btn-secondary" id="validatePrompt">
+          <i data-lucide="check-circle" width="16" height="16"></i>
+          <span data-i18n="validatePrompt">验证模板</span>
+        </button>
+        <div style="flex: 1;"></div>
+        <button class="btn btn-secondary" id="cancelPromptEdit" data-i18n="cancel">取消</button>
+        <button class="btn btn-primary" id="savePromptEdit">
+          <i data-lucide="save" width="16" height="16"></i>
+          <span data-i18n="savePrompt">保存</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../utils/settings-schema.js"></script>
+  <script src="../providers/prompt-templates.js"></script>
+  <script src="../utils/i18n-helper.js"></script>
+  <script src="options.js"></script>
+  <!-- Initialize Lucide Icons -->
+  <script src="../lib/lucide-init.js"></script>
+</body>
+</html>
+

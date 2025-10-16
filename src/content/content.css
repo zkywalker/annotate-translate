@@ -1,0 +1,470 @@
+/* Content Script Styles for Annotate Translate Extension */
+
+.annotate-translate-menu {
+  position: absolute;
+  z-index: 10000;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  padding: 1px;
+  display: flex;
+  gap: 1px;
+  /* 添加淡入动画 */
+  animation: menuFadeIn 0.15s ease-out;
+  /* 防止用户选中菜单内的文字 */
+  -webkit-user-select: none;
+  user-select: none;
+  /* 防止点击事件穿透 */
+  pointer-events: auto;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 默认按钮样式 - Small size */
+.annotate-translate-menu .menu-button {
+  padding: 3px 6px;
+  border: none;
+  border-radius: 3px;
+  background-color: #1a73e8;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Medium size - 中等尺寸 */
+.annotate-translate-menu.size-medium {
+  padding: 2px;
+  gap: 2px;
+  border-radius: 5px;
+}
+
+.annotate-translate-menu.size-medium .menu-button {
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+}
+
+/* Large size - 大尺寸 */
+.annotate-translate-menu.size-large {
+  padding: 3px;
+  gap: 3px;
+  border-radius: 6px;
+}
+
+.annotate-translate-menu.size-large .menu-button {
+  padding: 6px 10px !important;
+  border-radius: 5px !important;
+  font-size: 13px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+}
+
+.annotate-translate-menu .menu-button:hover {
+  background-color: #1557b0;
+  transform: scale(1.05);
+}
+
+.annotate-translate-menu .menu-button:active {
+  transform: scale(0.98);
+}
+
+.annotate-translate-tooltip {
+  position: absolute;
+  z-index: 10001;
+  background-color: white;
+  color: #333;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 14px;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 加载状态 */
+.annotate-translate-tooltip.loading {
+  background-color: #f8f9fa;
+  padding: 16px 20px;
+}
+
+.annotate-translate-tooltip .loading-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #5f6368;
+}
+
+.annotate-translate-tooltip .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #e8eaed;
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 错误状态 */
+.annotate-translate-tooltip.error {
+  background-color: #fef7f7;
+  padding: 16px 20px;
+  border: 1px solid #fce8e6;
+}
+
+.annotate-translate-tooltip .error-content {
+  display: flex;
+  gap: 12px;
+}
+
+.annotate-translate-tooltip .error-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.annotate-translate-tooltip .error-message strong {
+  display: block;
+  color: #d93025;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.annotate-translate-tooltip .error-message p {
+  margin: 0;
+  color: #5f6368;
+  font-size: 13px;
+}
+
+/* 翻译卡片关闭按钮 */
+.translation-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: rgba(95, 99, 104, 0.1);
+  color: #5f6368;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+  z-index: 10;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.translation-close-btn:hover {
+  background-color: rgba(95, 99, 104, 0.2);
+  color: #202124;
+  transform: scale(1.15);
+}
+
+.translation-close-btn:active {
+  transform: scale(0.9);
+}
+
+/* 确保翻译UI组件在tooltip内正常显示 */
+.annotate-translate-tooltip .translation-result-container,
+.annotate-translate-tooltip .translation-simple-container {
+  box-shadow: none;
+  max-width: none;
+}
+
+/* 为翻译结果容器留出关闭按钮的空间 */
+.annotate-translate-tooltip .translation-result-container {
+  position: relative;
+}
+
+/* 调整第一个section的右侧padding，避免被关闭按钮遮挡 */
+.annotate-translate-tooltip .translation-section:first-child {
+  padding-right: 44px;
+}
+
+.annotate-translate-highlight {
+  background-color: #ffeb3b;
+  border-bottom: 2px solid #fbc02d;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.annotate-translate-highlight:hover {
+  background-color: #fdd835;
+}
+
+/* Ruby annotation styles */
+ruby.annotate-translate-ruby {
+  /* 使用 ruby 显示模式，让浏览器原生处理对齐 */
+  ruby-align: center;
+  position: relative;
+  /* 不使用 inline-block，使用默认的 ruby 显示方式 */
+  display: ruby;
+  /* 保持原文本的正常宽度，不被标注撑开 */
+  white-space: nowrap;
+  /* 默认样式，可能会被 JavaScript 修改为 pointer */
+  cursor: default;
+  /* 添加过渡效果 */
+  transition: all 0.2s ease;
+}
+
+/* 可点击的标注样式 */
+ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover {
+  background-color: rgba(26, 115, 232, 0.05);
+  border-radius: 3px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+
+ruby.annotate-translate-ruby[style*="cursor: pointer"]:active {
+  background-color: rgba(26, 115, 232, 0.1);
+}
+
+ruby.annotate-translate-ruby rt.annotate-translate-rt {
+  /* 标注文本样式 */
+  font-size: 0.5em;
+  color: #1a73e8;
+  font-weight: 500;
+  line-height: 1.2;
+  -webkit-user-select: none;
+  user-select: none;
+  /* 使用 ruby-text 显示，确保居中对齐 */
+  display: ruby-text;
+  ruby-position: over;
+  /* 标注文本居中对齐 */
+  text-align: center;
+  /* 防止标注文本换行 */
+  white-space: nowrap;
+  /* 如果标注比原文长，允许溢出显示 */
+  overflow: visible;
+  /* 添加文字阴影，提高小字可读性 */
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8),
+               0 1px 1px rgba(255, 255, 255, 0.9),
+               1px 0 1px rgba(255, 255, 255, 0.9),
+               -1px 0 1px rgba(255, 255, 255, 0.9),
+               0 -1px 1px rgba(255, 255, 255, 0.9);
+  /* 添加过渡效果 */
+  transition: color 0.2s ease, font-weight 0.2s ease, text-shadow 0.2s ease;
+}
+
+ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-translate-rt {
+  /* 可以稍微加深颜色，提示可点击 */
+  color: #1557b0;
+  font-weight: 600;
+  /* 悬停时增强阴影效果 */
+  text-shadow: 0 0 3px rgba(255, 255, 255, 1),
+               0 1px 2px rgba(255, 255, 255, 1),
+               1px 0 2px rgba(255, 255, 255, 1),
+               -1px 0 2px rgba(255, 255, 255, 1),
+               0 -1px 2px rgba(255, 255, 255, 1);
+}
+
+/* Dialog styles for multiple matches */
+.annotate-translate-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.annotate-translate-dialog .dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+.annotate-translate-dialog .dialog-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  min-width: 350px;
+  animation: dialogSlideIn 0.2s ease-out;
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.annotate-translate-dialog h3 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #202124;
+}
+
+.annotate-translate-dialog p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+.annotate-translate-dialog .dialog-buttons {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.annotate-translate-dialog .dialog-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.annotate-translate-dialog .dialog-btn-primary {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.annotate-translate-dialog .dialog-btn-primary:hover {
+  background-color: #1557b0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.annotate-translate-dialog .dialog-btn-success {
+  background-color: #34a853;
+  color: white;
+}
+
+.annotate-translate-dialog .dialog-btn-success:hover {
+  background-color: #2d8e47;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.annotate-translate-dialog .dialog-btn-secondary {
+  background-color: #f1f3f4;
+  color: #5f6368;
+}
+
+.annotate-translate-dialog .dialog-btn-secondary:hover {
+  background-color: #e8eaed;
+}
+
+.annotate-translate-dialog .dialog-btn:active {
+  transform: translateY(1px);
+}
+
+/* Audio button in ruby annotation */
+.annotate-audio-button {
+  border: none;
+  background: transparent; /* 移除背景 */
+  padding: 2px;
+  margin-left: 4px;
+  cursor: pointer;
+  line-height: 1;
+  vertical-align: middle;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1em;
+  color: #5f6368;
+  opacity: 0.8;
+  border-radius: 3px;
+}
+
+.annotate-audio-button:hover {
+  opacity: 1;
+  background: #e8f0fe; /* 悬停时显示淡蓝色背景 */
+  color: #1a73e8;
+  transform: scale(1.2);
+}
+
+.annotate-audio-button:active {
+  transform: scale(0.9);
+}
+
+.annotate-audio-button.playing {
+  color: #1a73e8;
+  animation: audioPlaying 0.6s ease-in-out infinite;
+}
+
+@keyframes audioPlaying {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Ensure rt content is displayed inline */
+ruby.annotate-translate-ruby rt.annotate-translate-rt span {
+  display: inline;
+}
+
+/* Annotation detail popup specific styles */
+.annotation-detail-popup {
+  animation: annotationPopupSlideIn 0.3s ease-out;
+}
+
+@keyframes annotationPopupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

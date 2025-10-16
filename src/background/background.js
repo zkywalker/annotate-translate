@@ -1,0 +1,311 @@
+// Background Service Worker for Annotate Translate Extension
+
+// Initialize extension on install
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    console.log('Annotate Translate extension installed');
+    
+    // Detect browser language and set default target language
+    const browserLanguage = chrome.i18n.getUILanguage() || navigator.language || 'en';
+    console.log('Detected browser language:', browserLanguage);
+    
+    // Map browser language to target language
+    let targetLanguage = 'en'; // Default to English
+    
+    if (browserLanguage.startsWith('zh-CN') || browserLanguage.startsWith('zh-Hans')) {
+      targetLanguage = 'zh-CN'; // Simplified Chinese
+    } else if (browserLanguage.startsWith('zh-TW') || browserLanguage.startsWith('zh-Hant')) {
+      targetLanguage = 'zh-TW'; // Traditional Chinese
+    } else if (browserLanguage.startsWith('zh')) {
+      targetLanguage = 'zh-CN'; // Default Chinese to Simplified
+    } else if (browserLanguage.startsWith('ja')) {
+      targetLanguage = 'ja'; // Japanese
+    } else if (browserLanguage.startsWith('ko')) {
+      targetLanguage = 'ko'; // Korean
+    } else if (browserLanguage.startsWith('es')) {
+      targetLanguage = 'es'; // Spanish
+    } else if (browserLanguage.startsWith('fr')) {
+      targetLanguage = 'fr'; // French
+    } else if (browserLanguage.startsWith('de')) {
+      targetLanguage = 'de'; // German
+    }
+    
+    console.log('Setting default target language to:', targetLanguage);
+    
+    // Set default settings with detected language (使用新的分层结构)
+    chrome.storage.sync.set({
+      general: {
+        enableTranslate: false,  // 默认关闭翻译功能
+        enableAnnotate: true,
+        uiLanguage: 'auto',
+        targetLanguage: targetLanguage
+      },
+      providers: {
+        current: 'google',
+        google: { enabled: true },
+        youdao: { enabled: false, appKey: '', appSecret: '', connectionStatus: null },
+        deepl: { enabled: false, apiKey: '', useFreeApi: true, connectionStatus: null },
+        openai: { enabled: false, apiKey: '', model: 'gpt-3.5-turbo', baseUrl: 'https://api.openai.com/v1', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null }
+      },
+      display: {
+        translation: {
+          enableAudio: true,
+          showPhonetics: true,
+          showDefinitions: true,
+          showExamples: true,
+          maxExamples: 3,
+          autoCloseDelay: 10,
+          enablePhoneticFallback: true
+        },
+        menu: { buttonSize: 'small' },
+        annotation: { 
+          showPhonetics: true, 
+          enableAudio: true,
+          hidePhoneticForMultipleWords: false
+        }
+      },
+      performance: {
+        enableCache: true,
+        cacheSize: 100
+      },
+      debug: {
+        enableDebugMode: false
+      }
+    });
+
+    // Create context menu items
+    createContextMenus();
+  } else if (details.reason === 'update') {
+    console.log('Annotate Translate extension updated');
+    createContextMenus();
+  }
+});
+
+// Create context menus on startup as well
+chrome.runtime.onStartup.addListener(() => {
+  console.log('Annotate Translate extension started');
+  createContextMenus();
+});
+
+// Create context menu items
+function createContextMenus() {
+  // Remove existing menus first to avoid duplicates
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'translate-text',
+      title: 'Translate "%s"',
+      contexts: ['selection']
+    });
+
+    chrome.contextMenus.create({
+      id: 'annotate-text',
+      title: 'Annotate "%s"',
+      contexts: ['selection']
+    });
+    console.log('[Annotate-Translate BG] Context menus created');
+  });
+}
+
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  console.log('[Annotate-Translate BG] Context menu clicked:', info.menuItemId, 'Text:', info.selectionText);
+  
+  // Ensure content script is injected before sending message
+  try {
+    await ensureContentScriptInjected(tab.id);
+  } catch (error) {
+    console.error('[Annotate-Translate BG] Failed to inject content script:', error);
+    return;
+  }
+  
+  if (info.menuItemId === 'translate-text') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'translate',
+      text: info.selectionText
+    }, function(response) {
+      // Handle potential errors when content script is not available
+      if (chrome.runtime.lastError) {
+        console.error('[Annotate-Translate BG] Could not send translate message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Translate message sent successfully');
+      }
+    });
+  } else if (info.menuItemId === 'annotate-text') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'annotate',
+      text: info.selectionText
+    }, function(response) {
+      // Handle potential errors when content script is not available
+      if (chrome.runtime.lastError) {
+        console.error('[Annotate-Translate BG] Could not send annotate message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Annotate message sent successfully');
+      }
+    });
+  }
+});
+
+// Ensure content script is injected into the tab
+async function ensureContentScriptInjected(tabId) {
+  try {
+    // Try to ping the content script
+    const response = await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+    if (response && response.pong) {
+      console.log('[Annotate-Translate BG] Content script already injected');
+      return;
+    }
+  } catch (error) {
+    // Content script not injected, inject it now
+    console.log('[Annotate-Translate BG] Injecting content script...');
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content.js']
+      });
+      await chrome.scripting.insertCSS({
+        target: { tabId: tabId },
+        files: ['content.css']
+      });
+      console.log('[Annotate-Translate BG] Content script injected successfully');
+      // Wait a bit for the script to initialize
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (injectError) {
+      console.error('[Annotate-Translate BG] Failed to inject content script:', injectError);
+      throw injectError;
+    }
+  }
+}
+
+// Handle messages from content scripts or popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'getSettings') {
+    chrome.storage.sync.get({
+      enableTranslate: false,  // 默认关闭翻译功能
+      enableAnnotate: true,
+      targetLanguage: 'en'
+    }, (settings) => {
+      sendResponse({settings: settings});
+    });
+    return true; // Keep message channel open for async response
+  }
+  
+  // Handle clear cache request from options page
+  if (request.action === 'clearCache') {
+    console.log('[Annotate-Translate BG] Clearing translation cache...');
+    
+    // Send message to all tabs to clear their caches
+    chrome.tabs.query({}, (tabs) => {
+      let clearedCount = 0;
+      tabs.forEach((tab) => {
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'clearCache'
+        }, (response) => {
+          if (!chrome.runtime.lastError && response && response.success) {
+            clearedCount++;
+          }
+        });
+      });
+      
+      // Wait a bit and respond
+      setTimeout(() => {
+        console.log(`[Annotate-Translate BG] Cache cleared in ${clearedCount} tabs`);
+        sendResponse({ success: true, count: clearedCount });
+      }, 100);
+    });
+    
+    return true; // Keep message channel open for async response
+  }
+  
+  // Handle Youdao translation request (to bypass CORS)
+  if (request.action === 'youdaoTranslate') {
+    console.log('[Annotate-Translate BG] Handling Youdao translation request...');
+    handleYoudaoTranslate(request.params)
+      .then(data => {
+        console.log('[Annotate-Translate BG] Youdao translation successful');
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[Annotate-Translate BG] Youdao translation failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep message channel open for async response
+  }
+  
+  // Handle DeepL translation request (to bypass CORS)
+  if (request.action === 'deeplTranslate') {
+    console.log('[Annotate-Translate BG] Handling DeepL translation request...');
+    handleDeepLTranslate(request.params)
+      .then(data => {
+        console.log('[Annotate-Translate BG] DeepL translation successful');
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[Annotate-Translate BG] DeepL translation failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep message channel open for async response
+  }
+});
+
+/**
+ * Handle Youdao translation API request in background script (bypasses CORS)
+ * @param {Object} params - Request parameters (url, method, headers, body)
+ * @returns {Promise<Object>} Response data
+ */
+async function handleYoudaoTranslate(params) {
+  try {
+    const response = await fetch(params.url, {
+      method: params.method || 'POST',
+      headers: params.headers || {},
+      body: params.body
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Annotate-Translate BG] Fetch error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Handle DeepL translation API request in background script (bypasses CORS)
+ * @param {Object} params - Request parameters (url, method, headers, body)
+ * @returns {Promise<Object>} Response data
+ */
+async function handleDeepLTranslate(params) {
+  try {
+    const response = await fetch(params.url, {
+      method: params.method || 'POST',
+      headers: params.headers || {},
+      body: params.body
+    });
+
+    if (!response.ok) {
+      // DeepL API 返回详细的错误信息
+      const errorData = await response.json().catch(() => null);
+      if (errorData && errorData.message) {
+        throw new Error(`DeepL API error [${response.status}]: ${errorData.message}`);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Annotate-Translate BG] DeepL fetch error:', error);
+    throw error;
+  }
+}
+
+// Listen for tab updates to inject content script if needed
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.url) {
+    // Content script is automatically injected via manifest
+    console.log('Tab updated:', tab.url);
+  }
+});
