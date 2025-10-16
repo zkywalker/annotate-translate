@@ -8,27 +8,25 @@ A Chrome extension for annotating and translating text on web pages.
 ### Core Features
 - **Text Translation**: Select any text on a webpage to translate it to your target language
 - **Text Annotation**: Highlight and annotate important text passages for later reference
-- **Multiple Providers**: Google Translate, Youdao
+- **Multiple Providers**: Google Translate, Youdao, Generative AI
 - **Rich Translation Results**: Audio playback, phonetics, definitions, examples
-- **Settings Page**: Centralized configuration for all features
-- **Context Menu Integration**: Right-click on selected text for quick access to features
 - **Persistent Storage**: Your annotations and settings are saved across browsing sessions
 
 ### Translation Features
 - 🌍 **Translation Providers**:
   - Google Translate (production recommended, no config needed)
-  - Youdao (Chinese optimized, **requires API key** - [Setup Guide](YOUDAO_SETUP_GUIDE.md))
+  - Youdao (Chinese optimized, **requires API key**)
+  - DeepL (**requires API key**)
+  - Generative AI with OpenAi Like API 
 - 🔊 **Audio Playback**: 
   - **In Translation Cards**: Three-tier audio strategy (ArrayBuffer → URL → TTS)
-  - **In Annotations**: Click speaker button 🔊 next to phonetics to play pronunciation ([Audio Feature Guide](AUDIO_FEATURE.md))
+  - **In Annotations**: Click speaker button 🔊 next to phonetics to play pronunciation
   - **Smart Audio Source**: Automatically uses FreeDictionary API or Web Speech API fallback
 - 📖 **Phonetics**: 
   - US/UK pronunciations with IPA notation
-  - FreeDictionary fallback for missing phonetics ([Phonetic Fallback Guide](PHONETIC_FALLBACK_FEATURE.md))
+  - FreeDictionary fallback for missing phonetics
 - 📚 **Definitions**: Multiple meanings with part of speech
 - 📝 **Examples**: Real-world usage examples
-- 💾 **Smart Cache**: Reduce API calls, improve speed
-- 🎨 **Responsive UI**: Desktop and mobile support, dark mode ready
 
 ## Project Structure
 
@@ -140,35 +138,6 @@ annotate-translate/
 
 **Example**: Select "hello" → Annotate → See `/həˈloʊ/ 你好 🔊` above the word → Click 🔊 to hear pronunciation
 
-**Ruby Tag Structure:**
-The extension creates standard HTML ruby annotations like this:
-```html
-<ruby class="annotate-translate-ruby">
-  selected text
-  <rt class="annotate-translate-rt">your annotation</rt>
-</ruby>
-```
-
-This allows the annotation text to appear directly above the base text, which is especially useful for:
-- Adding pronunciation guides
-- Providing translations
-- Adding contextual notes
-- Creating reading aids for language learning
-
-### Settings Page ⚙️
-
-Access the settings page by:
-- Right-clicking the extension icon → "Options"
-- Or visit `chrome://extensions/` → Extension details → "Extension options"
-
-**Configuration Sections**:
-1. **Feature Toggles**: Enable/disable translation and annotation
-2. **Translation Provider**: Choose from Google/Youdao
-3. **Youdao API Configuration**: Set App Key and App Secret (when Youdao is selected) - [Setup Guide](YOUDAO_SETUP_GUIDE.md)
-4. **Language Settings**: Set source and target languages
-5. **UI Settings**: Configure audio, phonetics, definitions, examples display
-6. **Performance**: Cache settings and auto-close delay
-7. **Debug Settings**: Enable debug mode and console logs
 
 ## Documentation 📚
 
@@ -243,16 +212,6 @@ TranslationUI.render()
 Display to User
 ```
 
-
-## Browser Compatibility
-
-| Browser | Version | Status |
-|---------|---------|--------|
-| Chrome | 88+ | ✅ Fully Supported |
-| Edge | 88+ | ✅ Fully Supported |
-| Firefox | 85+ | ⚠️ Partial (Manifest V3 support varies) |
-| Safari | 14+ | ⚠️ Partial (Limited extension API) |
-
 ## Permissions
 
 This extension requires the following permissions:
@@ -315,10 +274,3 @@ Contributions are welcome! Here's how you can help:
 ## License 📄
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments 🙏
-
-- Chrome Extension API documentation
-- Web Audio API specification
-- Speech Synthesis API
-- All contributors and users
