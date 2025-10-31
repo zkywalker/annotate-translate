@@ -297,13 +297,53 @@
     "message": "标注设置",
     "description": "Annotation settings section title"
   },
+  "annotationStyle": {
+    "message": "标注样式",
+    "description": "Annotation style section title"
+  },
   "showPhoneticInAnnotation": {
-    "message": "在标注中显示音标 + 翻译",
+    "message": "显示音标",
     "description": "Show phonetic in annotation label"
   },
-  "showPhoneticInAnnotationDesc": {
-    "message": "启用时，标注将同时显示音标和翻译（例如：\"/həˈloʊ/ 你好\"）。禁用时，标注将只显示翻译（例如：\"你好\"）。",
+  "annotationPhoneticsDesc": {
+    "message": "在标注中显示音标",
     "description": "Show phonetic in annotation description"
+  },
+  "showTranslationInAnnotation": {
+    "message": "显示翻译",
+    "description": "Show translation in annotation label"
+  },
+  "annotationTranslationDesc": {
+    "message": "在标注中显示翻译内容",
+    "description": "Show translation in annotation description"
+  },
+  "showDefinitionsInAnnotation": {
+    "message": "显示释义",
+    "description": "Show definitions in annotation label"
+  },
+  "annotationDefinitionsDesc": {
+    "message": "在标注中显示词义释义（⚠️ 可能超长影响体验）",
+    "description": "Show definitions in annotation description"
+  },
+  "showAudioInAnnotation": {
+    "message": "显示发音按钮",
+    "description": "Show audio button in annotation label"
+  },
+  "annotationAudioDesc": {
+    "message": "在标注中显示发音按钮",
+    "description": "Show audio button in annotation description"
+  },
+  "annotationMinimumOneRequired": {
+    "message": "⚠️ 音标、翻译、释义三项必须至少选择一项",
+    "description": "Annotation minimum one required validation message"
+  },
+  "hidePhoneticForMultipleWords": {
+    "message": "多个单词时隐藏读音",
+    "description": "Hide phonetic for multiple words label"
+  },
+  "hidePhoneticForMultipleWordsDesc": {
+    "message": "选取多个英语单词时，不显示读音标注",
+    "description": "Hide phonetic for multiple words description"
   },
   "menuButtonSize": {
     "message": "选择菜单按钮大小",
@@ -865,18 +905,6 @@
     "message": "选择菜单中按钮的大小",
     "description": "Button size description"
   },
-  "annotationStyle": {
-    "message": "标注样式",
-    "description": "Annotation style section"
-  },
-  "annotationPhoneticsDesc": {
-    "message": "在标注中显示音标符号",
-    "description": "Annotation phonetics description"
-  },
-  "annotationAudioDesc": {
-    "message": "为标注的单词启用音频",
-    "description": "Annotation audio description"
-  },
   "enableCacheDesc": {
     "message": "缓存翻译以提高性能并减少 API 调用",
     "description": "Enable cache description"
@@ -900,18 +928,6 @@
   "actionsInfo": {
     "message": "💡 这些操作将立即生效且无法撤销。",
     "description": "Actions info message"
-  },
-  "showAudioInAnnotation": {
-    "message": "在标注中启用音频",
-    "description": "Show audio in annotation label"
-  },
-  "hidePhoneticForMultipleWords": {
-    "message": "多个单词时隐藏读音",
-    "description": "Hide phonetics for multiple words label"
-  },
-  "hidePhoneticForMultipleWordsDesc": {
-    "message": "选取多个英语单词时，不显示读音标注",
-    "description": "Hide phonetics for multiple words description"
   },
   "atLeastOneButtonRequired": {
     "message": "⚠️ 至少需要显示一个悬浮按钮",

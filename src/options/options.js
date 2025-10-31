@@ -62,6 +62,8 @@ const elements = {
   enablePhoneticFallback: document.getElementById('enablePhoneticFallback'),
   menuButtonSize: document.getElementById('menuButtonSize'),
   showPhoneticInAnnotation: document.getElementById('showPhoneticInAnnotation'),
+  showTranslationInAnnotation: document.getElementById('showTranslationInAnnotation'),
+  showDefinitionsInAnnotation: document.getElementById('showDefinitionsInAnnotation'),
   enableAudioInAnnotation: document.getElementById('enableAudioInAnnotation'),
   hidePhoneticForMultipleWords: document.getElementById('hidePhoneticForMultipleWords'),
   
@@ -292,6 +294,8 @@ function applySettingsToUI() {
   if (elements.enablePhoneticFallback) elements.enablePhoneticFallback.checked = settings.display.translation.enablePhoneticFallback;
   if (elements.menuButtonSize) elements.menuButtonSize.value = settings.display.menu.buttonSize;
   if (elements.showPhoneticInAnnotation) elements.showPhoneticInAnnotation.checked = settings.display.annotation.showPhonetics;
+  if (elements.showTranslationInAnnotation) elements.showTranslationInAnnotation.checked = settings.display.annotation.showTranslation ?? true;
+  if (elements.showDefinitionsInAnnotation) elements.showDefinitionsInAnnotation.checked = settings.display.annotation.showDefinitions ?? false;
   if (elements.enableAudioInAnnotation) elements.enableAudioInAnnotation.checked = settings.display.annotation.enableAudio;
   if (elements.hidePhoneticForMultipleWords) elements.hidePhoneticForMultipleWords.checked = settings.display.annotation.hidePhoneticForMultipleWords ?? false;
   
@@ -360,6 +364,8 @@ function collectSettingsFromUI() {
       },
       annotation: {
         showPhonetics: elements.showPhoneticInAnnotation?.checked ?? settings.display.annotation.showPhonetics,
+        showTranslation: elements.showTranslationInAnnotation?.checked ?? settings.display.annotation.showTranslation ?? true,
+        showDefinitions: elements.showDefinitionsInAnnotation?.checked ?? settings.display.annotation.showDefinitions ?? false,
         enableAudio: elements.enableAudioInAnnotation?.checked ?? settings.display.annotation.enableAudio,
         hidePhoneticForMultipleWords: elements.hidePhoneticForMultipleWords?.checked ?? settings.display.annotation.hidePhoneticForMultipleWords ?? false
       }
@@ -774,7 +780,8 @@ function setupEventListeners() {
     'enableTranslate', 'enableAnnotate', 'targetLanguage', 
     'currentProvider', 'deeplUseFreeApi', 'showPhonetics', 'enableAudio',
     'showDefinitions', 'showExamples', 'enablePhoneticFallback', 
-    'menuButtonSize', 'showPhoneticInAnnotation', 'enableAudioInAnnotation',
+    'menuButtonSize', 'showPhoneticInAnnotation', 'showTranslationInAnnotation',
+    'showDefinitionsInAnnotation', 'enableAudioInAnnotation',
     'hidePhoneticForMultipleWords',
     'enableCache', 'enableDebugMode', 'openaiPromptFormat', 'openaiUseContext'
   ];
@@ -792,6 +799,20 @@ function setupEventListeners() {
           if (!translateEnabled && !annotateEnabled) {
             el.checked = true; // 恢复当前复选框
             showValidationMessage('atLeastOneButtonRequired');
+            return;
+          }
+        }
+        
+        // 验证标注显示选项：至少保留一个（音标、翻译、释义）
+        if (id === 'showPhoneticInAnnotation' || id === 'showTranslationInAnnotation' || id === 'showDefinitionsInAnnotation') {
+          const phoneticsEnabled = elements.showPhoneticInAnnotation?.checked ?? false;
+          const translationEnabled = elements.showTranslationInAnnotation?.checked ?? false;
+          const definitionsEnabled = elements.showDefinitionsInAnnotation?.checked ?? false;
+          
+          // 如果三个都被关闭，阻止本次操作
+          if (!phoneticsEnabled && !translationEnabled && !definitionsEnabled) {
+            el.checked = true; // 恢复当前复选框
+            showValidationMessage('annotationMinimumOneRequired');
             return;
           }
         }

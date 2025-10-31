@@ -106,6 +106,8 @@ const $ = {
   get autoCloseDelay() { return settings.display.translation.autoCloseDelay; },
   get enablePhoneticFallback() { return settings.display.translation.enablePhoneticFallback; },
   get showPhoneticInAnnotation() { return settings.display.annotation.showPhonetics; },
+  get showTranslationInAnnotation() { return settings.display.annotation.showTranslation ?? true; },
+  get showDefinitionsInAnnotation() { return settings.display.annotation.showDefinitions ?? false; },
   get enableAudioInAnnotation() { return settings.display.annotation.enableAudio; },
   get hidePhoneticForMultipleWords() { return settings.display.annotation.hidePhoneticForMultipleWords; },
   get menuButtonSize() { return settings.display.menu.buttonSize; },
@@ -244,7 +246,13 @@ function applyTranslationSettings() {
       const googleProvider = translationService.providers.get('google');
       if (googleProvider) {
         googleProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        console.log('[Annotate-Translate] Google provider configured - showPhoneticInAnnotation:', googleProvider.showPhoneticInAnnotation);
+        googleProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        googleProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        console.log('[Annotate-Translate] Google provider configured - annotation settings:', {
+          showPhonetics: googleProvider.showPhoneticInAnnotation,
+          showTranslation: googleProvider.showTranslationInAnnotation,
+          showDefinitions: googleProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -253,7 +261,13 @@ function applyTranslationSettings() {
       const debugProvider = translationService.providers.get('debug');
       if (debugProvider) {
         debugProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        console.log('[Annotate-Translate] Debug provider configured - showPhoneticInAnnotation:', debugProvider.showPhoneticInAnnotation);
+        debugProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        debugProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        console.log('[Annotate-Translate] Debug provider configured - annotation settings:', {
+          showPhonetics: debugProvider.showPhoneticInAnnotation,
+          showTranslation: debugProvider.showTranslationInAnnotation,
+          showDefinitions: debugProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -266,9 +280,15 @@ function applyTranslationSettings() {
           $.youdaoAppSecret
         );
         youdaoProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
+        youdaoProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        youdaoProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
         console.log('[Annotate-Translate] Youdao provider configured:');
         console.log('  - AppKey:', $.youdaoAppKey ? 'Set' : 'Not set');
-        console.log('  - showPhoneticInAnnotation:', youdaoProvider.showPhoneticInAnnotation);
+        console.log('  - Annotation settings:', {
+          showPhonetics: youdaoProvider.showPhoneticInAnnotation,
+          showTranslation: youdaoProvider.showTranslationInAnnotation,
+          showDefinitions: youdaoProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -281,10 +301,16 @@ function applyTranslationSettings() {
           $.deeplUseFreeApi
         );
         deeplProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
+        deeplProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        deeplProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
         console.log('[Annotate-Translate] DeepL provider configured:');
         console.log('  - API Key:', $.deeplApiKey ? 'Set' : 'Not set');
         console.log('  - Use Free API:', $.deeplUseFreeApi);
-        console.log('  - showPhoneticInAnnotation:', deeplProvider.showPhoneticInAnnotation);
+        console.log('  - Annotation settings:', {
+          showPhonetics: deeplProvider.showPhoneticInAnnotation,
+          showTranslation: deeplProvider.showTranslationInAnnotation,
+          showDefinitions: deeplProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -298,12 +324,19 @@ function applyTranslationSettings() {
           baseURL: $.openaiBaseUrl,
           promptFormat: 'jsonFormat',
           useContext: true,
-          showPhoneticInAnnotation: $.showPhoneticInAnnotation !== false
+          showPhoneticInAnnotation: $.showPhoneticInAnnotation !== false,
+          showTranslationInAnnotation: $.showTranslationInAnnotation !== false,
+          showDefinitionsInAnnotation: $.showDefinitionsInAnnotation === true
         });
         console.log('[Annotate-Translate] OpenAI provider configured:');
         console.log('  - API Key:', $.openaiApiKey ? 'Set' : 'Not set');
         console.log('  - Model:', $.openaiModel || 'gpt-3.5-turbo');
         console.log('  - Base URL:', $.openaiBaseUrl || 'https://api.openai.com/v1');
+        console.log('  - Annotation settings:', {
+          showPhonetics: openaiProvider.showPhoneticInAnnotation,
+          showTranslation: openaiProvider.showTranslationInAnnotation,
+          showDefinitions: openaiProvider.showDefinitionsInAnnotation
+        });
         console.log('  - showPhoneticInAnnotation:', openaiProvider.showPhoneticInAnnotation);
       }
     }
@@ -313,6 +346,16 @@ function applyTranslationSettings() {
   if ($.showPhoneticInAnnotation !== undefined) {
     translationService.showPhoneticInAnnotation = $.showPhoneticInAnnotation;
     console.log('[Annotate-Translate] Show phonetic in annotation:', $.showPhoneticInAnnotation ? 'Enabled' : 'Disabled');
+  }
+  
+  if ($.showTranslationInAnnotation !== undefined) {
+    translationService.showTranslationInAnnotation = $.showTranslationInAnnotation;
+    console.log('[Annotate-Translate] Show translation in annotation:', $.showTranslationInAnnotation ? 'Enabled' : 'Disabled');
+  }
+  
+  if ($.showDefinitionsInAnnotation !== undefined) {
+    translationService.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation;
+    console.log('[Annotate-Translate] Show definitions in annotation:', $.showDefinitionsInAnnotation ? 'Enabled' : 'Disabled');
   }
   
   if ($.enablePhoneticFallback !== undefined) {

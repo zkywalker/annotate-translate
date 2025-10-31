@@ -71,8 +71,10 @@ const DEFAULT_SETTINGS = {
     
     // 标注样式设置
     annotation: {
-      showPhonetics: true,
-      enableAudio: true
+      showPhonetics: true,       // 显示音标
+      showTranslation: true,     // 显示翻译
+      showDefinitions: false,    // 显示释义（可能超长）
+      enableAudio: true          // 显示发音按钮
     }
   },
 

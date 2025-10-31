@@ -297,13 +297,53 @@
     "message": "Annotation Settings",
     "description": "Annotation settings section title"
   },
+  "annotationStyle": {
+    "message": "Annotation Style",
+    "description": "Annotation style section title"
+  },
   "showPhoneticInAnnotation": {
-    "message": "Show Phonetic + Translation in Annotation",
+    "message": "Show Phonetics",
     "description": "Show phonetic in annotation label"
   },
-  "showPhoneticInAnnotationDesc": {
-    "message": "When enabled, annotations will show both phonetic symbols and translation (e.g., \"/həˈloʊ/ 你好\"). When disabled, annotations will only show the translation (e.g., \"你好\").",
+  "annotationPhoneticsDesc": {
+    "message": "Display phonetic symbols in annotations",
     "description": "Show phonetic in annotation description"
+  },
+  "showTranslationInAnnotation": {
+    "message": "Show Translation",
+    "description": "Show translation in annotation label"
+  },
+  "annotationTranslationDesc": {
+    "message": "Display translation content in annotations",
+    "description": "Show translation in annotation description"
+  },
+  "showDefinitionsInAnnotation": {
+    "message": "Show Definitions",
+    "description": "Show definitions in annotation label"
+  },
+  "annotationDefinitionsDesc": {
+    "message": "Display word definitions in annotations (⚠️ may be lengthy and affect experience)",
+    "description": "Show definitions in annotation description"
+  },
+  "showAudioInAnnotation": {
+    "message": "Show Audio Button",
+    "description": "Show audio button in annotation label"
+  },
+  "annotationAudioDesc": {
+    "message": "Display audio pronunciation button in annotations",
+    "description": "Show audio button in annotation description"
+  },
+  "annotationMinimumOneRequired": {
+    "message": "⚠️ At least one of phonetics, translation, or definitions must be selected",
+    "description": "Annotation minimum one required validation message"
+  },
+  "hidePhoneticForMultipleWords": {
+    "message": "Hide Phonetics for Multiple Words",
+    "description": "Hide phonetic for multiple words label"
+  },
+  "hidePhoneticForMultipleWordsDesc": {
+    "message": "Don't show phonetic annotations when multiple English words are selected",
+    "description": "Hide phonetic for multiple words description"
   },
   "menuButtonSize": {
     "message": "Selection Menu Button Size",
@@ -865,18 +905,6 @@
     "message": "Size of buttons in the selection menu",
     "description": "Button size description"
   },
-  "annotationStyle": {
-    "message": "Annotation Style",
-    "description": "Annotation style section"
-  },
-  "annotationPhoneticsDesc": {
-    "message": "Show phonetic symbols in annotations",
-    "description": "Annotation phonetics description"
-  },
-  "annotationAudioDesc": {
-    "message": "Enable audio for annotated words",
-    "description": "Annotation audio description"
-  },
   "enableCacheDesc": {
     "message": "Cache translations to improve performance and reduce API calls",
     "description": "Enable cache description"
@@ -900,18 +928,6 @@
   "actionsInfo": {
     "message": "💡 These actions will take effect immediately and cannot be undone.",
     "description": "Actions info message"
-  },
-  "showAudioInAnnotation": {
-    "message": "Enable Audio in Annotation",
-    "description": "Show audio in annotation label"
-  },
-  "hidePhoneticForMultipleWords": {
-    "message": "Hide Phonetics for Multiple Words",
-    "description": "Hide phonetics for multiple words label"
-  },
-  "hidePhoneticForMultipleWordsDesc": {
-    "message": "Hide phonetic annotations when multiple English words are selected",
-    "description": "Hide phonetics for multiple words description"
   },
   "atLeastOneButtonRequired": {
     "message": "⚠️ At least one floating button must be shown",
