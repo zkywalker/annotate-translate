@@ -245,6 +245,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true; // Keep message channel open for async response
   }
+
+  // Handle OpenAI translation request (to bypass CORS)
+  if (request.action === 'openaiTranslate') {
+    console.log('[Annotate-Translate BG] Handling OpenAI translation request...');
+    handleOpenAITranslate(request.params)
+      .then(data => {
+        console.log('[Annotate-Translate BG] OpenAI translation successful');
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[Annotate-Translate BG] OpenAI translation failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep message channel open for async response
+  }
 });
 
 /**
@@ -298,6 +313,36 @@ async function handleDeepLTranslate(params) {
     return data;
   } catch (error) {
     console.error('[Annotate-Translate BG] DeepL fetch error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Handle OpenAI translation API request in background script (bypasses CORS)
+ * @param {Object} params - Request parameters (url, method, headers, body)
+ * @returns {Promise<Object>} Response data
+ */
+async function handleOpenAITranslate(params) {
+  try {
+    const response = await fetch(params.url, {
+      method: params.method || 'POST',
+      headers: params.headers || {},
+      body: params.body
+    });
+
+    if (!response.ok) {
+      // OpenAI API 返回详细的错误信息
+      const errorData = await response.json().catch(() => null);
+      if (errorData && errorData.error) {
+        throw new Error(`OpenAI API error [${response.status}]: ${errorData.error.message || JSON.stringify(errorData.error)}`);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Annotate-Translate BG] OpenAI fetch error:', error);
     throw error;
   }
 }

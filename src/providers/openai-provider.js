@@ -59,30 +59,68 @@ class OpenAIProvider extends BaseAIProvider {
     }
   }
 
-  async callAPI(prompts) {
-    const response = await fetch(this.apiEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: [
-          { role: 'system', content: prompts.system },
-          { role: 'user', content: prompts.user }
-        ],
-        temperature: this.temperature,
-        max_tokens: this.maxTokens
-      })
+  /**
+   * 通过 background script 发送请求（绕过 CORS）
+   * @param {string} url - API URL
+   * @param {Object} body - 请求体
+   * @param {Object} headers - 请求头
+   * @returns {Promise<Object>} API 响应数据
+   */
+  async sendRequestViaBackground(url, body, headers) {
+    return new Promise((resolve, reject) => {
+      // 检查是否在扩展环境中
+      if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+        reject(new Error('Chrome extension API not available'));
+        return;
+      }
+
+      chrome.runtime.sendMessage({
+        action: 'openaiTranslate',
+        params: {
+          url: url,
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(body)
+        }
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(`Background script error: ${chrome.runtime.lastError.message}`));
+          return;
+        }
+
+        if (!response) {
+          reject(new Error('No response from background script'));
+          return;
+        }
+
+        if (response.success) {
+          resolve(response.data);
+        } else {
+          reject(new Error(response.error || 'Unknown error from background script'));
+        }
+      });
     });
+  }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`OpenAI API error (${response.status}): ${errorData.error?.message || response.statusText}`);
-    }
+  async callAPI(prompts) {
+    const requestBody = {
+      model: this.model,
+      messages: [
+        { role: 'system', content: prompts.system },
+        { role: 'user', content: prompts.user }
+      ],
+      temperature: this.temperature,
+      max_tokens: this.maxTokens
+    };
 
-    return await response.json();
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.apiKey}`
+    };
+
+    // 使用 background script 发送请求以绕过 CORS
+    const data = await this.sendRequestViaBackground(this.apiEndpoint, requestBody, headers);
+    return data;
   }
 
   parseJsonResponse(rawResponse, originalText, sourceLang, targetLang) {
