@@ -70,6 +70,36 @@ chrome.runtime.onInstalled.addListener((details) => {
       },
       debug: {
         enableDebugMode: false
+      },
+      vocabulary: {
+        enabled: false,
+        provider: 'cet',
+        providers: {
+          cet: {
+            levels: ['cet6'],
+            mode: 'above',
+            includeBase: false
+          },
+          frequency: {
+            threshold: 5000,
+            mode: 'below'
+          },
+          custom: {
+            wordList: [],
+            source: 'user'
+          }
+        },
+        scanning: {
+          mode: 'manual',
+          autoScanDelay: 1000,
+          scanDynamicContent: true
+        },
+        annotationStyle: {
+          showPhonetic: true,
+          showTranslation: true,
+          showLevel: true,
+          style: 'ruby'
+        }
       }
     });
 
@@ -102,6 +132,20 @@ function createContextMenus() {
       title: 'Annotate "%s"',
       contexts: ['selection']
     });
+
+    // Vocabulary annotation menus (for full page)
+    chrome.contextMenus.create({
+      id: 'annotate-page',
+      title: chrome.i18n.getMessage('contextMenuAnnotatePage') || 'Annotate Page Vocabulary',
+      contexts: ['page']
+    });
+
+    chrome.contextMenus.create({
+      id: 'remove-annotations',
+      title: chrome.i18n.getMessage('contextMenuRemoveAnnotations') || 'Remove Vocabulary Annotations',
+      contexts: ['page']
+    });
+
     console.log('[Annotate-Translate BG] Context menus created');
   });
 }
@@ -140,6 +184,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         console.error('[Annotate-Translate BG] Could not send annotate message:', chrome.runtime.lastError.message);
       } else {
         console.log('[Annotate-Translate BG] Annotate message sent successfully');
+      }
+    });
+  } else if (info.menuItemId === 'annotate-page') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'annotate_page'
+    }, function(response) {
+      if (chrome.runtime.lastError) {
+        console.error('[Annotate-Translate BG] Could not send annotate_page message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Annotate page message sent successfully:', response);
+      }
+    });
+  } else if (info.menuItemId === 'remove-annotations') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'remove_annotations'
+    }, function(response) {
+      if (chrome.runtime.lastError) {
+        console.error('[Annotate-Translate BG] Could not send remove_annotations message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Remove annotations message sent successfully:', response);
       }
     });
   }
@@ -245,6 +309,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true; // Keep message channel open for async response
   }
+
+  // Handle OpenAI translation request (to bypass CORS)
+  if (request.action === 'openaiTranslate') {
+    console.log('[Annotate-Translate BG] Handling OpenAI translation request...');
+    handleOpenAITranslate(request.params)
+      .then(data => {
+        console.log('[Annotate-Translate BG] OpenAI translation successful');
+        sendResponse({ success: true, data: data });
+      })
+      .catch(error => {
+        console.error('[Annotate-Translate BG] OpenAI translation failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep message channel open for async response
+  }
 });
 
 /**
@@ -298,6 +377,36 @@ async function handleDeepLTranslate(params) {
     return data;
   } catch (error) {
     console.error('[Annotate-Translate BG] DeepL fetch error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Handle OpenAI translation API request in background script (bypasses CORS)
+ * @param {Object} params - Request parameters (url, method, headers, body)
+ * @returns {Promise<Object>} Response data
+ */
+async function handleOpenAITranslate(params) {
+  try {
+    const response = await fetch(params.url, {
+      method: params.method || 'POST',
+      headers: params.headers || {},
+      body: params.body
+    });
+
+    if (!response.ok) {
+      // OpenAI API 返回详细的错误信息
+      const errorData = await response.json().catch(() => null);
+      if (errorData && errorData.error) {
+        throw new Error(`OpenAI API error [${response.status}]: ${errorData.error.message || JSON.stringify(errorData.error)}`);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Annotate-Translate BG] OpenAI fetch error:', error);
     throw error;
   }
 }

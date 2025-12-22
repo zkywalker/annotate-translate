@@ -637,14 +637,14 @@ class YoudaoTranslateProvider extends TranslationProvider {
 
   /**
    * 生成用于标注的文本
-   * 优先使用：音标 + 翻译
+   * 根据配置组合：音标 + 翻译 + 释义
    * @param {Object} result - 翻译结果对象
    * @returns {string} 标注文本
    */
   generateAnnotationText(result) {
     const parts = [];
     
-    // 只有在 showPhoneticInAnnotation 开启时才添加音标
+    // 1. 音标 - 只有在 showPhoneticInAnnotation 开启时才添加
     if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
       // 如果有音标，优先使用美式音标，其次是默认音标
       const usPhonetic = result.phonetics.find(p => p.type === 'us');
@@ -656,10 +656,31 @@ class YoudaoTranslateProvider extends TranslationProvider {
       }
     }
     
-    // 添加翻译文本
-    // 总是使用 translatedText 作为标注（这是主要翻译结果）
-    if (result.translatedText) {
+    // 2. 翻译 - 只有在 showTranslationInAnnotation 开启时才添加
+    if (this.showTranslationInAnnotation !== false && result.translatedText) {
       parts.push(result.translatedText);
+    }
+    
+    // 3. 释义 - 只有在 showDefinitionsInAnnotation 开启时才添加
+    if (this.showDefinitionsInAnnotation && result.definitions && result.definitions.length > 0) {
+      // 选择前几个释义（避免过长）
+      const definitionsToShow = result.definitions.slice(0, 2); // 最多显示2个词性的释义
+      const definitionTexts = definitionsToShow.map(def => {
+        if (def.meanings && def.meanings.length > 0) {
+          // 只取每个词性的第一个释义
+          return `[${def.pos || ''}] ${def.meanings[0]}`;
+        }
+        return null;
+      }).filter(Boolean);
+      
+      if (definitionTexts.length > 0) {
+        parts.push(definitionTexts.join('; '));
+      }
+    }
+    
+    // 如果所有部分都为空（不应该发生，但作为兜底），返回翻译文本
+    if (parts.length === 0 && result.translatedText) {
+      return result.translatedText;
     }
     
     return parts.join(' ');
@@ -1039,14 +1060,14 @@ class DeepLTranslateProvider extends TranslationProvider {
 
   /**
    * 生成用于标注的文本
-   * DeepL 只返回翻译文本，音标由后续处理补充
+   * DeepL 只返回翻译文本，音标和释义由后续处理补充
    * @param {Object} result - 翻译结果对象
    * @returns {string} 标注文本
    */
   generateAnnotationText(result) {
     const parts = [];
     
-    // 只有在 showPhoneticInAnnotation 开启时才添加音标
+    // 1. 音标 - 只有在 showPhoneticInAnnotation 开启时才添加
     if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
       // 如果有音标（由后续处理补充），优先使用美式音标
       const usPhonetic = result.phonetics.find(p => p.type === 'us');
@@ -1058,9 +1079,29 @@ class DeepLTranslateProvider extends TranslationProvider {
       }
     }
     
-    // 添加翻译文本
-    if (result.translatedText) {
+    // 2. 翻译 - 只有在 showTranslationInAnnotation 开启时才添加
+    if (this.showTranslationInAnnotation !== false && result.translatedText) {
       parts.push(result.translatedText);
+    }
+    
+    // 3. 释义 - 只有在 showDefinitionsInAnnotation 开启时才添加
+    if (this.showDefinitionsInAnnotation && result.definitions && result.definitions.length > 0) {
+      const definitionsToShow = result.definitions.slice(0, 2);
+      const definitionTexts = definitionsToShow.map(def => {
+        if (def.meanings && def.meanings.length > 0) {
+          return `[${def.pos || ''}] ${def.meanings[0]}`;
+        }
+        return null;
+      }).filter(Boolean);
+      
+      if (definitionTexts.length > 0) {
+        parts.push(definitionTexts.join('; '));
+      }
+    }
+    
+    // 如果所有部分都为空，返回翻译文本作为兜底
+    if (parts.length === 0 && result.translatedText) {
+      return result.translatedText;
     }
     
     return parts.join(' ');
@@ -1426,9 +1467,16 @@ class OpenAITranslateProvider extends TranslationProvider {
     this.apiKey = config.apiKey || '';
     this.model = config.model || 'gpt-3.5-turbo';
     this.baseURL = config.baseURL || 'https://api.openai.com/v1';
+    this.temperature = config.temperature !== undefined ? config.temperature : 0.3;
+    this.maxTokens = config.maxTokens || 500;
+    this.timeout = config.timeout || 30;
     this.promptFormat = config.promptFormat || 'jsonFormat';
     this.useContext = config.useContext !== undefined ? config.useContext : true;
+    this.customTemplates = config.customTemplates || null;
+    this.providerName = config.providerName || 'OpenAI'; // 用户自定义的提供商名称
     this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false;
+    this.showTranslationInAnnotation = config.showTranslationInAnnotation !== false;
+    this.showDefinitionsInAnnotation = config.showDefinitionsInAnnotation === true;
   }
 
   /**
@@ -1447,11 +1495,23 @@ class OpenAITranslateProvider extends TranslationProvider {
       apiKey: this.apiKey,
       model: this.model,
       baseURL: this.baseURL,
+      temperature: this.temperature,
+      maxTokens: this.maxTokens,
+      timeout: this.timeout,
+      promptFormat: this.promptFormat,
+      useContext: this.useContext,
+      customTemplates: this.customTemplates
+    });
+
+    console.log(`[OpenAI Adapter] Initialized with:`, {
+      model: this.model,
+      baseURL: this.baseURL,
+      temperature: this.temperature,
+      maxTokens: this.maxTokens,
+      timeout: this.timeout,
       promptFormat: this.promptFormat,
       useContext: this.useContext
     });
-
-    console.log(`[OpenAI Adapter] Initialized with model: ${this.model}, baseURL: ${this.baseURL}`);
   }
 
   /**
@@ -1459,7 +1519,7 @@ class OpenAITranslateProvider extends TranslationProvider {
    */
   updateConfig(config) {
     let changed = false;
-    
+
     if (config.apiKey !== undefined && config.apiKey !== this.apiKey) {
       this.apiKey = config.apiKey;
       changed = true;
@@ -1472,6 +1532,18 @@ class OpenAITranslateProvider extends TranslationProvider {
       this.baseURL = config.baseURL;
       changed = true;
     }
+    if (config.temperature !== undefined && config.temperature !== this.temperature) {
+      this.temperature = config.temperature;
+      changed = true;
+    }
+    if (config.maxTokens !== undefined && config.maxTokens !== this.maxTokens) {
+      this.maxTokens = config.maxTokens;
+      changed = true;
+    }
+    if (config.timeout !== undefined && config.timeout !== this.timeout) {
+      this.timeout = config.timeout;
+      changed = true;
+    }
     if (config.promptFormat !== undefined && config.promptFormat !== this.promptFormat) {
       this.promptFormat = config.promptFormat;
       changed = true;
@@ -1480,8 +1552,22 @@ class OpenAITranslateProvider extends TranslationProvider {
       this.useContext = config.useContext;
       changed = true;
     }
+    if (config.customTemplates !== undefined && config.customTemplates !== this.customTemplates) {
+      this.customTemplates = config.customTemplates;
+      changed = true;
+    }
+    if (config.providerName !== undefined && config.providerName !== this.providerName) {
+      this.providerName = config.providerName;
+      // providerName 变更不需要重新初始化 provider
+    }
     if (config.showPhoneticInAnnotation !== undefined) {
       this.showPhoneticInAnnotation = config.showPhoneticInAnnotation;
+    }
+    if (config.showTranslationInAnnotation !== undefined) {
+      this.showTranslationInAnnotation = config.showTranslationInAnnotation;
+    }
+    if (config.showDefinitionsInAnnotation !== undefined) {
+      this.showDefinitionsInAnnotation = config.showDefinitionsInAnnotation;
     }
 
     if (changed) {
@@ -1524,6 +1610,7 @@ class OpenAITranslateProvider extends TranslationProvider {
         definitions: aiResult.definitions || [],
         examples: aiResult.examples || [],
         provider: 'openai',
+        providerDisplayName: this.providerName, // 用户自定义的提供商显示名称
         metadata: aiResult.metadata || {},
         timestamp: Date.now()
       };
@@ -1542,11 +1629,12 @@ class OpenAITranslateProvider extends TranslationProvider {
 
   /**
    * 构建标注文本
+   * 根据配置组合：音标 + 翻译 + 释义
    */
   buildAnnotationText(result) {
     let parts = [];
     
-    // 添加音标（如果有且设置显示）
+    // 1. 音标 - 只有在 showPhoneticInAnnotation 开启时才添加
     if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
       const phoneticTexts = result.phonetics.map(p => p.text).filter(t => t);
       if (phoneticTexts.length > 0) {
@@ -1554,8 +1642,30 @@ class OpenAITranslateProvider extends TranslationProvider {
       }
     }
     
-    // 添加翻译
-    parts.push(result.translatedText);
+    // 2. 翻译 - 只有在 showTranslationInAnnotation 开启时才添加
+    if (this.showTranslationInAnnotation !== false && result.translatedText) {
+      parts.push(result.translatedText);
+    }
+    
+    // 3. 释义 - 只有在 showDefinitionsInAnnotation 开启时才添加
+    if (this.showDefinitionsInAnnotation && result.definitions && result.definitions.length > 0) {
+      const definitionsToShow = result.definitions.slice(0, 2);
+      const definitionTexts = definitionsToShow.map(def => {
+        if (def.meanings && def.meanings.length > 0) {
+          return `[${def.pos || ''}] ${def.meanings[0]}`;
+        }
+        return null;
+      }).filter(Boolean);
+      
+      if (definitionTexts.length > 0) {
+        parts.push(definitionTexts.join('; '));
+      }
+    }
+    
+    // 如果所有部分都为空，返回翻译文本作为兜底
+    if (parts.length === 0 && result.translatedText) {
+      return result.translatedText;
+    }
     
     return parts.join(' ');
   }
@@ -1603,7 +1713,9 @@ class TranslationService {
     this.cache = new Map(); // 翻译缓存
     this.maxCacheSize = 100;
     this.enablePhoneticFallback = true; // 默认启用音标补充
-    this.showPhoneticInAnnotation = true; // 默认在标注中显示音标 + 翻译
+    this.showPhoneticInAnnotation = true; // 默认在标注中显示音标
+    this.showTranslationInAnnotation = true; // 默认在标注中显示翻译
+    this.showDefinitionsInAnnotation = false; // 默认不显示释义（可能过长）
   }
 
   /**
@@ -1730,14 +1842,14 @@ class TranslationService {
 
   /**
    * 生成用于标注的文本（通用方法）
-   * 优先使用：音标 + 翻译
+   * 根据配置组合：音标 + 翻译 + 释义
    * @param {Object} result - 翻译结果对象
    * @returns {string} 标注文本
    */
   generateAnnotationText(result) {
     const parts = [];
     
-    // 只有在 showPhoneticInAnnotation 开启时才添加音标
+    // 1. 音标 - 只有在 showPhoneticInAnnotation 开启时才添加
     if (this.showPhoneticInAnnotation && result.phonetics && result.phonetics.length > 0) {
       // 如果有音标，优先使用美式音标，其次是默认音标
       const usPhonetic = result.phonetics.find(p => p.type === 'us');
@@ -1749,10 +1861,31 @@ class TranslationService {
       }
     }
     
-    // 添加翻译文本
-    // 优先使用 translatedText（主要翻译），这适用于所有情况
-    if (result.translatedText) {
+    // 2. 翻译 - 只有在 showTranslationInAnnotation 开启时才添加
+    if (this.showTranslationInAnnotation && result.translatedText) {
       parts.push(result.translatedText);
+    }
+    
+    // 3. 释义 - 只有在 showDefinitionsInAnnotation 开启时才添加
+    if (this.showDefinitionsInAnnotation && result.definitions && result.definitions.length > 0) {
+      // 选择前几个释义（避免过长）
+      const definitionsToShow = result.definitions.slice(0, 2); // 最多显示2个词性的释义
+      const definitionTexts = definitionsToShow.map(def => {
+        if (def.meanings && def.meanings.length > 0) {
+          // 只取每个词性的第一个释义
+          return `[${def.pos || ''}] ${def.meanings[0]}`;
+        }
+        return null;
+      }).filter(Boolean);
+      
+      if (definitionTexts.length > 0) {
+        parts.push(definitionTexts.join('; '));
+      }
+    }
+    
+    // 如果所有部分都为空（不应该发生，但作为兜底），返回翻译文本
+    if (parts.length === 0 && result.translatedText) {
+      return result.translatedText;
     }
     
     return parts.join(' ');

@@ -14,8 +14,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load saved settings
   loadSettings();
 
-  // Save settings button
-  document.getElementById('save-settings').addEventListener('click', saveSettings);
+  // Add auto-save listeners to all settings controls
+  document.getElementById('enable-translate').addEventListener('change', autoSaveSettings);
+  document.getElementById('enable-annotate').addEventListener('change', autoSaveSettings);
+  document.getElementById('translation-provider').addEventListener('change', autoSaveSettings);
+  document.getElementById('target-language').addEventListener('change', autoSaveSettings);
 
   // Clear annotations button
   document.getElementById('clear-annotations').addEventListener('click', clearAnnotations);
@@ -89,9 +92,9 @@ function updateProviderIcon() {
   if (logoPath) {
     icon.src = chrome.runtime.getURL(logoPath);
     icon.alt = selectedOption.textContent;
-    icon.style.display = 'block';
+    icon.classList.remove('hidden');
   } else {
-    icon.style.display = 'none';
+    icon.classList.add('hidden');
   }
 }
 
@@ -136,8 +139,8 @@ function loadSettings() {
   });
 }
 
-// Save settings to storage
-function saveSettings() {
+// Auto-save settings when any control changes
+function autoSaveSettings() {
   // 先读取现有设置
   chrome.storage.sync.get(null, function(stored) {
     // 使用新的分层结构
@@ -159,7 +162,7 @@ function saveSettings() {
     stored.providers.current = document.getElementById('translation-provider').value;
 
     chrome.storage.sync.set(stored, function() {
-      // Update status to let user know settings were saved
+      // 显示简短的保存提示
       const status = document.getElementById('status');
       status.textContent = i18n('settingsSaved');
       status.className = 'status success';
@@ -179,10 +182,11 @@ function saveSettings() {
         }
       });
 
+      // 更短的提示时间
       setTimeout(function() {
         status.textContent = '';
         status.className = 'status';
-      }, 3000);
+      }, 1500);
     });
   });
 }

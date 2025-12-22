@@ -1,55 +1,51 @@
 // Content Script for Annotate Translate Extension
+// Note: Utility functions (safeGetMessage, isExtensionContextValid) are now imported from message-helper.js
 
-/**
- * 检查扩展上下文是否有效
- * @returns {boolean} 如果扩展上下文有效返回 true
- */
-function isExtensionContextValid() {
-  try {
-    return chrome.runtime && chrome.runtime.id !== undefined;
-  } catch (e) {
-    return false;
+// 深度合并两个对象
+function deepMerge(target, source) {
+  const result = { ...target };
+
+  for (const key in source) {
+    if (source.hasOwnProperty(key)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        // 递归合并对象
+        result[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        // 直接赋值（包括数组和基本类型）
+        result[key] = source[key];
+      }
+    }
   }
+
+  return result;
 }
 
-/**
- * 安全获取 i18n 消息，避免扩展上下文失效错误
- * 现在使用 i18n-helper.js 提供的 i18n 函数
- * @param {string} key - 消息 key
- * @param {Array|string} substitutions - 替换参数
- * @param {string} fallback - 后备文本
- * @returns {string} 翻译后的消息或后备文本
- */
-function safeGetMessage(key, substitutions = null, fallback = '') {
-  try {
-    // 使用 i18n-helper.js 提供的 i18n 函数
-    if (typeof i18n !== 'undefined') {
-      const subs = Array.isArray(substitutions) ? substitutions : (substitutions ? [substitutions] : []);
-      const message = i18n(key, subs);
-      return message || fallback;
-    }
-    // Fallback to chrome.i18n if i18n helper is not available
-    if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
-      const message = substitutions 
-        ? chrome.i18n.getMessage(key, substitutions)
-        : chrome.i18n.getMessage(key);
-      return message || fallback;
-    }
-    return fallback;
-  } catch (e) {
-    // 扩展上下文失效时返回后备文本
-    console.warn('[Annotate-Translate] Extension context invalidated, using fallback text');
-    return fallback;
-  }
-}
-
-// 全局设置对象 - 使用新的分层结构
+// 全局设置对象 - 使用新的扁平化结构
 let settings = {
   general: {
     enableTranslate: true,
     enableAnnotate: true,
     uiLanguage: 'auto',
-    targetLanguage: 'zh-CN'
+    targetLanguage: 'zh-CN',
+    showFloatingButton: true,
+    enableContextMenu: true,
+    phoneticDisplay: 'both',
+    enablePhoneticFallback: true
+  },
+  annotation: {
+    showPhonetics: true,
+    showTranslation: true,
+    showDefinitions: false,
+    enableAudio: true,
+    hidePhoneticForMultipleWords: false
+  },
+  translationCard: {
+    showPhonetics: true,
+    enableAudio: true,
+    showDefinitions: true,
+    showExamples: true,
+    maxExamples: 3,
+    autoCloseDelay: 10
   },
   providers: {
     current: 'google',
@@ -59,21 +55,7 @@ let settings = {
     openai: { enabled: false, apiKey: '', model: 'gpt-3.5-turbo', baseUrl: 'https://api.openai.com/v1', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null }
   },
   display: {
-    translation: {
-      enableAudio: true,
-      showPhonetics: true,
-      showDefinitions: true,
-      showExamples: true,
-      maxExamples: 3,
-      autoCloseDelay: 10,
-      enablePhoneticFallback: true
-    },
-    menu: { buttonSize: 'small' },
-    annotation: { 
-      showPhonetics: true, 
-      enableAudio: true,
-      hidePhoneticForMultipleWords: false  // 多个单词时隐藏读音
-    }
+    menu: { buttonSize: 'small' }
   },
   performance: {
     enableCache: true,
@@ -81,93 +63,194 @@ let settings = {
   },
   debug: {
     enableDebugMode: false
+  },
+  vocabulary: {
+    enabled: false,
+    provider: 'cet',
+    providers: {
+      cet: {
+        levels: ['cet6'],
+        mode: 'above',
+        includeBase: false
+      },
+      frequency: {
+        threshold: 5000,
+        mode: 'below'
+      },
+      custom: {
+        wordList: [],
+        source: 'user'
+      }
+    },
+    scanning: {
+      mode: 'manual',
+      autoScanDelay: 1000,
+      scanDynamicContent: true
+    },
+    annotationStyle: {
+      showPhonetic: true,
+      showTranslation: true,
+      showLevel: true,
+      style: 'ruby'
+    }
   }
 };
 
 // 设置访问辅助函数 - 简化代码
 const $ = {
-  get enableTranslate() { return settings.general.enableTranslate; },
-  get enableAnnotate() { return settings.general.enableAnnotate; },
-  get targetLanguage() { return settings.general.targetLanguage; },
-  get translationProvider() { return settings.providers.current; },
-  set translationProvider(val) { settings.providers.current = val; },
-  get youdaoAppKey() { return settings.providers.youdao.appKey; },
-  get youdaoAppSecret() { return settings.providers.youdao.appSecret; },
-  get deeplApiKey() { return settings.providers.deepl.apiKey; },
-  get deeplUseFreeApi() { return settings.providers.deepl.useFreeApi; },
-  get openaiApiKey() { return settings.providers.openai.apiKey; },
-  get openaiModel() { return settings.providers.openai.model; },
-  get openaiBaseUrl() { return settings.providers.openai.baseUrl; },
-  get enableAudio() { return settings.display.translation.enableAudio; },
-  get showPhonetics() { return settings.display.translation.showPhonetics; },
-  get showDefinitions() { return settings.display.translation.showDefinitions; },
-  get showExamples() { return settings.display.translation.showExamples; },
-  get maxExamples() { return settings.display.translation.maxExamples; },
-  get autoCloseDelay() { return settings.display.translation.autoCloseDelay; },
-  get enablePhoneticFallback() { return settings.display.translation.enablePhoneticFallback; },
-  get showPhoneticInAnnotation() { return settings.display.annotation.showPhonetics; },
-  get enableAudioInAnnotation() { return settings.display.annotation.enableAudio; },
-  get hidePhoneticForMultipleWords() { return settings.display.annotation.hidePhoneticForMultipleWords; },
-  get menuButtonSize() { return settings.display.menu.buttonSize; },
-  get enableCache() { return settings.performance.enableCache; },
-  get cacheSize() { return settings.performance.cacheSize; },
-  get debugMode() { return settings.debug.enableDebugMode; },
-  get showConsoleLogs() { return settings.debug.enableDebugMode; }
+  get enableTranslate() { return settings.general?.enableTranslate ?? true; },
+  get enableAnnotate() { return settings.general?.enableAnnotate ?? true; },
+  get targetLanguage() { return settings.general?.targetLanguage ?? 'zh-CN'; },
+  get translationProvider() { return settings.providers?.current ?? 'google'; },
+  set translationProvider(val) { if (settings.providers) settings.providers.current = val; },
+  get youdaoAppKey() { return settings.providers?.youdao?.appKey ?? ''; },
+  get youdaoAppSecret() { return settings.providers?.youdao?.appSecret ?? ''; },
+  get deeplApiKey() { return settings.providers?.deepl?.apiKey ?? ''; },
+  get deeplUseFreeApi() { return settings.providers?.deepl?.useFreeApi ?? true; },
+  // 获取当前选中的 AI 提供商配置
+  get currentAIProvider() {
+    const currentId = settings.providers?.currentAIProvider;
+    const aiProviders = settings.providers?.aiProviders || [];
+    const provider = aiProviders.find(p => p.id === currentId);
+
+    // 如果找不到，回退到旧的 openai 配置
+    if (!provider) {
+      return {
+        apiKey: settings.providers?.openai?.apiKey ?? '',
+        model: settings.providers?.openai?.model ?? 'gpt-3.5-turbo',
+        baseUrl: settings.providers?.openai?.baseUrl ?? 'https://api.openai.com/v1',
+        temperature: settings.providers?.openai?.temperature ?? 0.3,
+        maxTokens: settings.providers?.openai?.maxTokens ?? 500,
+        timeout: settings.providers?.openai?.timeout ?? 30,
+        promptFormat: settings.providers?.openai?.promptFormat ?? 'jsonFormat',
+        useContext: settings.providers?.openai?.useContext ?? true
+      };
+    }
+
+    return provider;
+  },
+  get openaiApiKey() { return this.currentAIProvider.apiKey ?? ''; },
+  get openaiModel() { return this.currentAIProvider.model ?? 'gpt-3.5-turbo'; },
+  get openaiBaseUrl() { return this.currentAIProvider.baseUrl ?? 'https://api.openai.com/v1'; },
+  get openaiTemperature() { return this.currentAIProvider.temperature ?? 0.3; },
+  get openaiMaxTokens() { return this.currentAIProvider.maxTokens ?? 500; },
+  get openaiTimeout() { return this.currentAIProvider.timeout ?? 30; },
+  get openaiPromptFormat() { return this.currentAIProvider.promptFormat ?? 'jsonFormat'; },
+  get openaiUseContext() { return this.currentAIProvider.useContext ?? true; },
+  get enableAudio() { return settings.translationCard?.enableAudio ?? true; },
+  get showPhonetics() { return settings.translationCard?.showPhonetics ?? true; },
+  get showDefinitions() { return settings.translationCard?.showDefinitions ?? true; },
+  get showExamples() { return settings.translationCard?.showExamples ?? true; },
+  get maxExamples() { return settings.translationCard?.maxExamples ?? 3; },
+  get autoCloseDelay() { return settings.translationCard?.autoCloseDelay ?? 10; },
+  get enablePhoneticFallback() { return settings.general?.enablePhoneticFallback ?? true; },
+  get showPhoneticInAnnotation() { return settings.annotation?.showPhonetics ?? true; },
+  get showTranslationInAnnotation() { return settings.annotation?.showTranslation ?? true; },
+  get showDefinitionsInAnnotation() { return settings.annotation?.showDefinitions ?? false; },
+  get enableAudioInAnnotation() { return settings.annotation?.enableAudio ?? true; },
+  get hidePhoneticForMultipleWords() { return settings.annotation?.hidePhoneticForMultipleWords ?? false; },
+  get menuButtonSize() { return settings.display?.menu?.buttonSize ?? 'small'; },
+  get enableCache() { return settings.performance?.enableCache ?? true; },
+  get cacheSize() { return settings.performance?.cacheSize ?? 100; },
+  get debugMode() { return settings.debug?.enableDebugMode ?? false; },
+  get showConsoleLogs() { return settings.debug?.enableDebugMode ?? false; },
+  // 词库标注相关
+  get vocabularyEnabled() { return settings.vocabulary?.enabled ?? false; },
+  get vocabularyProvider() { return settings.vocabulary?.provider ?? 'cet'; },
+  get vocabularyCETLevels() { return settings.vocabulary?.providers?.cet?.levels ?? ['cet6']; },
+  get vocabularyCETMode() { return settings.vocabulary?.providers?.cet?.mode ?? 'above'; },
+  get vocabularyCETIncludeBase() { return settings.vocabulary?.providers?.cet?.includeBase ?? false; },
+  get vocabularyFrequencyThreshold() { return settings.vocabulary?.providers?.frequency?.threshold ?? 5000; },
+  get vocabularyFrequencyMode() { return settings.vocabulary?.providers?.frequency?.mode ?? 'below'; },
+  get vocabularyScanMode() { return settings.vocabulary?.scanning?.mode ?? 'manual'; },
+  get vocabularyShowPhonetic() { return settings.vocabulary?.annotationStyle?.showPhonetic ?? true; },
+  get vocabularyShowTranslation() { return settings.vocabulary?.annotationStyle?.showTranslation ?? true; },
+  get vocabularyShowLevel() { return settings.vocabulary?.annotationStyle?.showLevel ?? true; }
 };
 
 let annotations = new Map();
 let lastSelection = null; // 保存最后一次选择的Range
 let translationUI = null; // TranslationUI实例
 let currentTooltip = null; // 当前显示的翻译卡片
+let annotationScanner = null; // AnnotationScanner实例
 
 // Initialize the extension
 init();
 
 async function init() {
   console.log('[Annotate-Translate] Content script loaded on:', window.location.href);
-  
+
   // 检查扩展上下文
   if (!isExtensionContextValid()) {
     console.error('[Annotate-Translate] Extension context is invalid, script will not initialize');
     return;
   }
-  
+
   // 检查翻译服务是否可用
   if (typeof translationService === 'undefined') {
     console.error('[Annotate-Translate] Translation service not loaded!');
     return;
   }
-  
+
   console.log('[Annotate-Translate] Translation service available:', translationService);
-  
+
   // 初始化语言设置（从 i18n-helper.js）
   if (typeof initializeLanguage !== 'undefined') {
     await initializeLanguage();
     console.log('[Annotate-Translate] Language initialized');
   }
-  
-  // Load settings from storage
-  chrome.storage.sync.get(null, function(items) {
-    // 如果有存储的设置，使用存储的设置
+
+  // Load settings from storage - FIX: Wait for settings to load before proceeding
+  try {
+    const items = await new Promise((resolve, reject) => {
+      chrome.storage.sync.get(null, function(items) {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(items);
+        }
+      });
+    });
+
+    // 如果有存储的设置，合并到默认设置（保留新增字段）
     if (items.general) {
-      settings = items;
-      console.log('[Annotate-Translate] Settings loaded:', settings);
+      // 深度合并：保留默认settings中的字段，用storage中的值覆盖
+      settings = deepMerge(settings, items);
+      console.log('[Annotate-Translate] Settings loaded from storage');
+      console.log('[Annotate-Translate] Merged settings:', settings);
     } else {
       console.log('[Annotate-Translate] No settings found, using defaults');
     }
-    
-    // 应用设置到翻译服务
+
+    // 应用设置到翻译服务 - Now happens BEFORE event listeners are registered
     applyTranslationSettings();
-  });
 
-  // 初始化TranslationUI
-  initializeTranslationUI();
+    // 初始化TranslationUI - After settings are loaded
+    initializeTranslationUI();
 
-  // Listen for text selection
-  document.addEventListener('mouseup', handleTextSelection);
+    // 初始化词库服务 - After settings are loaded
+    await initializeVocabularyService();
 
-  // Listen for messages from popup
-  chrome.runtime.onMessage.addListener(handleMessage);
+    // 初始化AnnotationScanner - After vocabulary service is initialized
+    initializeAnnotationScanner();
+
+    // Listen for text selection - Only after settings are loaded
+    document.addEventListener('mouseup', handleTextSelection);
+
+    // Listen for messages from popup
+    chrome.runtime.onMessage.addListener(handleMessage);
+
+    console.log('[Annotate-Translate] Initialization complete');
+  } catch (error) {
+    console.error('[Annotate-Translate] Failed to load settings:', error);
+    // Continue with defaults even if settings loading fails
+    applyTranslationSettings();
+    initializeTranslationUI();
+    await initializeVocabularyService();
+    initializeAnnotationScanner();
+    document.addEventListener('mouseup', handleTextSelection);
+    chrome.runtime.onMessage.addListener(handleMessage);
+  }
 }
 
 // 初始化TranslationUI
@@ -176,7 +259,7 @@ function initializeTranslationUI() {
     console.error('[Annotate-Translate] TranslationUI not loaded!');
     return;
   }
-  
+
   translationUI = new TranslationUI({
     showPhonetics: $.showPhonetics,
     showDefinitions: $.showDefinitions,
@@ -184,8 +267,114 @@ function initializeTranslationUI() {
     maxExamples: $.maxExamples,
     enableAudio: $.enableAudio
   });
-  
+
   console.log('[Annotate-Translate] TranslationUI initialized');
+}
+
+// 初始化词库服务
+async function initializeVocabularyService() {
+  console.log('[VocabularyService] Starting initialization...');
+  console.log('[VocabularyService] vocabularyService defined?', typeof vocabularyService !== 'undefined');
+  console.log('[VocabularyService] settings.vocabulary:', settings.vocabulary);
+
+  if (typeof vocabularyService === 'undefined') {
+    console.warn('[Annotate-Translate] VocabularyService not loaded, vocabulary features will be unavailable');
+    return;
+  }
+
+  try {
+    // 注册统一词库（新 - 推荐使用）
+    if (typeof UnifiedVocabularyProvider !== 'undefined') {
+      const unifiedProvider = new UnifiedVocabularyProvider('unified');
+      vocabularyService.registerProvider('unified', unifiedProvider);
+      console.log('[VocabularyService] Unified provider registered');
+    } else {
+      console.warn('[VocabularyService] UnifiedVocabularyProvider not defined');
+    }
+
+    // 注册CET词库（旧 - 向后兼容）
+    if (typeof CETVocabularyProvider !== 'undefined') {
+      const cetProvider = new CETVocabularyProvider();
+      vocabularyService.registerProvider('cet', cetProvider);
+      console.log('[VocabularyService] CET provider registered');
+    } else {
+      console.warn('[VocabularyService] CETVocabularyProvider not defined');
+    }
+
+    // 注册词频词库（旧 - 向后兼容）
+    if (typeof FrequencyVocabularyProvider !== 'undefined') {
+      const frequencyProvider = new FrequencyVocabularyProvider();
+      vocabularyService.registerProvider('frequency', frequencyProvider);
+      console.log('[VocabularyService] Frequency provider registered');
+    } else {
+      console.warn('[VocabularyService] FrequencyVocabularyProvider not defined');
+    }
+
+    // 设置活跃provider
+    // 优先使用 unified，如果设置中是 cet/frequency 则自动升级
+    let providerName = $.vocabularyProvider || 'unified';
+    let providerOptions = {};
+
+    // 自动升级旧配置并转换选项格式
+    if (providerName === 'cet' && typeof UnifiedVocabularyProvider !== 'undefined') {
+      console.log('[VocabularyService] Auto-upgrading from "cet" to "unified" provider');
+
+      // 将 CET 配置转换为 Unified 格式
+      const cetConfig = settings.vocabulary?.providers?.cet || {};
+      providerOptions = {
+        targetTags: cetConfig.levels || ['cet6'],  // CET levels as target tags
+        mode: 'any',  // 'any' tag match (CET-6 or higher)
+        includeBase: cetConfig.includeBase || false,
+        minCollins: 0
+      };
+
+      providerName = 'unified';
+      console.log('[VocabularyService] Converted CET options to unified format:', providerOptions);
+    } else if (providerName === 'unified') {
+      // Unified provider 使用默认配置
+      providerOptions = settings.vocabulary?.providers?.unified || {
+        targetTags: ['cet6', 'toefl', 'ielts'],  // 默认标注 CET-6/TOEFL/IELTS
+        mode: 'any',
+        includeBase: false,
+        minCollins: 0
+      };
+    } else {
+      // 其他 provider 使用原始配置
+      providerOptions = settings.vocabulary?.providers?.[providerName] || {};
+    }
+
+    console.log('[VocabularyService] About to set active provider:', providerName, providerOptions);
+
+    await vocabularyService.setActiveProvider(providerName, providerOptions);
+    console.log(`[VocabularyService] Active provider set to: ${providerName}`, providerOptions);
+
+    if ($.vocabularyEnabled) {
+      console.log('[VocabularyService] Vocabulary annotation feature is ENABLED');
+    } else {
+      console.log('[VocabularyService] Vocabulary annotation feature is DISABLED (can be enabled in settings)');
+    }
+
+    console.log('[Annotate-Translate] Vocabulary service initialized successfully');
+  } catch (error) {
+    console.error('[VocabularyService] Initialization failed:', error);
+    console.error('[VocabularyService] Error stack:', error.stack);
+  }
+}
+
+// 初始化AnnotationScanner
+function initializeAnnotationScanner() {
+  if (typeof AnnotationScanner === 'undefined') {
+    console.warn('[Annotate-Translate] AnnotationScanner not loaded, vocabulary annotation features will be unavailable');
+    return;
+  }
+
+  if (typeof vocabularyService === 'undefined') {
+    console.warn('[Annotate-Translate] VocabularyService not available, cannot initialize AnnotationScanner');
+    return;
+  }
+
+  annotationScanner = new AnnotationScanner(vocabularyService, translationService);
+  console.log('[Annotate-Translate] AnnotationScanner initialized');
 }
 
 // 应用翻译设置
@@ -207,10 +396,14 @@ function applyTranslationSettings() {
       $.translationProvider = 'google';
       if (isExtensionContextValid()) {
         try {
-          chrome.storage.sync.set({ 'providers.current': 'google' }, function() {
-            if (chrome.runtime.lastError) {
-              console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
-            }
+          chrome.storage.sync.get(['providers'], (result) => {
+            const providers = result.providers || {};
+            providers.current = 'google';
+            chrome.storage.sync.set({ providers }, function() {
+              if (chrome.runtime.lastError) {
+                console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
+              }
+            });
           });
         } catch (error) {
           console.warn('[Annotate-Translate] Failed to update provider:', error.message);
@@ -228,10 +421,14 @@ function applyTranslationSettings() {
       translationService.setActiveProvider('google');
       if (isExtensionContextValid()) {
         try {
-          chrome.storage.sync.set({ 'providers.current': 'google' }, function() {
-            if (chrome.runtime.lastError) {
-              console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
-            }
+          chrome.storage.sync.get(['providers'], (result) => {
+            const providers = result.providers || {};
+            providers.current = 'google';
+            chrome.storage.sync.set({ providers }, function() {
+              if (chrome.runtime.lastError) {
+                console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
+              }
+            });
           });
         } catch (error) {
           console.warn('[Annotate-Translate] Failed to update provider:', error.message);
@@ -244,7 +441,13 @@ function applyTranslationSettings() {
       const googleProvider = translationService.providers.get('google');
       if (googleProvider) {
         googleProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        console.log('[Annotate-Translate] Google provider configured - showPhoneticInAnnotation:', googleProvider.showPhoneticInAnnotation);
+        googleProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        googleProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        console.log('[Annotate-Translate] Google provider configured - annotation settings:', {
+          showPhonetics: googleProvider.showPhoneticInAnnotation,
+          showTranslation: googleProvider.showTranslationInAnnotation,
+          showDefinitions: googleProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -253,7 +456,13 @@ function applyTranslationSettings() {
       const debugProvider = translationService.providers.get('debug');
       if (debugProvider) {
         debugProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        console.log('[Annotate-Translate] Debug provider configured - showPhoneticInAnnotation:', debugProvider.showPhoneticInAnnotation);
+        debugProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        debugProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        console.log('[Annotate-Translate] Debug provider configured - annotation settings:', {
+          showPhonetics: debugProvider.showPhoneticInAnnotation,
+          showTranslation: debugProvider.showTranslationInAnnotation,
+          showDefinitions: debugProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -266,9 +475,15 @@ function applyTranslationSettings() {
           $.youdaoAppSecret
         );
         youdaoProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
+        youdaoProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        youdaoProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
         console.log('[Annotate-Translate] Youdao provider configured:');
         console.log('  - AppKey:', $.youdaoAppKey ? 'Set' : 'Not set');
-        console.log('  - showPhoneticInAnnotation:', youdaoProvider.showPhoneticInAnnotation);
+        console.log('  - Annotation settings:', {
+          showPhonetics: youdaoProvider.showPhoneticInAnnotation,
+          showTranslation: youdaoProvider.showTranslationInAnnotation,
+          showDefinitions: youdaoProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -281,10 +496,16 @@ function applyTranslationSettings() {
           $.deeplUseFreeApi
         );
         deeplProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
+        deeplProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+        deeplProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
         console.log('[Annotate-Translate] DeepL provider configured:');
         console.log('  - API Key:', $.deeplApiKey ? 'Set' : 'Not set');
         console.log('  - Use Free API:', $.deeplUseFreeApi);
-        console.log('  - showPhoneticInAnnotation:', deeplProvider.showPhoneticInAnnotation);
+        console.log('  - Annotation settings:', {
+          showPhonetics: deeplProvider.showPhoneticInAnnotation,
+          showTranslation: deeplProvider.showTranslationInAnnotation,
+          showDefinitions: deeplProvider.showDefinitionsInAnnotation
+        });
       }
     }
     
@@ -292,19 +513,38 @@ function applyTranslationSettings() {
     if ($.translationProvider === 'openai') {
       const openaiProvider = translationService.providers.get('openai');
       if (openaiProvider) {
+        const aiProviderConfig = $.currentAIProvider;
+
         openaiProvider.updateConfig({
-          apiKey: $.openaiApiKey,
-          model: $.openaiModel,
-          baseURL: $.openaiBaseUrl,
-          promptFormat: 'jsonFormat',
-          useContext: true,
-          showPhoneticInAnnotation: $.showPhoneticInAnnotation !== false
+          apiKey: aiProviderConfig.apiKey,
+          model: aiProviderConfig.model,
+          baseURL: aiProviderConfig.baseUrl,
+          temperature: aiProviderConfig.temperature,
+          maxTokens: aiProviderConfig.maxTokens,
+          timeout: aiProviderConfig.timeout,
+          promptFormat: aiProviderConfig.promptFormat,
+          useContext: aiProviderConfig.useContext,
+          customTemplates: aiProviderConfig.customTemplates,
+          providerName: aiProviderConfig.name || 'OpenAI', // 传递用户自定义的提供商名称
+          showPhoneticInAnnotation: $.showPhoneticInAnnotation !== false,
+          showTranslationInAnnotation: $.showTranslationInAnnotation !== false,
+          showDefinitionsInAnnotation: $.showDefinitionsInAnnotation === true
         });
-        console.log('[Annotate-Translate] OpenAI provider configured:');
-        console.log('  - API Key:', $.openaiApiKey ? 'Set' : 'Not set');
-        console.log('  - Model:', $.openaiModel || 'gpt-3.5-turbo');
-        console.log('  - Base URL:', $.openaiBaseUrl || 'https://api.openai.com/v1');
-        console.log('  - showPhoneticInAnnotation:', openaiProvider.showPhoneticInAnnotation);
+
+        console.log('[Annotate-Translate] AI provider configured:');
+        console.log('  - Provider:', aiProviderConfig.name || 'OpenAI');
+        console.log('  - API Key:', aiProviderConfig.apiKey ? 'Set' : 'Not set');
+        console.log('  - Model:', aiProviderConfig.model);
+        console.log('  - Base URL:', aiProviderConfig.baseUrl);
+        console.log('  - Temperature:', aiProviderConfig.temperature);
+        console.log('  - Max Tokens:', aiProviderConfig.maxTokens);
+        console.log('  - Prompt Format:', aiProviderConfig.promptFormat);
+        console.log('  - Use Context:', aiProviderConfig.useContext);
+        console.log('  - Annotation settings:', {
+          showPhonetics: openaiProvider.showPhoneticInAnnotation,
+          showTranslation: openaiProvider.showTranslationInAnnotation,
+          showDefinitions: openaiProvider.showDefinitionsInAnnotation
+        });
       }
     }
   }
@@ -313,6 +553,16 @@ function applyTranslationSettings() {
   if ($.showPhoneticInAnnotation !== undefined) {
     translationService.showPhoneticInAnnotation = $.showPhoneticInAnnotation;
     console.log('[Annotate-Translate] Show phonetic in annotation:', $.showPhoneticInAnnotation ? 'Enabled' : 'Disabled');
+  }
+  
+  if ($.showTranslationInAnnotation !== undefined) {
+    translationService.showTranslationInAnnotation = $.showTranslationInAnnotation;
+    console.log('[Annotate-Translate] Show translation in annotation:', $.showTranslationInAnnotation ? 'Enabled' : 'Disabled');
+  }
+  
+  if ($.showDefinitionsInAnnotation !== undefined) {
+    translationService.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation;
+    console.log('[Annotate-Translate] Show definitions in annotation:', $.showDefinitionsInAnnotation ? 'Enabled' : 'Disabled');
   }
   
   if ($.enablePhoneticFallback !== undefined) {
@@ -396,16 +646,17 @@ function showContextMenu(x, y, text) {
   }
 
   if ($.enableAnnotate) {
+    // 标注按钮
     const annotateBtn = document.createElement('button');
     annotateBtn.textContent = 'A';
     annotateBtn.className = 'menu-button';
     annotateBtn.title = safeGetMessage('annotate', null, 'Annotate');
     annotateBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // 阻止事件冒泡
-      e.preventDefault();  // 阻止默认行为
+      e.stopPropagation();
+      e.preventDefault();
       console.log('[Annotate-Translate] Annotate button clicked');
       hideContextMenu();
-      // 使用改进的标注方法（支持批量标注和精确定位）
+      // 直接标注用户选择的文本，使用保存的 Range
       annotateSelectedText(text);
     });
     menu.appendChild(annotateBtn);
@@ -440,7 +691,7 @@ function hideContextMenu() {
  * @param {string} text - 选中的文本（可选，用于定位）
  * @returns {string} 包含选中文本的完整上下文
  */
-function extractContext(selectionOrRange, maxLength = 300, text = '') {
+function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text = '') {
   console.log('[Annotate-Translate] extractContext called with:', {
     type: selectionOrRange?.constructor?.name,
     maxLength,
@@ -812,37 +1063,249 @@ async function translateText(text) {
 }
 
 // Annotate selected text
-// Create ruby annotation for context menu action
+// 优化版本：直接使用保存的 Range，不再弹窗询问
 function annotateSelectedText(text) {
   console.log('[Annotate-Translate] Annotating selected text:', text);
   console.log('[Annotate-Translate] lastSelection:', lastSelection);
-  
-  // 使用保存的Range，如果有的话
+
+  // 优先使用保存的 Range（用户真正选择的位置）
   if (lastSelection) {
     try {
-      // 验证Range是否仍然有效
+      // 验证 Range 是否仍然有效
       const selectedText = lastSelection.toString();
       console.log('[Annotate-Translate] lastSelection.toString():', selectedText);
       console.log('[Annotate-Translate] lastSelection container:', lastSelection.commonAncestorContainer);
-      
-      if (selectedText === text) {
-        console.log('[Annotate-Translate] Using saved range');
+
+      // 比较时去除首尾空格，因为用户可能选择时多选了空格
+      if (selectedText.trim() === text.trim()) {
+        console.log('[Annotate-Translate] Using saved range - annotating exact user selection');
         promptAndAnnotate(lastSelection, text);
         return;
       } else {
-        console.log('[Annotate-Translate] Saved range text mismatch:', selectedText, 'vs', text);
+        console.log('[Annotate-Translate] Saved range text mismatch:', selectedText.trim(), 'vs', text.trim());
       }
     } catch (e) {
       console.error('[Annotate-Translate] Saved range is invalid:', e);
     }
   }
-  
-  // 如果没有保存的Range或Range无效，尝试查找文本
-  console.log('[Annotate-Translate] Searching for text in DOM');
-  findAndAnnotateText(text);
+
+  // 如果没有保存的 Range 或 Range 无效，显示错误
+  console.warn('[Annotate-Translate] No valid saved range, cannot annotate');
+  showTemporaryMessage(
+    safeGetMessage('annotationFailed', null, 'Annotation failed') + ': ' +
+    safeGetMessage('pleaseReselectText', null, 'Please select the text again'),
+    'error'
+  );
 }
 
-// 查找并标注文本（用于右键菜单）
+// 查找文本的第一个匹配项
+function findFirstOccurrence(text) {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        // Skip script, style elements and existing annotations
+        if (node.parentElement.tagName === 'SCRIPT' ||
+            node.parentElement.tagName === 'STYLE' ||
+            node.parentElement.closest('ruby.annotate-translate-ruby')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return node.nodeValue.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    }
+  );
+
+  const node = walker.nextNode();
+  if (node) {
+    const index = node.nodeValue.indexOf(text);
+    return { node, index, text };
+  }
+
+  return null;
+}
+
+// 标注页面所有相同文本（新功能：替代弹窗）
+async function annotateAllOccurrences(text) {
+  console.log('[Annotate-Translate] Annotating all occurrences of:', text);
+
+  // 查找所有匹配项
+  const matches = findAllOccurrences(text);
+
+  if (matches.length === 0) {
+    showTemporaryMessage(
+      safeGetMessage('textNotFound', null, 'Could not find the text on the page.'),
+      'error'
+    );
+    return;
+  }
+
+  console.log(`[Annotate-Translate] Found ${matches.length} occurrences`);
+
+  // 显示进度提示
+  const progressMsg = showTemporaryMessage(
+    safeGetMessage('annotatingAll', [matches.length], `Annotating ${matches.length} occurrences...`),
+    'loading',
+    0 // 不自动关闭
+  );
+
+  try {
+    // 先翻译一次（所有匹配项使用相同的翻译）
+    const result = await translationService.translate(
+      text,
+      $.targetLanguage || 'zh-CN',
+      'auto',
+      { context: extractContextFromMatch(matches[0]) }
+    );
+
+    // 判断是否应该隐藏读音
+    const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(text);
+
+    // 使用翻译结果
+    let annotationText;
+    if (shouldHidePhonetic) {
+      annotationText = result.translatedText;
+    } else {
+      annotationText = result.annotationText || result.translatedText;
+    }
+
+    // 批量标注所有匹配项（从后往前，避免 DOM 变化影响索引）
+    let successCount = 0;
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const match = matches[i];
+      try {
+        if (!document.contains(match.node)) {
+          console.warn('[Annotate-Translate] Node no longer in document, skipping');
+          continue;
+        }
+
+        const range = document.createRange();
+        range.setStart(match.node, match.index);
+        range.setEnd(match.node, match.index + match.text.length);
+        createRubyAnnotation(range, text, annotationText, result);
+        successCount++;
+      } catch (e) {
+        console.error('[Annotate-Translate] Failed to annotate match:', e);
+      }
+    }
+
+    // 移除进度提示
+    if (progressMsg && progressMsg.parentElement) {
+      progressMsg.remove();
+    }
+
+    // 显示成功提示
+    showTemporaryMessage(
+      safeGetMessage('annotatedCount', [successCount, matches.length],
+        `Successfully annotated ${successCount} of ${matches.length} occurrences`),
+      'success'
+    );
+
+    console.log(`[Annotate-Translate] Successfully annotated ${successCount}/${matches.length} occurrences`);
+
+  } catch (error) {
+    console.error('[Annotate-Translate] Batch annotation failed:', error);
+
+    // 移除进度提示
+    if (progressMsg && progressMsg.parentElement) {
+      progressMsg.remove();
+    }
+
+    // 显示错误
+    showTemporaryMessage(
+      safeGetMessage('annotationFailed', null, 'Annotation failed') + ': ' + error.message,
+      'error'
+    );
+  }
+}
+
+// 查找所有匹配项
+function findAllOccurrences(text) {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        if (node.parentElement.tagName === 'SCRIPT' ||
+            node.parentElement.tagName === 'STYLE' ||
+            node.parentElement.closest('ruby.annotate-translate-ruby')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return node.nodeValue.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    }
+  );
+
+  const matches = [];
+  let node;
+  while (node = walker.nextNode()) {
+    const nodeText = node.nodeValue;
+    let index = nodeText.indexOf(text);
+    while (index !== -1) {
+      matches.push({
+        node: node,
+        index: index,
+        text: text
+      });
+      index = nodeText.indexOf(text, index + 1);
+    }
+  }
+
+  return matches;
+}
+
+// 从匹配项提取上下文
+function extractContextFromMatch(match) {
+  if (!match) return '';
+
+  try {
+    const range = document.createRange();
+    range.setStart(match.node, match.index);
+    range.setEnd(match.node, match.index + match.text.length);
+    return extractContext(range, CONTEXT_MAX_LENGTH, match.text);
+  } catch (e) {
+    console.warn('[Annotate-Translate] Failed to extract context:', e);
+    return '';
+  }
+}
+
+// 显示临时消息（替代 alert）
+function showTemporaryMessage(message, type = 'info', autoCloseMs = ERROR_MESSAGE_AUTO_CLOSE_MS) {
+  const toast = document.createElement('div');
+  toast.className = `annotate-translate-toast toast-${type}`;
+
+  const icon = type === 'error' ? '⚠️' :
+               type === 'success' ? '✅' :
+               type === 'loading' ? '⏳' : 'ℹ️';
+
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+
+  document.body.appendChild(toast);
+
+  // 添加显示动画
+  requestAnimationFrame(() => {
+    toast.classList.add('toast-visible');
+  });
+
+  // 自动关闭（如果设置了）
+  if (autoCloseMs > 0) {
+    setTimeout(() => {
+      toast.classList.remove('toast-visible');
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, 300); // 等待淡出动画
+    }, autoCloseMs);
+  }
+
+  return toast;
+}
+
+// 查找并标注文本（保留用于右键菜单或其他场景）
 function findAndAnnotateText(text) {
   const walker = document.createTreeWalker(
     document.body,
@@ -1196,76 +1659,91 @@ function isMultipleEnglishWords(text) {
   return words && words.length > 1;
 }
 
+/**
+ * 创建 Ruby 元素（不进行 DOM 操作）
+ * 供 annotation-scanner 批量处理时使用
+ * @param {string} baseText - 基础文本
+ * @param {string} annotationText - 标注文本
+ * @param {Object} result - 翻译结果对象
+ * @returns {HTMLElement} ruby 元素
+ */
+function createRubyElement(baseText, annotationText, result = null) {
+  // Create ruby element structure
+  const ruby = document.createElement('ruby');
+  ruby.className = 'annotate-translate-ruby';
+  ruby.setAttribute('data-annotation', annotationText);
+  ruby.setAttribute('data-base-text', baseText);
+
+  // Add base text
+  ruby.textContent = baseText;
+
+  // Create rt (ruby text) element for annotation
+  const rt = document.createElement('rt');
+  rt.className = 'annotate-translate-rt';
+
+  // 检查是否应该隐藏读音（当文本为多个英语单词且设置启用时）
+  const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(baseText);
+
+  // Add annotation text
+  const textSpan = document.createElement('span');
+  textSpan.textContent = annotationText;
+  rt.appendChild(textSpan);
+
+  // Add audio button if phonetics available and annotation audio is enabled
+  // 如果设置为隐藏多个单词的读音，则不显示音频按钮
+  if (result && result.phonetics && result.phonetics.length > 0 &&
+      $.enableAudioInAnnotation && !shouldHidePhonetic) {
+    const audioButton = createAudioButton(result.phonetics, baseText);
+    rt.appendChild(audioButton);
+  }
+
+  ruby.appendChild(rt);
+
+  // Store annotation with full result data
+  annotations.set(ruby, {
+    base: baseText,
+    annotation: annotationText,
+    phonetics: result ? result.phonetics : null,
+    fullResult: result  // 保存完整的翻译结果
+  });
+
+  // Add click event to show detailed translation
+  if (result && (result.definitions || result.examples)) {
+    ruby.style.cursor = 'pointer';
+    ruby.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
+
+    ruby.addEventListener('click', (e) => {
+      // 如果点击的是音频按钮，不显示详细弹窗
+      if (e.target.closest('.annotate-audio-button')) {
+        return;
+      }
+
+      e.stopPropagation();
+      showDetailedTranslation(ruby, result);
+    });
+  }
+
+  return ruby;
+}
+
 // Create ruby tag annotation
 function createRubyAnnotation(range, baseText, annotationText, result = null) {
   try {
     console.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
-    
-    // Create ruby element structure
-    const ruby = document.createElement('ruby');
-    ruby.className = 'annotate-translate-ruby';
-    ruby.setAttribute('data-annotation', annotationText);
-    ruby.setAttribute('data-base-text', baseText);
-    
-    // Add base text
-    ruby.textContent = baseText;
-    
-    // Create rt (ruby text) element for annotation
-    const rt = document.createElement('rt');
-    rt.className = 'annotate-translate-rt';
-    
-    // 检查是否应该隐藏读音（当文本为多个英语单词且设置启用时）
-    const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(baseText);
-    
-    // Add annotation text
-    const textSpan = document.createElement('span');
-    textSpan.textContent = annotationText;
-    rt.appendChild(textSpan);
-    
-    // Add audio button if phonetics available and annotation audio is enabled
-    // 如果设置为隐藏多个单词的读音，则不显示音频按钮
-    if (result && result.phonetics && result.phonetics.length > 0 && 
-        $.enableAudioInAnnotation && !shouldHidePhonetic) {
-      const audioButton = createAudioButton(result.phonetics, baseText);
-      rt.appendChild(audioButton);
-    }
-    
-    ruby.appendChild(rt);
-    
+
+    // Use the helper function to create ruby element
+    const ruby = createRubyElement(baseText, annotationText, result);
+
     // Replace the selected text with the ruby element
     range.deleteContents();
     range.insertNode(ruby);
-    
-    // Store annotation with full result data
-    annotations.set(ruby, {
-      base: baseText,
-      annotation: annotationText,
-      phonetics: result ? result.phonetics : null,
-      fullResult: result  // 保存完整的翻译结果
-    });
-    
-    // Add click event to show detailed translation
-    if (result && (result.definitions || result.examples)) {
-      ruby.style.cursor = 'pointer';
-      ruby.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
-      
-      ruby.addEventListener('click', (e) => {
-        // 如果点击的是音频按钮，不显示详细弹窗
-        if (e.target.closest('.annotate-audio-button')) {
-          return;
-        }
-        
-        e.stopPropagation();
-        showDetailedTranslation(ruby, result);
-      });
-    }
-    
+
     // Save annotation to storage
     saveAnnotation(baseText, annotationText);
-    
+
     // Clear selection
     window.getSelection().removeAllRanges();
-    
+
     console.log('[Annotate-Translate] Ruby annotation created successfully');
   } catch (e) {
     console.error('[Annotate-Translate] Failed to create ruby annotation:', e);
@@ -1275,7 +1753,7 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
 
 // Audio cache for better performance
 const audioCache = new Map(); // Cache Audio objects
-const audioCacheMaxSize = 50; // Max cached audio files
+const audioCacheMaxSize = AUDIO_CACHE_MAX_SIZE; // Max cached audio files
 
 // Create audio playback button
 function createAudioButton(phonetics, text) {
@@ -1532,6 +2010,51 @@ function handleMessage(request, sender, sendResponse) {
     console.log('[Annotate-Translate] Translating text:', request.text);
     translateText(request.text);
     sendResponse({success: true});
+  } else if (request.action === 'annotate_page') {
+    // Handle vocabulary annotation action
+    console.log('[Annotate-Translate] Annotating page vocabulary');
+
+    // 获取词汇配置信息
+    const vocabularyConfig = {
+      provider: vocabularyService.activeProvider ? vocabularyService.activeProvider.name : 'unknown',
+      options: vocabularyService.activeOptions || {}
+    };
+
+    // 调试：打印扫描选项
+    const scanOptions = {
+      fetchTranslation: $.vocabularyShowTranslation,
+      fetchPhonetic: $.vocabularyShowPhonetic,
+      sourceLang: 'en',
+      targetLang: $.targetLanguage,
+      vocabularyConfig: vocabularyConfig  // 传递词汇配置信息
+    };
+    console.log('[Annotate-Translate] Scan options:', scanOptions);
+    console.log('[Annotate-Translate] TranslationService available:', !!translationService);
+
+    if (annotationScanner) {
+      annotationScanner.scanPage(scanOptions).then(result => {
+        console.log('[Annotate-Translate] Annotation result:', result);
+        sendResponse(result);
+      }).catch(error => {
+        console.error('[Annotate-Translate] Annotation failed:', error);
+        sendResponse({ status: 'error', error: error.message });
+      });
+    } else {
+      console.error('[Annotate-Translate] AnnotationScanner not initialized');
+      sendResponse({ status: 'error', error: 'AnnotationScanner not initialized' });
+    }
+    return true; // 异步响应
+  } else if (request.action === 'remove_annotations') {
+    // Handle remove annotations action
+    console.log('[Annotate-Translate] Removing vocabulary annotations');
+    if (annotationScanner) {
+      const count = annotationScanner.removeAnnotations();
+      console.log(`[Annotate-Translate] Removed ${count} annotations`);
+      sendResponse({ status: 'success', count });
+    } else {
+      console.error('[Annotate-Translate] AnnotationScanner not initialized');
+      sendResponse({ status: 'error', error: 'AnnotationScanner not initialized' });
+    }
   }
   return true;
 }

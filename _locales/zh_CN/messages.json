@@ -297,13 +297,53 @@
     "message": "标注设置",
     "description": "Annotation settings section title"
   },
+  "annotationStyle": {
+    "message": "标注样式",
+    "description": "Annotation style section title"
+  },
   "showPhoneticInAnnotation": {
-    "message": "在标注中显示音标 + 翻译",
+    "message": "显示音标",
     "description": "Show phonetic in annotation label"
   },
-  "showPhoneticInAnnotationDesc": {
-    "message": "启用时，标注将同时显示音标和翻译（例如：\"/həˈloʊ/ 你好\"）。禁用时，标注将只显示翻译（例如：\"你好\"）。",
+  "annotationPhoneticsDesc": {
+    "message": "在标注中显示音标",
     "description": "Show phonetic in annotation description"
+  },
+  "showTranslationInAnnotation": {
+    "message": "显示翻译",
+    "description": "Show translation in annotation label"
+  },
+  "annotationTranslationDesc": {
+    "message": "在标注中显示翻译内容",
+    "description": "Show translation in annotation description"
+  },
+  "showDefinitionsInAnnotation": {
+    "message": "显示释义",
+    "description": "Show definitions in annotation label"
+  },
+  "annotationDefinitionsDesc": {
+    "message": "在标注中显示词义释义（⚠️ 可能超长影响体验）",
+    "description": "Show definitions in annotation description"
+  },
+  "showAudioInAnnotation": {
+    "message": "显示发音按钮",
+    "description": "Show audio button in annotation label"
+  },
+  "annotationAudioDesc": {
+    "message": "在标注中显示发音按钮",
+    "description": "Show audio button in annotation description"
+  },
+  "annotationMinimumOneRequired": {
+    "message": "⚠️ 音标、翻译、释义三项必须至少选择一项",
+    "description": "Annotation minimum one required validation message"
+  },
+  "hidePhoneticForMultipleWords": {
+    "message": "多个单词时隐藏读音",
+    "description": "Hide phonetic for multiple words label"
+  },
+  "hidePhoneticForMultipleWordsDesc": {
+    "message": "选取多个英语单词时，不显示读音标注",
+    "description": "Hide phonetic for multiple words description"
   },
   "menuButtonSize": {
     "message": "选择菜单按钮大小",
@@ -479,6 +519,10 @@
   "poweredBy": {
     "message": "技术支持",
     "description": "Powered by label"
+  },
+  "aiTranslation": {
+    "message": "AI翻译",
+    "description": "AI translation label"
   },
   "clickToViewDetails": {
     "message": "点击查看详细翻译",
@@ -865,18 +909,6 @@
     "message": "选择菜单中按钮的大小",
     "description": "Button size description"
   },
-  "annotationStyle": {
-    "message": "标注样式",
-    "description": "Annotation style section"
-  },
-  "annotationPhoneticsDesc": {
-    "message": "在标注中显示音标符号",
-    "description": "Annotation phonetics description"
-  },
-  "annotationAudioDesc": {
-    "message": "为标注的单词启用音频",
-    "description": "Annotation audio description"
-  },
   "enableCacheDesc": {
     "message": "缓存翻译以提高性能并减少 API 调用",
     "description": "Enable cache description"
@@ -900,18 +932,6 @@
   "actionsInfo": {
     "message": "💡 这些操作将立即生效且无法撤销。",
     "description": "Actions info message"
-  },
-  "showAudioInAnnotation": {
-    "message": "在标注中启用音频",
-    "description": "Show audio in annotation label"
-  },
-  "hidePhoneticForMultipleWords": {
-    "message": "多个单词时隐藏读音",
-    "description": "Hide phonetics for multiple words label"
-  },
-  "hidePhoneticForMultipleWordsDesc": {
-    "message": "选取多个英语单词时，不显示读音标注",
-    "description": "Hide phonetics for multiple words description"
   },
   "atLeastOneButtonRequired": {
     "message": "⚠️ 至少需要显示一个悬浮按钮",
@@ -1013,6 +1033,834 @@
   "savePrompt": {
     "message": "保存",
     "description": "Save prompt button"
+  },
+  
+  "translationCardSettings": {
+    "message": "翻译详情",
+    "description": "Translation card settings page title"
+  },
+  "translationCardSettingsDesc": {
+    "message": "弹出翻译卡片窗口的内容和样式设置",
+    "description": "Translation card settings description"
+  },
+  "audioSettings": {
+    "message": "发音设置",
+    "description": "Audio settings page title"
+  },
+  "audioSettingsDesc": {
+    "message": "音频播放和语音合成的相关设置",
+    "description": "Audio settings description"
+  },
+  "dataSettings": {
+    "message": "数据与隐私",
+    "description": "Data and privacy settings page title"
+  },
+  "dataSettingsDesc": {
+    "message": "管理您的数据、隐私和同步设置",
+    "description": "Data settings description"
+  },
+  
+  "interactionSettings": {
+    "message": "交互设置",
+    "description": "Interaction settings section title"
+  },
+  "showFloatingButton": {
+    "message": "显示浮动按钮",
+    "description": "Show floating button"
+  },
+  "showFloatingButtonDesc": {
+    "message": "选中文本后显示翻译和标注按钮",
+    "description": "Show floating button description"
+  },
+  "enableContextMenu": {
+    "message": "右键菜单",
+    "description": "Enable context menu"
+  },
+  "enableContextMenuDesc": {
+    "message": "在右键菜单中显示翻译和标注选项",
+    "description": "Enable context menu description"
+  },
+  "phoneticDisplay": {
+    "message": "音标显示类型",
+    "description": "Phonetic display type"
+  },
+  "phoneticDisplayDesc": {
+    "message": "选择显示美式、英式或同时显示两种音标",
+    "description": "Phonetic display description"
+  },
+  "phoneticUS": {
+    "message": "仅美式",
+    "description": "US phonetic only"
+  },
+  "phoneticUK": {
+    "message": "仅英式",
+    "description": "UK phonetic only"
+  },
+  "phoneticBoth": {
+    "message": "美式和英式",
+    "description": "Both US and UK phonetics"
+  },
+  
+  "annotationContent": {
+    "message": "显示内容",
+    "description": "Annotation content section title"
+  },
+  "annotationFontSize": {
+    "message": "标注字体大小",
+    "description": "Annotation font size"
+  },
+  "annotationFontSizeDesc": {
+    "message": "调整标注文字的大小",
+    "description": "Annotation font size description"
+  },
+  "fontSize12": {
+    "message": "小 (12px)",
+    "description": "Font size 12px"
+  },
+  "fontSize14": {
+    "message": "中 (14px)",
+    "description": "Font size 14px"
+  },
+  "fontSize16": {
+    "message": "大 (16px)",
+    "description": "Font size 16px"
+  },
+  "annotationColor": {
+    "message": "标注文字颜色",
+    "description": "Annotation text color"
+  },
+  "annotationColorDesc": {
+    "message": "自定义标注文字的颜色",
+    "description": "Annotation color description"
+  },
+  "highlightAnnotatedText": {
+    "message": "高亮标注文字",
+    "description": "Highlight annotated text"
+  },
+  "highlightAnnotatedTextDesc": {
+    "message": "为添加了标注的文字添加背景高亮",
+    "description": "Highlight annotated text description"
+  },
+  "highlightColor": {
+    "message": "高亮颜色",
+    "description": "Highlight color"
+  },
+  "highlightColorDesc": {
+    "message": "选择标注文字的背景高亮颜色",
+    "description": "Highlight color description"
+  },
+  "annotationData": {
+    "message": "标注数据",
+    "description": "Annotation data section title"
+  },
+  "saveAnnotationHistory": {
+    "message": "保存标注历史",
+    "description": "Save annotation history"
+  },
+  "saveAnnotationHistoryDesc": {
+    "message": "自动保存所有标注记录，方便日后查看和复习",
+    "description": "Save annotation history description"
+  },
+  "annotationHistoryCount": {
+    "message": "历史记录",
+    "description": "Annotation history count"
+  },
+  "annotationHistoryCountDesc": {
+    "message": "当前已保存的标注数量",
+    "description": "Annotation history count description"
+  },
+  "viewHistory": {
+    "message": "查看历史",
+    "description": "View history button"
+  },
+  "exportAnnotations": {
+    "message": "导出标注",
+    "description": "Export annotations"
+  },
+  "exportAnnotationsDesc": {
+    "message": "将标注数据导出为 JSON 或 CSV 格式",
+    "description": "Export annotations description"
+  },
+  "export": {
+    "message": "导出",
+    "description": "Export button"
+  },
+  
+  "triggerMethods": {
+    "message": "触发方式",
+    "description": "Trigger methods section title"
+  },
+  "clickTranslateButton": {
+    "message": "点击翻译按钮",
+    "description": "Click translate button"
+  },
+  "clickTranslateButtonDesc": {
+    "message": "点击浮动的 \"T\" 按钮时显示翻译详情",
+    "description": "Click translate button description"
+  },
+  "doubleClickWord": {
+    "message": "双击单词",
+    "description": "Double click word"
+  },
+  "doubleClickWordDesc": {
+    "message": "双击网页上的单词时自动显示翻译详情",
+    "description": "Double click word description"
+  },
+  "hoverToTranslate": {
+    "message": "鼠标悬停",
+    "description": "Hover to translate"
+  },
+  "hoverToTranslateDesc": {
+    "message": "鼠标悬停在文字上时自动显示翻译（实验性功能）",
+    "description": "Hover to translate description"
+  },
+  "hoverDelay": {
+    "message": "悬停延迟",
+    "description": "Hover delay"
+  },
+  "hoverDelayDesc": {
+    "message": "鼠标悬停多久后显示翻译（毫秒）",
+    "description": "Hover delay description"
+  },
+  "cardContent": {
+    "message": "显示内容",
+    "description": "Card content section title"
+  },
+  "cardStyle": {
+    "message": "窗口样式",
+    "description": "Card style section title"
+  },
+  "cardTheme": {
+    "message": "主题",
+    "description": "Card theme"
+  },
+  "cardThemeDesc": {
+    "message": "选择翻译卡片的颜色主题",
+    "description": "Card theme description"
+  },
+  "themeLight": {
+    "message": "浅色",
+    "description": "Light theme"
+  },
+  "themeDark": {
+    "message": "深色",
+    "description": "Dark theme"
+  },
+  "themeAuto": {
+    "message": "跟随系统",
+    "description": "Auto theme"
+  },
+  "cardFontSize": {
+    "message": "字体大小",
+    "description": "Card font size"
+  },
+  "cardFontSizeDesc": {
+    "message": "调整翻译卡片中的文字大小",
+    "description": "Card font size description"
+  },
+  "cardWidth": {
+    "message": "卡片宽度",
+    "description": "Card width"
+  },
+  "cardWidthDesc": {
+    "message": "设置翻译卡片的宽度（像素）",
+    "description": "Card width description"
+  },
+  "cardPosition": {
+    "message": "卡片位置",
+    "description": "Card position"
+  },
+  "cardPositionDesc": {
+    "message": "选择翻译卡片的显示位置",
+    "description": "Card position description"
+  },
+  "positionMouse": {
+    "message": "跟随鼠标",
+    "description": "Follow mouse position"
+  },
+  "positionCenter": {
+    "message": "屏幕居中",
+    "description": "Center of screen"
+  },
+  "positionTop": {
+    "message": "顶部居中",
+    "description": "Top center"
+  },
+  "longTextHandling": {
+    "message": "长文本处理",
+    "description": "Long text handling section title"
+  },
+  "simplifyLongText": {
+    "message": "启用简化 UI",
+    "description": "Simplify long text"
+  },
+  "simplifyLongTextDesc": {
+    "message": "对长文本使用简化界面，只显示翻译结果（不显示例句和音标）",
+    "description": "Simplify long text description"
+  },
+  "simplifyThreshold": {
+    "message": "简化阈值",
+    "description": "Simplify threshold"
+  },
+  "simplifyThresholdDesc": {
+    "message": "超过多少字符时启用简化 UI",
+    "description": "Simplify threshold description"
+  },
+  
+  "audioBehavior": {
+    "message": "发音行为",
+    "description": "Audio behavior section title"
+  },
+  "autoPlayAudio": {
+    "message": "自动播放发音",
+    "description": "Auto play audio"
+  },
+  "autoPlayAudioDesc": {
+    "message": "打开翻译卡片时自动播放发音（标注中的发音按钮仍需手动点击）",
+    "description": "Auto play audio description"
+  },
+  "preferredVoice": {
+    "message": "优先音标",
+    "description": "Preferred voice"
+  },
+  "preferredVoiceDesc": {
+    "message": "当有多个音标时，优先播放哪种发音",
+    "description": "Preferred voice description"
+  },
+  "voiceUS": {
+    "message": "美式英语",
+    "description": "US English voice"
+  },
+  "voiceUK": {
+    "message": "英式英语",
+    "description": "UK English voice"
+  },
+  "audioSources": {
+    "message": "音频来源优先级",
+    "description": "Audio sources section title"
+  },
+  "audioSourcesDesc": {
+    "message": "按优先级尝试不同的音频来源，直到成功播放",
+    "description": "Audio sources description"
+  },
+  "sourceProvider": {
+    "message": "翻译提供商音频",
+    "description": "Provider audio source"
+  },
+  "sourceTTS": {
+    "message": "浏览器语音合成 (TTS)",
+    "description": "TTS audio source"
+  },
+  "qualityHigh": {
+    "message": "最高质量",
+    "description": "High quality"
+  },
+  "qualityGood": {
+    "message": "高质量",
+    "description": "Good quality"
+  },
+  "qualityFallback": {
+    "message": "备用",
+    "description": "Fallback quality"
+  },
+  "audioSourcesInfo": {
+    "message": "拖动以调整优先级顺序。系统将按顺序尝试，直到成功播放。",
+    "description": "Audio sources info"
+  },
+  "ttsSettings": {
+    "message": "语音合成设置",
+    "description": "TTS settings section title"
+  },
+  "ttsSpeed": {
+    "message": "语速",
+    "description": "TTS speed"
+  },
+  "ttsSpeedDesc": {
+    "message": "调整语音合成的播放速度（0.5 - 2.0 倍）",
+    "description": "TTS speed description"
+  },
+  "ttsPitch": {
+    "message": "音调",
+    "description": "TTS pitch"
+  },
+  "ttsPitchDesc": {
+    "message": "调整语音合成的音调高低（0.5 - 2.0）",
+    "description": "TTS pitch description"
+  },
+  "testTTS": {
+    "message": "测试发音",
+    "description": "Test TTS"
+  },
+  "testTTSDesc": {
+    "message": "播放测试文本以预览当前设置效果",
+    "description": "Test TTS description"
+  },
+  "playTest": {
+    "message": "播放 \"Hello World\"",
+    "description": "Play test button"
+  },
+  
+  "dataSync": {
+    "message": "数据同步",
+    "description": "Data sync section title"
+  },
+  "enableChromeSync": {
+    "message": "启用 Chrome 同步",
+    "description": "Enable Chrome sync"
+  },
+  "enableChromeSyncDesc": {
+    "message": "使用 Chrome 账号在不同设备间同步设置和标注数据",
+    "description": "Enable Chrome sync description"
+  },
+  "privacyInfo": {
+    "message": "所有数据仅在本地和您的 Chrome 账号间同步，不会发送到第三方服务器。翻译 API 调用除外。",
+    "description": "Privacy info"
+  },
+  "cacheManagement": {
+    "message": "缓存管理",
+    "description": "Cache management section title"
+  },
+  "cacheStatus": {
+    "message": "翻译缓存",
+    "description": "Cache status"
+  },
+  "cacheStatusDesc": {
+    "message": "当前缓存使用情况",
+    "description": "Cache status description"
+  },
+  "dataTransfer": {
+    "message": "数据导出/导入",
+    "description": "Data transfer section title"
+  },
+  "exportAllData": {
+    "message": "导出所有数据",
+    "description": "Export all data"
+  },
+  "exportAllDataDesc": {
+    "message": "将设置和标注数据导出为 JSON 文件",
+    "description": "Export all data description"
+  },
+  "exportJSON": {
+    "message": "导出 JSON",
+    "description": "Export JSON button"
+  },
+  "importData": {
+    "message": "导入数据",
+    "description": "Import data"
+  },
+  "importDataDesc": {
+    "message": "从之前导出的 JSON 文件恢复数据",
+    "description": "Import data description"
+  },
+  "selectFile": {
+    "message": "选择文件...",
+    "description": "Select file button"
+  },
+  "resetSettings": {
+    "message": "重置设置",
+    "description": "Reset settings section title"
+  },
+  "resetToDefaultsDesc": {
+    "message": "将所有设置恢复为默认值（不影响标注数据）",
+    "description": "Reset to defaults description"
+  },
+  "reset": {
+    "message": "重置设置",
+    "description": "Reset button"
+  },
+  "clearAllData": {
+    "message": "清除所有数据",
+    "description": "Clear all data"
+  },
+  "clearAllDataDesc": {
+    "message": "⚠️ 危险操作：删除所有设置、缓存和标注数据，此操作不可恢复！",
+    "description": "Clear all data description"
+  },
+  "clearAll": {
+    "message": "清除全部",
+    "description": "Clear all button"
+  },
+  
+  "pageMovedTitle": {
+    "message": "页面已重新组织",
+    "description": "Page moved title"
+  },
+  "pageMovedDesc": {
+    "message": "原\"显示与外观\"的设置已分离到以下两个页面：",
+    "description": "Page moved description"
+  },
+
+  "aiProviders": {
+    "message": "AI 提供商",
+    "description": "AI providers section title"
+  },
+  "addProvider": {
+    "message": "添加提供商",
+    "description": "Add provider button"
+  },
+  "addAIProvider": {
+    "message": "添加 AI 提供商",
+    "description": "Add AI provider modal title"
+  },
+  "editAIProvider": {
+    "message": "编辑 AI 提供商",
+    "description": "Edit AI provider modal title"
+  },
+  "noAIProviders": {
+    "message": "暂无 AI 提供商，点击上方按钮添加",
+    "description": "No AI providers message"
+  },
+  "providerName": {
+    "message": "提供商名称",
+    "description": "Provider name label"
+  },
+  "providerNamePlaceholder": {
+    "message": "例如：OpenAI、Azure OpenAI、本地 Ollama",
+    "description": "Provider name placeholder"
+  },
+  "providerNameDesc": {
+    "message": "为这个 AI 提供商起一个名字，方便识别",
+    "description": "Provider name description"
+  },
+  "apiKeyLabel": {
+    "message": "API 密钥",
+    "description": "API key label"
+  },
+  "apiKeyDesc": {
+    "message": "从服务提供商获取的 API Key",
+    "description": "API key description"
+  },
+  "modelLabel": {
+    "message": "模型名称",
+    "description": "Model label"
+  },
+  "modelDesc": {
+    "message": "要使用的模型名称",
+    "description": "Model description"
+  },
+  "baseUrlLabel": {
+    "message": "Base URL",
+    "description": "Base URL label"
+  },
+  "baseUrlDesc": {
+    "message": "API 端点地址",
+    "description": "Base URL description"
+  },
+  "temperatureLabel": {
+    "message": "Temperature",
+    "description": "Temperature label"
+  },
+  "temperatureDesc": {
+    "message": "控制创造性（0-1，越低越准确）",
+    "description": "Temperature description"
+  },
+  "maxTokensLabel": {
+    "message": "Max Tokens",
+    "description": "Max tokens label"
+  },
+  "maxTokensDesc": {
+    "message": "单次翻译最大 token 数",
+    "description": "Max tokens description"
+  },
+  "timeoutLabel": {
+    "message": "超时时间（秒）",
+    "description": "Timeout label"
+  },
+  "timeoutDesc": {
+    "message": "API 请求超时时间",
+    "description": "Timeout description"
+  },
+  "promptFormatLabel": {
+    "message": "提示词格式",
+    "description": "Prompt format label"
+  },
+  "promptFormatDesc": {
+    "message": "AI 返回的数据格式",
+    "description": "Prompt format description"
+  },
+  "jsonFormatOption": {
+    "message": "JSON 格式（完整信息）",
+    "description": "JSON format option"
+  },
+  "simpleFormatOption": {
+    "message": "简单格式（仅翻译）",
+    "description": "Simple format option"
+  },
+  "useContextLabel": {
+    "message": "使用上下文",
+    "description": "Use context label"
+  },
+  "useContextDesc": {
+    "message": "提供周围文本以提高准确性",
+    "description": "Use context description"
+  },
+  "advancedOptions": {
+    "message": "高级选项",
+    "description": "Advanced options"
+  },
+  "testConnectionButton": {
+    "message": "测试连接",
+    "description": "Test connection button"
+  },
+  "saveButton": {
+    "message": "保存",
+    "description": "Save button"
+  },
+  "cancelButton": {
+    "message": "取消",
+    "description": "Cancel button"
+  },
+  "useProviderButton": {
+    "message": "使用",
+    "description": "Use provider button"
+  },
+  "editProviderButton": {
+    "message": "编辑",
+    "description": "Edit provider button"
+  },
+  "testProviderButton": {
+    "message": "测试",
+    "description": "Test provider button"
+  },
+  "deleteProviderButton": {
+    "message": "删除",
+    "description": "Delete provider button"
+  },
+  "currentProvider": {
+    "message": "当前使用",
+    "description": "Current provider badge"
+  },
+  "connectionUntested": {
+    "message": "未测试",
+    "description": "Connection untested status"
+  },
+  "connectionSuccess": {
+    "message": "连接正常",
+    "description": "Connection success status"
+  },
+  "connectionFailed": {
+    "message": "连接失败",
+    "description": "Connection failed status"
+  },
+  "createdAt": {
+    "message": "创建于",
+    "description": "Created at label"
+  },
+  "testingConnection": {
+    "message": "测试中...",
+    "description": "Testing connection"
+  },
+  "connectionTestSuccess": {
+    "message": "✅ 连接测试成功！API 配置正确。",
+    "description": "Connection test success message"
+  },
+  "connectionTestFailed": {
+    "message": "❌ 连接测试失败",
+    "description": "Connection test failed message"
+  },
+  "fillRequiredFields": {
+    "message": "请填写所有必填字段！",
+    "description": "Fill required fields message"
+  },
+  "confirmDeleteProvider": {
+    "message": "确定要删除这个 AI 提供商吗？",
+    "description": "Confirm delete provider message"
+  },
+  "apiKeyNotSet": {
+    "message": "未设置",
+    "description": "API key not set"
+  },
+  "contextMenuAnnotatePage": {
+    "message": "启用词汇模式",
+    "description": "Context menu option to annotate page vocabulary"
+  },
+  "contextMenuRemoveAnnotations": {
+    "message": "关闭词汇模式",
+    "description": "Context menu option to remove vocabulary annotations"
+  },
+  "vocabularyMode": {
+    "message": "词汇模式",
+    "description": "Vocabulary mode navigation label"
+  },
+  "vocabularyModeTitle": {
+    "message": "词汇模式",
+    "description": "Title for vocabulary mode settings section"
+  },
+  "enableVocabularyMode": {
+    "message": "启用词汇模式",
+    "description": "Label for vocabulary mode enable toggle"
+  },
+  "vocabularyModeDescription": {
+    "message": "根据您的词汇量设置自动标注页面上的单词，非常适合在阅读中学习语言。",
+    "description": "Description of vocabulary mode feature"
+  },
+  "vocabularyModeEnable": {
+    "message": "启用词汇模式",
+    "description": "Label for enabling vocabulary mode"
+  },
+  "vocabularyModeProvider": {
+    "message": "词库数据库",
+    "description": "Label for vocabulary provider selection"
+  },
+  "vocabularyModeProviderCET": {
+    "message": "CET（大学英语考试）",
+    "description": "CET vocabulary provider"
+  },
+  "vocabularyModeProviderFrequency": {
+    "message": "词频统计",
+    "description": "Frequency-based vocabulary provider"
+  },
+  "vocabularyModeCETLevel": {
+    "message": "CET 等级",
+    "description": "Label for CET level selection"
+  },
+  "vocabularyModeCETMode": {
+    "message": "标注模式",
+    "description": "Label for CET annotation mode"
+  },
+  "vocabularyModeCETModeAbove": {
+    "message": "高于所选等级",
+    "description": "Annotate words above the selected level"
+  },
+  "vocabularyModeCETModeExact": {
+    "message": "仅所选等级",
+    "description": "Annotate words in the exact level only"
+  },
+  "vocabularyModeCETIncludeBase": {
+    "message": "包含基础等级（CET-4）",
+    "description": "Option to include base vocabulary levels"
+  },
+  "vocabularyModeShowTranslation": {
+    "message": "在标注中显示翻译",
+    "description": "Option to show translation in vocabulary annotations"
+  },
+  "vocabularyModeShowPhonetic": {
+    "message": "在标注中显示音标",
+    "description": "Option to show phonetics in vocabulary annotations"
+  },
+  "vocabularyModeAutoEnable": {
+    "message": "页面加载时自动启用",
+    "description": "Option to automatically enable vocabulary mode when page loads"
+  },
+  "vocabularyModeDesc": {
+    "message": "根据词汇水平自动标注页面单词，适合英语学习",
+    "description": "Description of vocabulary mode feature in settings"
+  },
+  "vocabularyModeSwitch": {
+    "message": "功能开关",
+    "description": "Section title for vocabulary mode enable/disable"
+  },
+  "enableVocabularyModeDesc": {
+    "message": "在右键菜单中显示「启用词汇模式」选项",
+    "description": "Description for vocabulary mode enable toggle"
+  },
+  "vocabularySelection": {
+    "message": "词汇选择",
+    "description": "Section title for vocabulary selection"
+  },
+  "targetVocabulary": {
+    "message": "目标词汇",
+    "description": "Label for target vocabulary selection"
+  },
+  "targetVocabularyDesc": {
+    "message": "选择要标注的词汇类型（可多选）",
+    "description": "Description for target vocabulary selection"
+  },
+  "vocabularyMatchMode": {
+    "message": "匹配模式",
+    "description": "Label for vocabulary match mode"
+  },
+  "vocabularyMatchModeDesc": {
+    "message": "当选择多个词汇类型时的匹配规则",
+    "description": "Description for match mode"
+  },
+  "matchModeAny": {
+    "message": "包含任一标签（推荐）",
+    "description": "Match mode: any tag"
+  },
+  "matchModeAll": {
+    "message": "包含所有标签",
+    "description": "Match mode: all tags"
+  },
+  "matchModeExact": {
+    "message": "精确匹配",
+    "description": "Match mode: exact"
+  },
+  "matchModeHint": {
+    "message": "例：选择 CET-6 + TOEFL",
+    "description": "Example hint for match mode"
+  },
+  "matchModeHintAny": {
+    "message": "• 任一：标注含有 CET-6 或 TOEFL 标签的词",
+    "description": "Explanation for any mode"
+  },
+  "matchModeHintAll": {
+    "message": "• 所有：只标注同时含有 CET-6 和 TOEFL 的词",
+    "description": "Explanation for all mode"
+  },
+  "matchModeHintExact": {
+    "message": "• 精确：只标注恰好这两个标签的词",
+    "description": "Explanation for exact mode"
+  },
+  "includeBaseWords": {
+    "message": "包含基础词汇",
+    "description": "Label for include base words option"
+  },
+  "includeBaseWordsDesc": {
+    "message": "是否标注 CET-4 等基础词汇",
+    "description": "Description for include base words"
+  },
+  "minCollinsStars": {
+    "message": "最低柯林斯星级",
+    "description": "Label for minimum Collins stars"
+  },
+  "minCollinsStarsDesc": {
+    "message": "只标注重要程度达到指定星级的词（0 = 不限制）",
+    "description": "Description for minimum Collins stars"
+  },
+  "collinsStarsHint": {
+    "message": "柯林斯星级：1-5星表示词汇重要性，0表示无限制",
+    "description": "Hint for Collins stars"
+  },
+  "vocabularyDataSource": {
+    "message": "数据来源",
+    "description": "Section title for vocabulary data source"
+  },
+  "dataSourceTitle": {
+    "message": "词库来源：ECDICT",
+    "description": "Data source title"
+  },
+  "dataSourceInfo": {
+    "message": "本扩展使用 <a href=\"https://github.com/skywind3000/ECDICT\" target=\"_blank\" rel=\"noopener\">ECDICT</a> 开源词典数据（MIT License），包含 14,942 个带标签词汇。",
+    "description": "Data source information"
+  },
+  "dataSourceStats": {
+    "message": "• 核心词库：9,642词 (CET/考研/常用词)",
+    "description": "Core vocabulary stats"
+  },
+  "dataSourceStatsAdvanced": {
+    "message": "• 高级词库：5,300词 (GRE/专业词汇，按需加载)",
+    "description": "Advanced vocabulary stats"
+  },
+  "vocabularyStats": {
+    "message": "词库统计",
+    "description": "Label for vocabulary statistics"
+  },
+  "vocabularyStatsDesc": {
+    "message": "当前加载的词汇数量",
+    "description": "Description for vocabulary statistics"
+  },
+  "refreshStats": {
+    "message": "刷新统计",
+    "description": "Button text for refresh statistics"
+  },
+  "statsNotAvailable": {
+    "message": "统计信息将在页面加载时显示",
+    "description": "Message when stats are not available"
+  },
+  "selectVocabularyTags": {
+    "message": "点击选择词汇类型...",
+    "description": "Placeholder for tag selector"
   }
 }
 

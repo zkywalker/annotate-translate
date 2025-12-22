@@ -18,22 +18,24 @@
         </div>
         <div class="settings">
             <h2 data-i18n="settings">Settings</h2>
-            <div class="setting-item">
-                <label for="enable-translate">
-                    <input type="checkbox" id="enable-translate" checked>
-                    <span data-i18n="enableTranslation">Enable Translation</span>
+            <div class="setting-item switch-item">
+                <span data-i18n="enableTranslation">Enable Translation</span>
+                <label class="switch">
+                    <input type="checkbox" id="enable-translate" checked aria-label="Enable Translation">
+                    <span class="slider"></span>
                 </label>
             </div>
-            <div class="setting-item">
-                <label for="enable-annotate">
-                    <input type="checkbox" id="enable-annotate" checked>
-                    <span data-i18n="enableAnnotation">Enable Annotation</span>
+            <div class="setting-item switch-item">
+                <span data-i18n="enableAnnotation">Enable Annotation</span>
+                <label class="switch">
+                    <input type="checkbox" id="enable-annotate" checked aria-label="Enable Annotation">
+                    <span class="slider"></span>
                 </label>
             </div>
             <div class="setting-item">
                 <label for="translation-provider" data-i18n="selectTranslationService">Translation Service:</label>
                 <div class="provider-select-container">
-                    <img id="provider-select-icon" class="provider-select-icon" src="" alt="" style="display: none;">
+                    <img id="provider-select-icon" class="provider-select-icon hidden" src="" alt="">
                     <select id="translation-provider">
                         <!-- Options will be populated by JavaScript with i18n -->
                     </select>
@@ -47,7 +49,6 @@
             </div>
         </div>
         <div class="actions">
-            <button id="save-settings" data-i18n="saveSettings">Save Settings</button>
             <button id="clear-annotations" data-i18n="clearAllAnnotations">Clear All Annotations</button>
         </div>
         <div id="status" class="status"></div>
