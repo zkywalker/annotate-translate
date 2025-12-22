@@ -484,7 +484,7 @@
             </div>
             <div class="service-info">
               <h3>AI翻译</h3>
-              <p data-i18n="openaiIntro">使用 AI 模型进行智能翻译，支持上下文理解和自然语言处理。支持 OpenAI 或 OpenAI 兼容的 API 服务。</p>
+              <p data-i18n="openaiIntro">使用 AI 模型进行智能翻译，支持上下文理解和自然语言处理。支持 OpenAI 或 OpenAI 兼容的 API 服务（如 Azure OpenAI、Ollama、Claude、Gemini 等）。</p>
             </div>
           </div>
 
@@ -500,149 +500,52 @@
               </button>
             </div>
           </div>
+        </section>
 
-          <h3 class="section-title" data-i18n="apiConfiguration">API 配置</h3>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="apiKey">API 密钥</label>
-              <p class="setting-desc" data-i18n="openaiApiKeyDesc">从 OpenAI 平台获取的 API 密钥</p>
-            </div>
-            <div class="setting-control">
-              <input type="password" id="openaiApiKey" class="text-input" placeholder="sk-...">
-            </div>
-          </div>
-        
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="model">模型</label>
-              <p class="setting-desc" data-i18n="modelDesc">选择或输入要使用的模型名称</p>
-            </div>
-            <div class="setting-control">
-              <input type="text" id="openaiModel" class="text-input" list="openaiModelList" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
-              <datalist id="openaiModelList">
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                <option value="gpt-4o-mini">GPT-4o Mini</option>
-                <option value="gpt-4o">GPT-4o</option>
-                <option value="gpt-4-turbo">GPT-4 Turbo</option>
-              </datalist>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="baseUrl">Base URL</label>
-              <p class="setting-desc" data-i18n="baseUrlDesc">API 端点 URL（支持兼容服务）</p>
-            </div>
-            <div class="setting-control">
-              <input type="text" id="openaiBaseUrl" class="text-input" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
-            </div>
-          </div>
-
-          <!-- 连接测试 -->
-          <div class="test-section">
-            <h3 class="section-title" data-i18n="connectionTest">连接测试</h3>
-            <button class="btn btn-secondary" id="testOpenaiConnection">
-              <i data-lucide="check-circle" width="16" height="16"></i>
-              <span data-i18n="testConnection">测试连接</span>
+        <!-- AI 提供商列表 -->
+        <section class="section">
+          <div class="section-header">
+            <h3 class="section-title" data-i18n="aiProviders">AI 提供商</h3>
+            <button class="btn btn-primary btn-sm" id="addAIProvider">
+              <i data-lucide="plus" width="16" height="16"></i>
+              <span data-i18n="addProvider">添加提供商</span>
             </button>
-            <div id="openaiTestResult" class="test-result"></div>
           </div>
 
-          <!-- 高级选项 -->
-          <details class="advanced-section">
-            <summary data-i18n="advancedOptions">高级选项</summary>
-            
-            <div class="setting-row">
-              <div class="setting-info">
-                <label class="setting-label">Temperature</label>
-                <p class="setting-desc" data-i18n="temperatureDesc">控制翻译的创造性（0-1，越低越准确）</p>
-              </div>
-              <div class="setting-control">
-                <input type="number" id="openaiTemperature" class="number-input" min="0" max="1" step="0.1" value="0.3">
-              </div>
-            </div>
+          <div id="aiProvidersList" class="providers-list">
+            <!-- AI 提供商卡片将通过 JS 动态生成 -->
+          </div>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label class="setting-label">Max Tokens</label>
-                <p class="setting-desc" data-i18n="maxTokensDesc">单次翻译的最大 token 数量</p>
-              </div>
-              <div class="setting-control">
-                <input type="number" id="openaiMaxTokens" class="number-input" min="100" max="4000" value="500">
-              </div>
-            </div>
+          <div id="noProvidersMessage" class="empty-state" style="display: none;">
+            <i data-lucide="inbox" width="48" height="48"></i>
+            <p data-i18n="noAIProviders">暂无 AI 提供商，点击上方按钮添加</p>
+          </div>
+        </section>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label class="setting-label" data-i18n="timeout">超时时间</label>
-                <p class="setting-desc" data-i18n="timeoutDesc">API 请求超时时间（秒）</p>
-              </div>
-              <div class="setting-control">
-                <input type="number" id="openaiTimeout" class="number-input" min="5" max="60" value="30">
-              </div>
-            </div>
-
-            <!-- 提示词配置 -->
-            <div class="setting-group">
-              <h4 class="setting-group-title" data-i18n="promptSettings">提示词设置</h4>
-              
-              <div class="setting-row">
-                <div class="setting-info">
-                  <label class="setting-label" data-i18n="promptFormat">提示词格式</label>
-                  <p class="setting-desc" data-i18n="promptFormatDesc">选择AI返回的数据格式</p>
-                </div>
-                <div class="setting-control">
-                  <select id="openaiPromptFormat" class="select-input">
-                    <option value="jsonFormat" data-i18n="jsonFormatOption">JSON格式（完整信息）</option>
-                    <option value="simpleFormat" data-i18n="simpleFormatOption">简单格式（仅翻译）</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="setting-row">
-                <div class="setting-info">
-                  <label class="setting-label" data-i18n="useContext">使用上下文</label>
-                  <p class="setting-desc" data-i18n="useContextDesc">提供周围文本以提高翻译准确性</p>
-                </div>
-                <div class="setting-control">
-                  <label class="switch">
-                    <input type="checkbox" id="openaiUseContext" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="setting-row">
-                <div class="setting-info">
-                  <label class="setting-label" data-i18n="customPrompt">自定义提示词</label>
-                  <p class="setting-desc" data-i18n="customPromptDesc">高级用户可自定义AI提示词模板</p>
-                </div>
-                <div class="setting-control">
-                  <button class="btn btn-secondary" id="openPromptEditor">
-                    <i data-lucide="edit" width="16" height="16"></i>
-                    <span data-i18n="editPrompt">编辑提示词</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </details>
-
-          <!-- 帮助信息 -->
+        <!-- 帮助信息 -->
+        <section class="section">
           <div class="info-box">
             <button class="info-toggle" data-target="openai-help">
               <i data-lucide="info" width="16" height="16"></i>
               <strong data-i18n="howToGetAiCredentials">如何获取 API 凭据？</strong>
             </button>
             <div id="openai-help" class="info-content collapsed">
+              <h4>OpenAI</h4>
               <ol>
                 <li>访问 <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI Platform</a></li>
                 <li data-i18n="openaiStep2">注册并登录账号</li>
                 <li data-i18n="openaiStep3">前往 API Keys 页面创建新密钥</li>
                 <li data-i18n="openaiStep4">为账号充值（按使用量付费）</li>
-                <li data-i18n="openaiStep5">将 API Key 填入上方并测试</li>
+                <li data-i18n="openaiStep5">将 API Key 填入配置</li>
               </ol>
-              <p data-i18n="openaiCompatible">💡 Base URL 支持其他兼容 OpenAI API 的服务（如 Azure OpenAI、Ollama 等）</p>
+
+              <h4>兼容服务</h4>
+              <p data-i18n="openaiCompatible">💡 支持其他兼容 OpenAI API 的服务：</p>
+              <ul>
+                <li><strong>Azure OpenAI</strong>: <code>https://your-resource.openai.azure.com/</code></li>
+                <li><strong>Ollama（本地）</strong>: <code>http://localhost:11434/v1</code></li>
+                <li><strong>其他兼容服务</strong>: 只需修改 Base URL 即可</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -935,6 +838,145 @@
     <span data-i18n="settingsSaved">设置已保存</span>
   </div>
 
+  <!-- AI 提供商编辑模态框 -->
+  <div id="aiProviderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="aiProviderModalTitle" data-i18n="addAIProvider">添加 AI 提供商</h3>
+        <button class="modal-close" id="closeAIProviderModal">
+          <i data-lucide="x" width="20" height="20"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="aiProviderId">
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="aiProviderName">提供商名称 *</label>
+            <p class="setting-desc">为这个 AI 提供商起一个名字，方便识别</p>
+          </div>
+          <div class="setting-control">
+            <input type="text" id="aiProviderName" class="text-input" placeholder="例如：OpenAI、Azure OpenAI、本地 Ollama" required>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="aiProviderApiKey">API 密钥 *</label>
+            <p class="setting-desc">从服务提供商获取的 API Key</p>
+          </div>
+          <div class="setting-control">
+            <input type="password" id="aiProviderApiKey" class="text-input" placeholder="sk-..." required>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="aiProviderModel">模型名称 *</label>
+            <p class="setting-desc">要使用的模型名称</p>
+          </div>
+          <div class="setting-control">
+            <input type="text" id="aiProviderModel" class="text-input" list="modalModelList" placeholder="gpt-3.5-turbo" required>
+            <datalist id="modalModelList">
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="gpt-4o-mini">GPT-4o Mini</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              <option value="gpt-4">GPT-4</option>
+              <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+              <option value="gemini-pro">Gemini Pro</option>
+            </datalist>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="aiProviderBaseUrl">Base URL *</label>
+            <p class="setting-desc">API 端点地址</p>
+          </div>
+          <div class="setting-control">
+            <input type="text" id="aiProviderBaseUrl" class="text-input" placeholder="https://api.openai.com/v1" required>
+          </div>
+        </div>
+
+        <!-- 高级选项 -->
+        <details class="advanced-section">
+          <summary>高级选项</summary>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" for="aiProviderTemperature">Temperature</label>
+              <p class="setting-desc">控制创造性（0-1，越低越准确）</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="aiProviderTemperature" class="number-input" min="0" max="1" step="0.1" value="0.3">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" for="aiProviderMaxTokens">Max Tokens</label>
+              <p class="setting-desc">单次翻译最大 token 数</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="aiProviderMaxTokens" class="number-input" min="100" max="4000" value="500">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" for="aiProviderTimeout">超时时间（秒）</label>
+              <p class="setting-desc">API 请求超时时间</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="aiProviderTimeout" class="number-input" min="5" max="120" value="30">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" for="aiProviderPromptFormat">提示词格式</label>
+              <p class="setting-desc">AI 返回的数据格式</p>
+            </div>
+            <div class="setting-control">
+              <select id="aiProviderPromptFormat" class="select-input">
+                <option value="jsonFormat">JSON 格式（完整信息）</option>
+                <option value="simpleFormat">简单格式（仅翻译）</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label">使用上下文</label>
+              <p class="setting-desc">提供周围文本以提高准确性</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="aiProviderUseContext" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="testAIProviderConnection">
+          <i data-lucide="check-circle" width="16" height="16"></i>
+          <span>测试连接</span>
+        </button>
+        <div style="flex: 1;"></div>
+        <button class="btn btn-secondary" id="cancelAIProvider">取消</button>
+        <button class="btn btn-primary" id="saveAIProvider">
+          <i data-lucide="save" width="16" height="16"></i>
+          <span>保存</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 脚本加载 -->
   <!-- 提示词编辑器模态框 -->
   <div id="promptEditorModal" class="modal" style="display: none;">
@@ -1031,6 +1073,7 @@
   <script src="../utils/settings-schema.js"></script>
   <script src="../providers/prompt-templates.js"></script>
   <script src="../utils/i18n-helper.js"></script>
+  <script src="ai-providers-manager.js"></script>
   <script src="options.js"></script>
   <!-- Initialize Lucide Icons -->
   <script src="../lib/lucide-init.js"></script>

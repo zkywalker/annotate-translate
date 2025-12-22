@@ -58,9 +58,36 @@ const $ = {
   get youdaoAppSecret() { return settings.providers?.youdao?.appSecret ?? ''; },
   get deeplApiKey() { return settings.providers?.deepl?.apiKey ?? ''; },
   get deeplUseFreeApi() { return settings.providers?.deepl?.useFreeApi ?? true; },
-  get openaiApiKey() { return settings.providers?.openai?.apiKey ?? ''; },
-  get openaiModel() { return settings.providers?.openai?.model ?? 'gpt-3.5-turbo'; },
-  get openaiBaseUrl() { return settings.providers?.openai?.baseUrl ?? 'https://api.openai.com/v1'; },
+  // 获取当前选中的 AI 提供商配置
+  get currentAIProvider() {
+    const currentId = settings.providers?.currentAIProvider;
+    const aiProviders = settings.providers?.aiProviders || [];
+    const provider = aiProviders.find(p => p.id === currentId);
+
+    // 如果找不到，回退到旧的 openai 配置
+    if (!provider) {
+      return {
+        apiKey: settings.providers?.openai?.apiKey ?? '',
+        model: settings.providers?.openai?.model ?? 'gpt-3.5-turbo',
+        baseUrl: settings.providers?.openai?.baseUrl ?? 'https://api.openai.com/v1',
+        temperature: settings.providers?.openai?.temperature ?? 0.3,
+        maxTokens: settings.providers?.openai?.maxTokens ?? 500,
+        timeout: settings.providers?.openai?.timeout ?? 30,
+        promptFormat: settings.providers?.openai?.promptFormat ?? 'jsonFormat',
+        useContext: settings.providers?.openai?.useContext ?? true
+      };
+    }
+
+    return provider;
+  },
+  get openaiApiKey() { return this.currentAIProvider.apiKey ?? ''; },
+  get openaiModel() { return this.currentAIProvider.model ?? 'gpt-3.5-turbo'; },
+  get openaiBaseUrl() { return this.currentAIProvider.baseUrl ?? 'https://api.openai.com/v1'; },
+  get openaiTemperature() { return this.currentAIProvider.temperature ?? 0.3; },
+  get openaiMaxTokens() { return this.currentAIProvider.maxTokens ?? 500; },
+  get openaiTimeout() { return this.currentAIProvider.timeout ?? 30; },
+  get openaiPromptFormat() { return this.currentAIProvider.promptFormat ?? 'jsonFormat'; },
+  get openaiUseContext() { return this.currentAIProvider.useContext ?? true; },
   get enableAudio() { return settings.translationCard?.enableAudio ?? true; },
   get showPhonetics() { return settings.translationCard?.showPhonetics ?? true; },
   get showDefinitions() { return settings.translationCard?.showDefinitions ?? true; },
@@ -191,10 +218,14 @@ function applyTranslationSettings() {
       $.translationProvider = 'google';
       if (isExtensionContextValid()) {
         try {
-          chrome.storage.sync.set({ 'providers.current': 'google' }, function() {
-            if (chrome.runtime.lastError) {
-              console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
-            }
+          chrome.storage.sync.get(['providers'], (result) => {
+            const providers = result.providers || {};
+            providers.current = 'google';
+            chrome.storage.sync.set({ providers }, function() {
+              if (chrome.runtime.lastError) {
+                console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
+              }
+            });
           });
         } catch (error) {
           console.warn('[Annotate-Translate] Failed to update provider:', error.message);
@@ -212,10 +243,14 @@ function applyTranslationSettings() {
       translationService.setActiveProvider('google');
       if (isExtensionContextValid()) {
         try {
-          chrome.storage.sync.set({ 'providers.current': 'google' }, function() {
-            if (chrome.runtime.lastError) {
-              console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
-            }
+          chrome.storage.sync.get(['providers'], (result) => {
+            const providers = result.providers || {};
+            providers.current = 'google';
+            chrome.storage.sync.set({ providers }, function() {
+              if (chrome.runtime.lastError) {
+                console.warn('[Annotate-Translate] Failed to update provider:', chrome.runtime.lastError.message);
+              }
+            });
           });
         } catch (error) {
           console.warn('[Annotate-Translate] Failed to update provider:', error.message);
@@ -300,26 +335,38 @@ function applyTranslationSettings() {
     if ($.translationProvider === 'openai') {
       const openaiProvider = translationService.providers.get('openai');
       if (openaiProvider) {
+        const aiProviderConfig = $.currentAIProvider;
+
         openaiProvider.updateConfig({
-          apiKey: $.openaiApiKey,
-          model: $.openaiModel,
-          baseURL: $.openaiBaseUrl,
-          promptFormat: 'jsonFormat',
-          useContext: true,
+          apiKey: aiProviderConfig.apiKey,
+          model: aiProviderConfig.model,
+          baseURL: aiProviderConfig.baseUrl,
+          temperature: aiProviderConfig.temperature,
+          maxTokens: aiProviderConfig.maxTokens,
+          timeout: aiProviderConfig.timeout,
+          promptFormat: aiProviderConfig.promptFormat,
+          useContext: aiProviderConfig.useContext,
+          customTemplates: aiProviderConfig.customTemplates,
+          providerName: aiProviderConfig.name || 'OpenAI', // 传递用户自定义的提供商名称
           showPhoneticInAnnotation: $.showPhoneticInAnnotation !== false,
           showTranslationInAnnotation: $.showTranslationInAnnotation !== false,
           showDefinitionsInAnnotation: $.showDefinitionsInAnnotation === true
         });
-        console.log('[Annotate-Translate] OpenAI provider configured:');
-        console.log('  - API Key:', $.openaiApiKey ? 'Set' : 'Not set');
-        console.log('  - Model:', $.openaiModel || 'gpt-3.5-turbo');
-        console.log('  - Base URL:', $.openaiBaseUrl || 'https://api.openai.com/v1');
+
+        console.log('[Annotate-Translate] AI provider configured:');
+        console.log('  - Provider:', aiProviderConfig.name || 'OpenAI');
+        console.log('  - API Key:', aiProviderConfig.apiKey ? 'Set' : 'Not set');
+        console.log('  - Model:', aiProviderConfig.model);
+        console.log('  - Base URL:', aiProviderConfig.baseUrl);
+        console.log('  - Temperature:', aiProviderConfig.temperature);
+        console.log('  - Max Tokens:', aiProviderConfig.maxTokens);
+        console.log('  - Prompt Format:', aiProviderConfig.promptFormat);
+        console.log('  - Use Context:', aiProviderConfig.useContext);
         console.log('  - Annotation settings:', {
           showPhonetics: openaiProvider.showPhoneticInAnnotation,
           showTranslation: openaiProvider.showTranslationInAnnotation,
           showDefinitions: openaiProvider.showDefinitionsInAnnotation
         });
-        console.log('  - showPhoneticInAnnotation:', openaiProvider.showPhoneticInAnnotation);
       }
     }
   }

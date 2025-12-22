@@ -503,16 +503,15 @@ class TranslationUI {
 
     const provider = document.createElement('span');
     provider.className = 'provider-info';
-    const poweredByText = safeGetMessage('poweredBy', null, 'Powered by');
-    
-    // 添加 logo 图标
+
+    // 添加 logo 图标和提供商文本
     const providerName = result.provider ? result.provider.toLowerCase() : 'unknown';
     const logoMap = {
       'google': 'assets/icons/icon_logo_google.svg',
       'youdao': 'assets/icons/icon_logo_youdao.svg',
       'deepl': 'assets/icons/icon_logo_deepl.svg'
     };
-    
+
     if (logoMap[providerName]) {
       const logo = document.createElement('img');
       logo.className = 'provider-logo';
@@ -520,11 +519,21 @@ class TranslationUI {
       logo.alt = result.provider || 'Unknown';
       provider.appendChild(logo);
     }
-    
+
     const providerText = document.createElement('span');
-    providerText.textContent = `${poweredByText} ${result.provider || 'Unknown'}`;
+
+    // 对于 AI 翻译提供商，使用特殊格式显示
+    if (providerName === 'openai') {
+      const aiTranslationText = safeGetMessage('aiTranslation', null, 'AI翻译');
+      const displayName = result.providerDisplayName || 'OpenAI';
+      providerText.textContent = `${aiTranslationText} · ${displayName}`;
+    } else {
+      // 对于其他提供商，保持原来的格式
+      const poweredByText = safeGetMessage('poweredBy', null, 'Powered by');
+      providerText.textContent = `${poweredByText} ${result.provider || 'Unknown'}`;
+    }
+
     provider.appendChild(providerText);
-    
     footer.appendChild(provider);
 
     if (result.timestamp) {

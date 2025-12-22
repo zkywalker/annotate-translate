@@ -520,6 +520,10 @@
     "message": "技术支持",
     "description": "Powered by label"
   },
+  "aiTranslation": {
+    "message": "AI翻译",
+    "description": "AI translation label"
+  },
   "clickToViewDetails": {
     "message": "点击查看详细翻译",
     "description": "Tooltip for clickable annotations"
@@ -1484,6 +1488,187 @@
   "pageMovedDesc": {
     "message": "原\"显示与外观\"的设置已分离到以下两个页面：",
     "description": "Page moved description"
+  },
+
+  "aiProviders": {
+    "message": "AI 提供商",
+    "description": "AI providers section title"
+  },
+  "addProvider": {
+    "message": "添加提供商",
+    "description": "Add provider button"
+  },
+  "addAIProvider": {
+    "message": "添加 AI 提供商",
+    "description": "Add AI provider modal title"
+  },
+  "editAIProvider": {
+    "message": "编辑 AI 提供商",
+    "description": "Edit AI provider modal title"
+  },
+  "noAIProviders": {
+    "message": "暂无 AI 提供商，点击上方按钮添加",
+    "description": "No AI providers message"
+  },
+  "providerName": {
+    "message": "提供商名称",
+    "description": "Provider name label"
+  },
+  "providerNamePlaceholder": {
+    "message": "例如：OpenAI、Azure OpenAI、本地 Ollama",
+    "description": "Provider name placeholder"
+  },
+  "providerNameDesc": {
+    "message": "为这个 AI 提供商起一个名字，方便识别",
+    "description": "Provider name description"
+  },
+  "apiKeyLabel": {
+    "message": "API 密钥",
+    "description": "API key label"
+  },
+  "apiKeyDesc": {
+    "message": "从服务提供商获取的 API Key",
+    "description": "API key description"
+  },
+  "modelLabel": {
+    "message": "模型名称",
+    "description": "Model label"
+  },
+  "modelDesc": {
+    "message": "要使用的模型名称",
+    "description": "Model description"
+  },
+  "baseUrlLabel": {
+    "message": "Base URL",
+    "description": "Base URL label"
+  },
+  "baseUrlDesc": {
+    "message": "API 端点地址",
+    "description": "Base URL description"
+  },
+  "temperatureLabel": {
+    "message": "Temperature",
+    "description": "Temperature label"
+  },
+  "temperatureDesc": {
+    "message": "控制创造性（0-1，越低越准确）",
+    "description": "Temperature description"
+  },
+  "maxTokensLabel": {
+    "message": "Max Tokens",
+    "description": "Max tokens label"
+  },
+  "maxTokensDesc": {
+    "message": "单次翻译最大 token 数",
+    "description": "Max tokens description"
+  },
+  "timeoutLabel": {
+    "message": "超时时间（秒）",
+    "description": "Timeout label"
+  },
+  "timeoutDesc": {
+    "message": "API 请求超时时间",
+    "description": "Timeout description"
+  },
+  "promptFormatLabel": {
+    "message": "提示词格式",
+    "description": "Prompt format label"
+  },
+  "promptFormatDesc": {
+    "message": "AI 返回的数据格式",
+    "description": "Prompt format description"
+  },
+  "jsonFormatOption": {
+    "message": "JSON 格式（完整信息）",
+    "description": "JSON format option"
+  },
+  "simpleFormatOption": {
+    "message": "简单格式（仅翻译）",
+    "description": "Simple format option"
+  },
+  "useContextLabel": {
+    "message": "使用上下文",
+    "description": "Use context label"
+  },
+  "useContextDesc": {
+    "message": "提供周围文本以提高准确性",
+    "description": "Use context description"
+  },
+  "advancedOptions": {
+    "message": "高级选项",
+    "description": "Advanced options"
+  },
+  "testConnectionButton": {
+    "message": "测试连接",
+    "description": "Test connection button"
+  },
+  "saveButton": {
+    "message": "保存",
+    "description": "Save button"
+  },
+  "cancelButton": {
+    "message": "取消",
+    "description": "Cancel button"
+  },
+  "useProviderButton": {
+    "message": "使用",
+    "description": "Use provider button"
+  },
+  "editProviderButton": {
+    "message": "编辑",
+    "description": "Edit provider button"
+  },
+  "testProviderButton": {
+    "message": "测试",
+    "description": "Test provider button"
+  },
+  "deleteProviderButton": {
+    "message": "删除",
+    "description": "Delete provider button"
+  },
+  "currentProvider": {
+    "message": "当前使用",
+    "description": "Current provider badge"
+  },
+  "connectionUntested": {
+    "message": "未测试",
+    "description": "Connection untested status"
+  },
+  "connectionSuccess": {
+    "message": "连接正常",
+    "description": "Connection success status"
+  },
+  "connectionFailed": {
+    "message": "连接失败",
+    "description": "Connection failed status"
+  },
+  "createdAt": {
+    "message": "创建于",
+    "description": "Created at label"
+  },
+  "testingConnection": {
+    "message": "测试中...",
+    "description": "Testing connection"
+  },
+  "connectionTestSuccess": {
+    "message": "✅ 连接测试成功！API 配置正确。",
+    "description": "Connection test success message"
+  },
+  "connectionTestFailed": {
+    "message": "❌ 连接测试失败",
+    "description": "Connection test failed message"
+  },
+  "fillRequiredFields": {
+    "message": "请填写所有必填字段！",
+    "description": "Fill required fields message"
+  },
+  "confirmDeleteProvider": {
+    "message": "确定要删除这个 AI 提供商吗？",
+    "description": "Confirm delete provider message"
+  },
+  "apiKeyNotSet": {
+    "message": "未设置",
+    "description": "API key not set"
   }
 }
 

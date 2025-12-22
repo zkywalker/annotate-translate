@@ -42,26 +42,27 @@ const DEFAULT_SETTINGS = {
   // 翻译服务配置
   providers: {
     current: 'google', // 当前使用的服务
-    
+
     google: {
       enabled: true
       // Google 翻译无需额外配置
     },
-    
+
     youdao: {
       enabled: false,
       appKey: '',
       appSecret: '',
       connectionStatus: null // { tested: boolean, success: boolean, timestamp: number, responseTime: number, error: string }
     },
-    
+
     deepl: {
       enabled: false,
       apiKey: '',
       useFreeApi: true,
       connectionStatus: null
     },
-    
+
+    // 保留 openai 作为默认 AI 提供商（向后兼容）
     openai: {
       enabled: false,
       apiKey: '',
@@ -75,7 +76,30 @@ const DEFAULT_SETTINGS = {
       promptFormat: 'jsonFormat', // 'jsonFormat' | 'simpleFormat'
       useContext: true, // 是否使用上下文信息
       customTemplates: null // 自定义模板对象，null表示使用默认模板
-    }
+    },
+
+    // 新增：AI 提供商列表（支持多个 OpenAI 兼容的服务）
+    aiProviders: [
+      {
+        id: 'openai-default',
+        name: 'OpenAI',
+        enabled: true,
+        apiKey: '',
+        model: 'gpt-3.5-turbo',
+        baseUrl: 'https://api.openai.com/v1',
+        temperature: 0.3,
+        maxTokens: 500,
+        timeout: 30,
+        promptFormat: 'jsonFormat',
+        useContext: true,
+        customTemplates: null,
+        connectionStatus: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+    ],
+    // 当前选择的 AI 提供商 ID
+    currentAIProvider: 'openai-default'
   },
 
   // 显示与外观 (选择菜单)

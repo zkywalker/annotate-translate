@@ -520,6 +520,10 @@
     "message": "Powered by",
     "description": "Powered by label"
   },
+  "aiTranslation": {
+    "message": "AI Translation",
+    "description": "AI translation label"
+  },
   "clickToViewDetails": {
     "message": "Click to view detailed translation",
     "description": "Tooltip for clickable annotations"
@@ -1484,6 +1488,187 @@
   "pageMovedDesc": {
     "message": "The original \"Display & Appearance\" settings have been split into the following pages:",
     "description": "Page moved description"
+  },
+
+  "aiProviders": {
+    "message": "AI Providers",
+    "description": "AI providers section title"
+  },
+  "addProvider": {
+    "message": "Add Provider",
+    "description": "Add provider button"
+  },
+  "addAIProvider": {
+    "message": "Add AI Provider",
+    "description": "Add AI provider modal title"
+  },
+  "editAIProvider": {
+    "message": "Edit AI Provider",
+    "description": "Edit AI provider modal title"
+  },
+  "noAIProviders": {
+    "message": "No AI providers yet, click the button above to add one",
+    "description": "No AI providers message"
+  },
+  "providerName": {
+    "message": "Provider Name",
+    "description": "Provider name label"
+  },
+  "providerNamePlaceholder": {
+    "message": "e.g., OpenAI, Azure OpenAI, Local Ollama",
+    "description": "Provider name placeholder"
+  },
+  "providerNameDesc": {
+    "message": "Give this AI provider a name for easy identification",
+    "description": "Provider name description"
+  },
+  "apiKeyLabel": {
+    "message": "API Key",
+    "description": "API key label"
+  },
+  "apiKeyDesc": {
+    "message": "API Key obtained from the service provider",
+    "description": "API key description"
+  },
+  "modelLabel": {
+    "message": "Model Name",
+    "description": "Model label"
+  },
+  "modelDesc": {
+    "message": "The model name to use",
+    "description": "Model description"
+  },
+  "baseUrlLabel": {
+    "message": "Base URL",
+    "description": "Base URL label"
+  },
+  "baseUrlDesc": {
+    "message": "API endpoint address",
+    "description": "Base URL description"
+  },
+  "temperatureLabel": {
+    "message": "Temperature",
+    "description": "Temperature label"
+  },
+  "temperatureDesc": {
+    "message": "Controls creativity (0-1, lower is more accurate)",
+    "description": "Temperature description"
+  },
+  "maxTokensLabel": {
+    "message": "Max Tokens",
+    "description": "Max tokens label"
+  },
+  "maxTokensDesc": {
+    "message": "Maximum tokens per translation",
+    "description": "Max tokens description"
+  },
+  "timeoutLabel": {
+    "message": "Timeout (seconds)",
+    "description": "Timeout label"
+  },
+  "timeoutDesc": {
+    "message": "API request timeout",
+    "description": "Timeout description"
+  },
+  "promptFormatLabel": {
+    "message": "Prompt Format",
+    "description": "Prompt format label"
+  },
+  "promptFormatDesc": {
+    "message": "Data format returned by AI",
+    "description": "Prompt format description"
+  },
+  "jsonFormatOption": {
+    "message": "JSON Format (Full Info)",
+    "description": "JSON format option"
+  },
+  "simpleFormatOption": {
+    "message": "Simple Format (Translation Only)",
+    "description": "Simple format option"
+  },
+  "useContextLabel": {
+    "message": "Use Context",
+    "description": "Use context label"
+  },
+  "useContextDesc": {
+    "message": "Provide surrounding text to improve accuracy",
+    "description": "Use context description"
+  },
+  "advancedOptions": {
+    "message": "Advanced Options",
+    "description": "Advanced options"
+  },
+  "testConnectionButton": {
+    "message": "Test Connection",
+    "description": "Test connection button"
+  },
+  "saveButton": {
+    "message": "Save",
+    "description": "Save button"
+  },
+  "cancelButton": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  "useProviderButton": {
+    "message": "Use",
+    "description": "Use provider button"
+  },
+  "editProviderButton": {
+    "message": "Edit",
+    "description": "Edit provider button"
+  },
+  "testProviderButton": {
+    "message": "Test",
+    "description": "Test provider button"
+  },
+  "deleteProviderButton": {
+    "message": "Delete",
+    "description": "Delete provider button"
+  },
+  "currentProvider": {
+    "message": "Current",
+    "description": "Current provider badge"
+  },
+  "connectionUntested": {
+    "message": "Not Tested",
+    "description": "Connection untested status"
+  },
+  "connectionSuccess": {
+    "message": "Connected",
+    "description": "Connection success status"
+  },
+  "connectionFailed": {
+    "message": "Failed",
+    "description": "Connection failed status"
+  },
+  "createdAt": {
+    "message": "Created at",
+    "description": "Created at label"
+  },
+  "testingConnection": {
+    "message": "Testing...",
+    "description": "Testing connection"
+  },
+  "connectionTestSuccess": {
+    "message": "✅ Connection test successful! API configuration is correct.",
+    "description": "Connection test success message"
+  },
+  "connectionTestFailed": {
+    "message": "❌ Connection test failed",
+    "description": "Connection test failed message"
+  },
+  "fillRequiredFields": {
+    "message": "Please fill in all required fields!",
+    "description": "Fill required fields message"
+  },
+  "confirmDeleteProvider": {
+    "message": "Are you sure you want to delete this AI provider?",
+    "description": "Confirm delete provider message"
+  },
+  "apiKeyNotSet": {
+    "message": "Not Set",
+    "description": "API key not set"
   }
 }
 
