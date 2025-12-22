@@ -1029,6 +1029,461 @@
   "savePrompt": {
     "message": "保存",
     "description": "Save prompt button"
+  },
+  
+  "translationCardSettings": {
+    "message": "翻译详情",
+    "description": "Translation card settings page title"
+  },
+  "translationCardSettingsDesc": {
+    "message": "弹出翻译卡片窗口的内容和样式设置",
+    "description": "Translation card settings description"
+  },
+  "audioSettings": {
+    "message": "发音设置",
+    "description": "Audio settings page title"
+  },
+  "audioSettingsDesc": {
+    "message": "音频播放和语音合成的相关设置",
+    "description": "Audio settings description"
+  },
+  "dataSettings": {
+    "message": "数据与隐私",
+    "description": "Data and privacy settings page title"
+  },
+  "dataSettingsDesc": {
+    "message": "管理您的数据、隐私和同步设置",
+    "description": "Data settings description"
+  },
+  
+  "interactionSettings": {
+    "message": "交互设置",
+    "description": "Interaction settings section title"
+  },
+  "showFloatingButton": {
+    "message": "显示浮动按钮",
+    "description": "Show floating button"
+  },
+  "showFloatingButtonDesc": {
+    "message": "选中文本后显示翻译和标注按钮",
+    "description": "Show floating button description"
+  },
+  "enableContextMenu": {
+    "message": "右键菜单",
+    "description": "Enable context menu"
+  },
+  "enableContextMenuDesc": {
+    "message": "在右键菜单中显示翻译和标注选项",
+    "description": "Enable context menu description"
+  },
+  "phoneticDisplay": {
+    "message": "音标显示类型",
+    "description": "Phonetic display type"
+  },
+  "phoneticDisplayDesc": {
+    "message": "选择显示美式、英式或同时显示两种音标",
+    "description": "Phonetic display description"
+  },
+  "phoneticUS": {
+    "message": "仅美式",
+    "description": "US phonetic only"
+  },
+  "phoneticUK": {
+    "message": "仅英式",
+    "description": "UK phonetic only"
+  },
+  "phoneticBoth": {
+    "message": "美式和英式",
+    "description": "Both US and UK phonetics"
+  },
+  
+  "annotationContent": {
+    "message": "显示内容",
+    "description": "Annotation content section title"
+  },
+  "annotationFontSize": {
+    "message": "标注字体大小",
+    "description": "Annotation font size"
+  },
+  "annotationFontSizeDesc": {
+    "message": "调整标注文字的大小",
+    "description": "Annotation font size description"
+  },
+  "fontSize12": {
+    "message": "小 (12px)",
+    "description": "Font size 12px"
+  },
+  "fontSize14": {
+    "message": "中 (14px)",
+    "description": "Font size 14px"
+  },
+  "fontSize16": {
+    "message": "大 (16px)",
+    "description": "Font size 16px"
+  },
+  "annotationColor": {
+    "message": "标注文字颜色",
+    "description": "Annotation text color"
+  },
+  "annotationColorDesc": {
+    "message": "自定义标注文字的颜色",
+    "description": "Annotation color description"
+  },
+  "highlightAnnotatedText": {
+    "message": "高亮标注文字",
+    "description": "Highlight annotated text"
+  },
+  "highlightAnnotatedTextDesc": {
+    "message": "为添加了标注的文字添加背景高亮",
+    "description": "Highlight annotated text description"
+  },
+  "highlightColor": {
+    "message": "高亮颜色",
+    "description": "Highlight color"
+  },
+  "highlightColorDesc": {
+    "message": "选择标注文字的背景高亮颜色",
+    "description": "Highlight color description"
+  },
+  "annotationData": {
+    "message": "标注数据",
+    "description": "Annotation data section title"
+  },
+  "saveAnnotationHistory": {
+    "message": "保存标注历史",
+    "description": "Save annotation history"
+  },
+  "saveAnnotationHistoryDesc": {
+    "message": "自动保存所有标注记录，方便日后查看和复习",
+    "description": "Save annotation history description"
+  },
+  "annotationHistoryCount": {
+    "message": "历史记录",
+    "description": "Annotation history count"
+  },
+  "annotationHistoryCountDesc": {
+    "message": "当前已保存的标注数量",
+    "description": "Annotation history count description"
+  },
+  "viewHistory": {
+    "message": "查看历史",
+    "description": "View history button"
+  },
+  "exportAnnotations": {
+    "message": "导出标注",
+    "description": "Export annotations"
+  },
+  "exportAnnotationsDesc": {
+    "message": "将标注数据导出为 JSON 或 CSV 格式",
+    "description": "Export annotations description"
+  },
+  "export": {
+    "message": "导出",
+    "description": "Export button"
+  },
+  
+  "triggerMethods": {
+    "message": "触发方式",
+    "description": "Trigger methods section title"
+  },
+  "clickTranslateButton": {
+    "message": "点击翻译按钮",
+    "description": "Click translate button"
+  },
+  "clickTranslateButtonDesc": {
+    "message": "点击浮动的 \"T\" 按钮时显示翻译详情",
+    "description": "Click translate button description"
+  },
+  "doubleClickWord": {
+    "message": "双击单词",
+    "description": "Double click word"
+  },
+  "doubleClickWordDesc": {
+    "message": "双击网页上的单词时自动显示翻译详情",
+    "description": "Double click word description"
+  },
+  "hoverToTranslate": {
+    "message": "鼠标悬停",
+    "description": "Hover to translate"
+  },
+  "hoverToTranslateDesc": {
+    "message": "鼠标悬停在文字上时自动显示翻译（实验性功能）",
+    "description": "Hover to translate description"
+  },
+  "hoverDelay": {
+    "message": "悬停延迟",
+    "description": "Hover delay"
+  },
+  "hoverDelayDesc": {
+    "message": "鼠标悬停多久后显示翻译（毫秒）",
+    "description": "Hover delay description"
+  },
+  "cardContent": {
+    "message": "显示内容",
+    "description": "Card content section title"
+  },
+  "cardStyle": {
+    "message": "窗口样式",
+    "description": "Card style section title"
+  },
+  "cardTheme": {
+    "message": "主题",
+    "description": "Card theme"
+  },
+  "cardThemeDesc": {
+    "message": "选择翻译卡片的颜色主题",
+    "description": "Card theme description"
+  },
+  "themeLight": {
+    "message": "浅色",
+    "description": "Light theme"
+  },
+  "themeDark": {
+    "message": "深色",
+    "description": "Dark theme"
+  },
+  "themeAuto": {
+    "message": "跟随系统",
+    "description": "Auto theme"
+  },
+  "cardFontSize": {
+    "message": "字体大小",
+    "description": "Card font size"
+  },
+  "cardFontSizeDesc": {
+    "message": "调整翻译卡片中的文字大小",
+    "description": "Card font size description"
+  },
+  "cardWidth": {
+    "message": "卡片宽度",
+    "description": "Card width"
+  },
+  "cardWidthDesc": {
+    "message": "设置翻译卡片的宽度（像素）",
+    "description": "Card width description"
+  },
+  "cardPosition": {
+    "message": "卡片位置",
+    "description": "Card position"
+  },
+  "cardPositionDesc": {
+    "message": "选择翻译卡片的显示位置",
+    "description": "Card position description"
+  },
+  "positionMouse": {
+    "message": "跟随鼠标",
+    "description": "Follow mouse position"
+  },
+  "positionCenter": {
+    "message": "屏幕居中",
+    "description": "Center of screen"
+  },
+  "positionTop": {
+    "message": "顶部居中",
+    "description": "Top center"
+  },
+  "longTextHandling": {
+    "message": "长文本处理",
+    "description": "Long text handling section title"
+  },
+  "simplifyLongText": {
+    "message": "启用简化 UI",
+    "description": "Simplify long text"
+  },
+  "simplifyLongTextDesc": {
+    "message": "对长文本使用简化界面，只显示翻译结果（不显示例句和音标）",
+    "description": "Simplify long text description"
+  },
+  "simplifyThreshold": {
+    "message": "简化阈值",
+    "description": "Simplify threshold"
+  },
+  "simplifyThresholdDesc": {
+    "message": "超过多少字符时启用简化 UI",
+    "description": "Simplify threshold description"
+  },
+  
+  "audioBehavior": {
+    "message": "发音行为",
+    "description": "Audio behavior section title"
+  },
+  "autoPlayAudio": {
+    "message": "自动播放发音",
+    "description": "Auto play audio"
+  },
+  "autoPlayAudioDesc": {
+    "message": "打开翻译卡片时自动播放发音（标注中的发音按钮仍需手动点击）",
+    "description": "Auto play audio description"
+  },
+  "preferredVoice": {
+    "message": "优先音标",
+    "description": "Preferred voice"
+  },
+  "preferredVoiceDesc": {
+    "message": "当有多个音标时，优先播放哪种发音",
+    "description": "Preferred voice description"
+  },
+  "voiceUS": {
+    "message": "美式英语",
+    "description": "US English voice"
+  },
+  "voiceUK": {
+    "message": "英式英语",
+    "description": "UK English voice"
+  },
+  "audioSources": {
+    "message": "音频来源优先级",
+    "description": "Audio sources section title"
+  },
+  "audioSourcesDesc": {
+    "message": "按优先级尝试不同的音频来源，直到成功播放",
+    "description": "Audio sources description"
+  },
+  "sourceProvider": {
+    "message": "翻译提供商音频",
+    "description": "Provider audio source"
+  },
+  "sourceTTS": {
+    "message": "浏览器语音合成 (TTS)",
+    "description": "TTS audio source"
+  },
+  "qualityHigh": {
+    "message": "最高质量",
+    "description": "High quality"
+  },
+  "qualityGood": {
+    "message": "高质量",
+    "description": "Good quality"
+  },
+  "qualityFallback": {
+    "message": "备用",
+    "description": "Fallback quality"
+  },
+  "audioSourcesInfo": {
+    "message": "拖动以调整优先级顺序。系统将按顺序尝试，直到成功播放。",
+    "description": "Audio sources info"
+  },
+  "ttsSettings": {
+    "message": "语音合成设置",
+    "description": "TTS settings section title"
+  },
+  "ttsSpeed": {
+    "message": "语速",
+    "description": "TTS speed"
+  },
+  "ttsSpeedDesc": {
+    "message": "调整语音合成的播放速度（0.5 - 2.0 倍）",
+    "description": "TTS speed description"
+  },
+  "ttsPitch": {
+    "message": "音调",
+    "description": "TTS pitch"
+  },
+  "ttsPitchDesc": {
+    "message": "调整语音合成的音调高低（0.5 - 2.0）",
+    "description": "TTS pitch description"
+  },
+  "testTTS": {
+    "message": "测试发音",
+    "description": "Test TTS"
+  },
+  "testTTSDesc": {
+    "message": "播放测试文本以预览当前设置效果",
+    "description": "Test TTS description"
+  },
+  "playTest": {
+    "message": "播放 \"Hello World\"",
+    "description": "Play test button"
+  },
+  
+  "dataSync": {
+    "message": "数据同步",
+    "description": "Data sync section title"
+  },
+  "enableChromeSync": {
+    "message": "启用 Chrome 同步",
+    "description": "Enable Chrome sync"
+  },
+  "enableChromeSyncDesc": {
+    "message": "使用 Chrome 账号在不同设备间同步设置和标注数据",
+    "description": "Enable Chrome sync description"
+  },
+  "privacyInfo": {
+    "message": "所有数据仅在本地和您的 Chrome 账号间同步，不会发送到第三方服务器。翻译 API 调用除外。",
+    "description": "Privacy info"
+  },
+  "cacheManagement": {
+    "message": "缓存管理",
+    "description": "Cache management section title"
+  },
+  "cacheStatus": {
+    "message": "翻译缓存",
+    "description": "Cache status"
+  },
+  "cacheStatusDesc": {
+    "message": "当前缓存使用情况",
+    "description": "Cache status description"
+  },
+  "dataTransfer": {
+    "message": "数据导出/导入",
+    "description": "Data transfer section title"
+  },
+  "exportAllData": {
+    "message": "导出所有数据",
+    "description": "Export all data"
+  },
+  "exportAllDataDesc": {
+    "message": "将设置和标注数据导出为 JSON 文件",
+    "description": "Export all data description"
+  },
+  "exportJSON": {
+    "message": "导出 JSON",
+    "description": "Export JSON button"
+  },
+  "importData": {
+    "message": "导入数据",
+    "description": "Import data"
+  },
+  "importDataDesc": {
+    "message": "从之前导出的 JSON 文件恢复数据",
+    "description": "Import data description"
+  },
+  "selectFile": {
+    "message": "选择文件...",
+    "description": "Select file button"
+  },
+  "resetSettings": {
+    "message": "重置设置",
+    "description": "Reset settings section title"
+  },
+  "resetToDefaultsDesc": {
+    "message": "将所有设置恢复为默认值（不影响标注数据）",
+    "description": "Reset to defaults description"
+  },
+  "reset": {
+    "message": "重置设置",
+    "description": "Reset button"
+  },
+  "clearAllData": {
+    "message": "清除所有数据",
+    "description": "Clear all data"
+  },
+  "clearAllDataDesc": {
+    "message": "⚠️ 危险操作：删除所有设置、缓存和标注数据，此操作不可恢复！",
+    "description": "Clear all data description"
+  },
+  "clearAll": {
+    "message": "清除全部",
+    "description": "Clear all button"
+  },
+  
+  "pageMovedTitle": {
+    "message": "页面已重新组织",
+    "description": "Page moved title"
+  },
+  "pageMovedDesc": {
+    "message": "原\"显示与外观\"的设置已分离到以下两个页面：",
+    "description": "Page moved description"
   }
 }
 

@@ -1,42 +1,13 @@
 /**
  * Translation UI Component
- * 
+ *
  * 该模块负责渲染翻译结果的UI，包括：
  * - 翻译文本展示
  * - 读音按钮和播放功能
  * - 词义、例句展示
+ *
+ * Note: Utility functions (safeGetMessage) are now imported from message-helper.js
  */
-
-/**
- * 安全获取 i18n 消息，避免扩展上下文失效错误
- * 现在使用 i18n-helper.js 提供的 i18n 函数
- * @param {string} key - 消息 key
- * @param {Array|string} substitutions - 替换参数
- * @param {string} fallback - 后备文本
- * @returns {string} 翻译后的消息或后备文本
- */
-function safeGetMessage(key, substitutions = null, fallback = '') {
-  try {
-    // 使用 i18n-helper.js 提供的 i18n 函数
-    if (typeof i18n !== 'undefined') {
-      const subs = Array.isArray(substitutions) ? substitutions : (substitutions ? [substitutions] : []);
-      const message = i18n(key, subs);
-      return message || fallback;
-    }
-    // Fallback to chrome.i18n if i18n helper is not available
-    if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
-      const message = substitutions 
-        ? chrome.i18n.getMessage(key, substitutions)
-        : chrome.i18n.getMessage(key);
-      return message || fallback;
-    }
-    return fallback;
-  } catch (e) {
-    // 扩展上下文失效时返回后备文本
-    console.warn('[Translation-UI] Extension context invalidated, using fallback text');
-    return fallback;
-  }
-}
 
 /**
  * 翻译结果UI渲染器
@@ -53,41 +24,36 @@ class TranslationUI {
       ...options
     };
     this.audioCache = new Map(); // 缓存音频数据
-    
+
     // 允许的 HTML 标签（用于例句高亮）
     this.allowedHTMLTags = ['b', 'i', 'em', 'strong', 'u', 'mark', 'span'];
   }
-  
+
   /**
    * 清理 HTML，只保留安全的标签
+   * 使用新的安全 HTML 清理工具 (html-sanitizer.js)
    * @param {string} html - 原始 HTML 字符串
    * @returns {string} 清理后的 HTML
    */
   sanitizeHTML(html) {
-    if (!html || typeof html !== 'string') {
-      return '';
-    }
-    
-    // 创建一个临时元素来解析 HTML
-    const temp = document.createElement('div');
-    temp.textContent = html; // 先转义所有内容
-    
-    // 然后只恢复允许的标签
-    let sanitized = temp.innerHTML;
-    
-    // 恢复允许的标签
-    this.allowedHTMLTags.forEach(tag => {
-      // 匹配 &lt;tag&gt; 和 &lt;/tag&gt;
-      const openTagRegex = new RegExp(`&lt;${tag}(&gt;|\\s[^&]*?&gt;)`, 'gi');
-      const closeTagRegex = new RegExp(`&lt;/${tag}&gt;`, 'gi');
-      
-      sanitized = sanitized.replace(openTagRegex, (match) => {
-        return match.replace('&lt;', '<').replace('&gt;', '>');
+    // Use the secure HTML sanitizer utility
+    if (typeof sanitizeHTML !== 'undefined') {
+      return sanitizeHTML(html, {
+        allowedTags: this.allowedHTMLTags,
+        allowedAttributes: ['class']
       });
-      sanitized = sanitized.replace(closeTagRegex, `</${tag}>`);
-    });
-    
-    return sanitized;
+    }
+
+    // Fallback: escape all HTML if sanitizer not loaded
+    console.warn('[TranslationUI] HTML sanitizer not loaded, escaping all HTML');
+    if (typeof escapeHTML !== 'undefined') {
+      return escapeHTML(html);
+    }
+
+    // Last resort: basic text content extraction
+    const div = document.createElement('div');
+    div.textContent = html;
+    return div.innerHTML;
   }
 
   /**

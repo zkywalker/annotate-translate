@@ -284,20 +284,22 @@ function applySettingsToUI() {
   if (elements.openaiPromptFormat) elements.openaiPromptFormat.value = settings.providers.openai.promptFormat || 'jsonFormat';
   if (elements.openaiUseContext) elements.openaiUseContext.checked = settings.providers.openai.useContext ?? true;
   
-  // 显示设置
-  if (elements.showPhonetics) elements.showPhonetics.checked = settings.display.translation.showPhonetics;
-  if (elements.enableAudio) elements.enableAudio.checked = settings.display.translation.enableAudio;
-  if (elements.showDefinitions) elements.showDefinitions.checked = settings.display.translation.showDefinitions;
-  if (elements.showExamples) elements.showExamples.checked = settings.display.translation.showExamples;
-  if (elements.maxExamples) elements.maxExamples.value = settings.display.translation.maxExamples;
-  if (elements.autoCloseDelay) elements.autoCloseDelay.value = settings.display.translation.autoCloseDelay;
-  if (elements.enablePhoneticFallback) elements.enablePhoneticFallback.checked = settings.display.translation.enablePhoneticFallback;
-  if (elements.menuButtonSize) elements.menuButtonSize.value = settings.display.menu.buttonSize;
-  if (elements.showPhoneticInAnnotation) elements.showPhoneticInAnnotation.checked = settings.display.annotation.showPhonetics;
-  if (elements.showTranslationInAnnotation) elements.showTranslationInAnnotation.checked = settings.display.annotation.showTranslation ?? true;
-  if (elements.showDefinitionsInAnnotation) elements.showDefinitionsInAnnotation.checked = settings.display.annotation.showDefinitions ?? false;
-  if (elements.enableAudioInAnnotation) elements.enableAudioInAnnotation.checked = settings.display.annotation.enableAudio;
-  if (elements.hidePhoneticForMultipleWords) elements.hidePhoneticForMultipleWords.checked = settings.display.annotation.hidePhoneticForMultipleWords ?? false;
+  // 翻译卡片设置
+  if (elements.showPhonetics) elements.showPhonetics.checked = settings.translationCard?.showPhonetics ?? true;
+  if (elements.enableAudio) elements.enableAudio.checked = settings.translationCard?.enableAudio ?? true;
+  if (elements.showDefinitions) elements.showDefinitions.checked = settings.translationCard?.showDefinitions ?? true;
+  if (elements.showExamples) elements.showExamples.checked = settings.translationCard?.showExamples ?? true;
+  if (elements.maxExamples) elements.maxExamples.value = settings.translationCard?.maxExamples ?? 3;
+  if (elements.autoCloseDelay) elements.autoCloseDelay.value = settings.translationCard?.autoCloseDelay ?? 10;
+  if (elements.enablePhoneticFallback) elements.enablePhoneticFallback.checked = settings.general?.enablePhoneticFallback ?? true;
+  if (elements.menuButtonSize) elements.menuButtonSize.value = settings.display?.menu?.buttonSize ?? 'small';
+
+  // 标注设置
+  if (elements.showPhoneticInAnnotation) elements.showPhoneticInAnnotation.checked = settings.annotation?.showPhonetics ?? true;
+  if (elements.showTranslationInAnnotation) elements.showTranslationInAnnotation.checked = settings.annotation?.showTranslation ?? true;
+  if (elements.showDefinitionsInAnnotation) elements.showDefinitionsInAnnotation.checked = settings.annotation?.showDefinitions ?? false;
+  if (elements.enableAudioInAnnotation) elements.enableAudioInAnnotation.checked = settings.annotation?.enableAudio ?? true;
+  if (elements.hidePhoneticForMultipleWords) elements.hidePhoneticForMultipleWords.checked = settings.annotation?.hidePhoneticForMultipleWords ?? false;
   
   // 性能设置
   if (elements.enableCache) elements.enableCache.checked = settings.performance.enableCache;
@@ -319,63 +321,78 @@ function applySettingsToUI() {
 function collectSettingsFromUI() {
   return {
     general: {
-      enableTranslate: elements.enableTranslate?.checked ?? settings.general.enableTranslate,
-      enableAnnotate: elements.enableAnnotate?.checked ?? settings.general.enableAnnotate,
-      uiLanguage: elements.uiLanguage?.value ?? settings.general.uiLanguage,
-      targetLanguage: elements.targetLanguage?.value ?? settings.general.targetLanguage
+      enableTranslate: elements.enableTranslate?.checked ?? settings.general?.enableTranslate ?? true,
+      enableAnnotate: elements.enableAnnotate?.checked ?? settings.general?.enableAnnotate ?? true,
+      uiLanguage: elements.uiLanguage?.value ?? settings.general?.uiLanguage ?? 'auto',
+      targetLanguage: elements.targetLanguage?.value ?? settings.general?.targetLanguage ?? 'zh-CN',
+      showFloatingButton: settings.general?.showFloatingButton ?? true,
+      enableContextMenu: settings.general?.enableContextMenu ?? true,
+      phoneticDisplay: settings.general?.phoneticDisplay ?? 'both',
+      enablePhoneticFallback: elements.enablePhoneticFallback?.checked ?? settings.general?.enablePhoneticFallback ?? true
+    },
+    annotation: {
+      showPhonetics: elements.showPhoneticInAnnotation?.checked ?? settings.annotation?.showPhonetics ?? true,
+      showTranslation: elements.showTranslationInAnnotation?.checked ?? settings.annotation?.showTranslation ?? true,
+      showDefinitions: elements.showDefinitionsInAnnotation?.checked ?? settings.annotation?.showDefinitions ?? false,
+      enableAudio: elements.enableAudioInAnnotation?.checked ?? settings.annotation?.enableAudio ?? true,
+      hidePhoneticForMultipleWords: elements.hidePhoneticForMultipleWords?.checked ?? settings.annotation?.hidePhoneticForMultipleWords ?? false
+    },
+    translationCard: {
+      showPhonetics: elements.showPhonetics?.checked ?? settings.translationCard?.showPhonetics ?? true,
+      enableAudio: elements.enableAudio?.checked ?? settings.translationCard?.enableAudio ?? true,
+      showDefinitions: elements.showDefinitions?.checked ?? settings.translationCard?.showDefinitions ?? true,
+      showExamples: elements.showExamples?.checked ?? settings.translationCard?.showExamples ?? true,
+      maxExamples: parseInt(elements.maxExamples?.value, 10) ?? settings.translationCard?.maxExamples ?? 3,
+      autoCloseDelay: parseInt(elements.autoCloseDelay?.value, 10) ?? settings.translationCard?.autoCloseDelay ?? 10
     },
     providers: {
-      current: elements.currentProvider?.value ?? settings.providers.current,
-      google: settings.providers.google,
+      current: elements.currentProvider?.value ?? settings.providers?.current ?? 'google',
+      google: settings.providers?.google ?? { enabled: true },
       youdao: {
-        ...settings.providers.youdao,
-        appKey: elements.youdaoAppKey?.value ?? settings.providers.youdao.appKey,
-        appSecret: elements.youdaoAppSecret?.value ?? settings.providers.youdao.appSecret
+        ...(settings.providers?.youdao ?? { enabled: false, appKey: '', appSecret: '', connectionStatus: null }),
+        appKey: elements.youdaoAppKey?.value ?? settings.providers?.youdao?.appKey ?? '',
+        appSecret: elements.youdaoAppSecret?.value ?? settings.providers?.youdao?.appSecret ?? ''
       },
       deepl: {
-        ...settings.providers.deepl,
-        apiKey: elements.deeplApiKey?.value ?? settings.providers.deepl.apiKey,
-        useFreeApi: elements.deeplUseFreeApi?.checked ?? settings.providers.deepl.useFreeApi
+        ...(settings.providers?.deepl ?? { enabled: false, apiKey: '', useFreeApi: true, connectionStatus: null }),
+        apiKey: elements.deeplApiKey?.value ?? settings.providers?.deepl?.apiKey ?? '',
+        useFreeApi: elements.deeplUseFreeApi?.checked ?? settings.providers?.deepl?.useFreeApi ?? true
       },
       openai: {
-        ...settings.providers.openai,
-        apiKey: elements.openaiApiKey?.value ?? settings.providers.openai.apiKey,
-        model: elements.openaiModel?.value ?? settings.providers.openai.model,
-        baseUrl: elements.openaiBaseUrl?.value ?? settings.providers.openai.baseUrl,
-        temperature: parseFloat(elements.openaiTemperature?.value) ?? settings.providers.openai.temperature,
-        maxTokens: parseInt(elements.openaiMaxTokens?.value, 10) ?? settings.providers.openai.maxTokens,
-        timeout: parseInt(elements.openaiTimeout?.value, 10) ?? settings.providers.openai.timeout,
-        promptFormat: elements.openaiPromptFormat?.value ?? settings.providers.openai.promptFormat ?? 'jsonFormat',
-        useContext: elements.openaiUseContext?.checked ?? settings.providers.openai.useContext ?? true
+        ...(settings.providers?.openai ?? {
+          enabled: false,
+          apiKey: '',
+          model: 'gpt-3.5-turbo',
+          baseUrl: 'https://api.openai.com/v1',
+          temperature: 0.3,
+          maxTokens: 500,
+          timeout: 30,
+          connectionStatus: null,
+          promptFormat: 'jsonFormat',
+          useContext: true,
+          customTemplates: null
+        }),
+        apiKey: elements.openaiApiKey?.value ?? settings.providers?.openai?.apiKey ?? '',
+        model: elements.openaiModel?.value ?? settings.providers?.openai?.model ?? 'gpt-3.5-turbo',
+        baseUrl: elements.openaiBaseUrl?.value ?? settings.providers?.openai?.baseUrl ?? 'https://api.openai.com/v1',
+        temperature: parseFloat(elements.openaiTemperature?.value) ?? settings.providers?.openai?.temperature ?? 0.3,
+        maxTokens: parseInt(elements.openaiMaxTokens?.value, 10) ?? settings.providers?.openai?.maxTokens ?? 500,
+        timeout: parseInt(elements.openaiTimeout?.value, 10) ?? settings.providers?.openai?.timeout ?? 30,
+        promptFormat: elements.openaiPromptFormat?.value ?? settings.providers?.openai?.promptFormat ?? 'jsonFormat',
+        useContext: elements.openaiUseContext?.checked ?? settings.providers?.openai?.useContext ?? true
       }
     },
     display: {
-      translation: {
-        enableAudio: elements.enableAudio?.checked ?? settings.display.translation.enableAudio,
-        showPhonetics: elements.showPhonetics?.checked ?? settings.display.translation.showPhonetics,
-        showDefinitions: elements.showDefinitions?.checked ?? settings.display.translation.showDefinitions,
-        showExamples: elements.showExamples?.checked ?? settings.display.translation.showExamples,
-        maxExamples: parseInt(elements.maxExamples?.value, 10) ?? settings.display.translation.maxExamples,
-        autoCloseDelay: parseInt(elements.autoCloseDelay?.value, 10) ?? settings.display.translation.autoCloseDelay,
-        enablePhoneticFallback: elements.enablePhoneticFallback?.checked ?? settings.display.translation.enablePhoneticFallback
-      },
       menu: {
-        buttonSize: elements.menuButtonSize?.value ?? settings.display.menu.buttonSize
-      },
-      annotation: {
-        showPhonetics: elements.showPhoneticInAnnotation?.checked ?? settings.display.annotation.showPhonetics,
-        showTranslation: elements.showTranslationInAnnotation?.checked ?? settings.display.annotation.showTranslation ?? true,
-        showDefinitions: elements.showDefinitionsInAnnotation?.checked ?? settings.display.annotation.showDefinitions ?? false,
-        enableAudio: elements.enableAudioInAnnotation?.checked ?? settings.display.annotation.enableAudio,
-        hidePhoneticForMultipleWords: elements.hidePhoneticForMultipleWords?.checked ?? settings.display.annotation.hidePhoneticForMultipleWords ?? false
+        buttonSize: elements.menuButtonSize?.value ?? settings.display?.menu?.buttonSize ?? 'small'
       }
     },
     performance: {
-      enableCache: elements.enableCache?.checked ?? settings.performance.enableCache,
-      cacheSize: parseInt(elements.cacheSize?.value, 10) ?? settings.performance.cacheSize
+      enableCache: elements.enableCache?.checked ?? settings.performance?.enableCache ?? true,
+      cacheSize: parseInt(elements.cacheSize?.value, 10) ?? settings.performance?.cacheSize ?? 100
     },
     debug: {
-      enableDebugMode: elements.enableDebugMode?.checked ?? settings.debug.enableDebugMode
+      enableDebugMode: elements.enableDebugMode?.checked ?? settings.debug?.enableDebugMode ?? false
     }
   };
 }

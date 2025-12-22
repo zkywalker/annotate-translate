@@ -30,6 +30,12 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+        "src/utils/constants.js",
+        "src/utils/html-sanitizer.js",
+        "src/utils/message-helper.js",
+        "src/utils/input-validator.js",
+        "src/utils/cache-manager.js",
+        "src/utils/event-manager.js",
         "src/utils/i18n-helper.js",
         "src/providers/prompt-templates.js",
         "src/providers/base-ai-provider.js",

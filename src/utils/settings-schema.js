@@ -9,7 +9,34 @@ const DEFAULT_SETTINGS = {
     enableTranslate: true,
     enableAnnotate: true,
     uiLanguage: 'auto', // 'auto' 跟随浏览器语言
-    targetLanguage: 'zh-CN'
+    targetLanguage: 'zh-CN',
+    showFloatingButton: true,
+    enableContextMenu: true,
+    phoneticDisplay: 'both', // 'us' | 'uk' | 'both'
+    enablePhoneticFallback: true // 音标补充功能
+  },
+
+  // 标注功能设置
+  annotation: {
+    // 显示内容
+    showPhonetics: true,       // 显示音标
+    showTranslation: true,     // 显示翻译
+    showDefinitions: false,    // 显示释义（可能超长）
+    enableAudio: true,         // 显示发音按钮
+
+    // 标注样式
+    hidePhoneticForMultipleWords: false // 多词时隐藏音标
+  },
+
+  // 翻译详情卡片设置
+  translationCard: {
+    // 显示内容
+    showPhonetics: true,     // 显示音标
+    enableAudio: true,       // 显示发音按钮
+    showDefinitions: true,   // 显示词义
+    showExamples: true,      // 显示例句
+    maxExamples: 3,          // 最大例句数量
+    autoCloseDelay: 10       // 自动关闭延迟（秒），0=不自动关闭
   },
 
   // 翻译服务配置
@@ -51,30 +78,10 @@ const DEFAULT_SETTINGS = {
     }
   },
 
-  // 显示与外观
+  // 显示与外观 (选择菜单)
   display: {
-    // 翻译弹窗设置
-    translation: {
-      enableAudio: true,
-      showPhonetics: true,
-      showDefinitions: true,
-      showExamples: true,
-      maxExamples: 3,
-      autoCloseDelay: 10, // 秒，0=不自动关闭
-      enablePhoneticFallback: true // 音标补充功能
-    },
-    
-    // 选择菜单设置
     menu: {
-      buttonSize: 'small' // 'small' | 'medium' | 'large'
-    },
-    
-    // 标注样式设置
-    annotation: {
-      showPhonetics: true,       // 显示音标
-      showTranslation: true,     // 显示翻译
-      showDefinitions: false,    // 显示释义（可能超长）
-      enableAudio: true          // 显示发音按钮
+      buttonSize: 'small'      // 'small' | 'medium' | 'large'
     }
   },
 

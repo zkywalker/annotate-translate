@@ -24,8 +24,18 @@
     <!-- 左侧导航 -->
     <nav class="sidebar">
       <a href="#general" class="nav-item active" data-page="general">
-        <i data-lucide="home" class="nav-icon" width="20" height="20"></i>
+        <i data-lucide="settings" class="nav-icon" width="20" height="20"></i>
         <span data-i18n="generalSettings">通用设置</span>
+      </a>
+
+      <a href="#annotation" class="nav-item" data-page="annotation">
+        <i data-lucide="highlighter" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="annotationSettings">标注功能</span>
+      </a>
+
+      <a href="#translation-card" class="nav-item" data-page="translation-card">
+        <i data-lucide="message-square" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="translationCardSettings">翻译详情</span>
       </a>
 
       <div class="nav-divider"></div>
@@ -53,9 +63,9 @@
 
       <div class="nav-divider"></div>
 
-      <a href="#display" class="nav-item" data-page="display">
-        <i data-lucide="monitor" class="nav-icon" width="20" height="20"></i>
-        <span data-i18n="displaySettings">显示与外观</span>
+      <a href="#data" class="nav-item" data-page="data">
+        <i data-lucide="database" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="dataSettings">数据与隐私</span>
       </a>
     </nav>
 
@@ -67,12 +77,12 @@
 
         <!-- 功能开关 -->
         <section class="section">
-          <h3 class="section-title" data-i18n="features">悬浮按钮</h3>
+          <h3 class="section-title" data-i18n="featureToggles">功能开关</h3>
           
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="enableTranslation">启用翻译功能</label>
-              <p class="setting-desc" data-i18n="enableTranslationDesc">选择文本后显示翻译选项</p>
+              <p class="setting-desc" data-i18n="enableTranslationDesc">选择文本后显示翻译按钮和翻译卡片</p>
             </div>
             <div class="setting-control">
               <label class="switch">
@@ -85,38 +95,11 @@
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="enableAnnotation">启用标注功能</label>
-              <p class="setting-desc" data-i18n="enableAnnotationDesc">为选中的文本添加翻译标注</p>
+              <p class="setting-desc" data-i18n="enableAnnotationDesc">在原文上方显示音标和翻译的标注功能</p>
             </div>
             <div class="setting-control">
               <label class="switch">
                 <input type="checkbox" id="enableAnnotate" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="floatingButtonSize">悬浮按钮尺寸</label>
-              <p class="setting-desc" data-i18n="floatingButtonSizeDesc">选择文本后显示的悬浮按钮大小</p>
-            </div>
-            <div class="setting-control">
-              <select id="menuButtonSize" class="select-input">
-                <option value="small" data-i18n="sizeSmall">小</option>
-                <option value="medium" data-i18n="sizeMedium">中</option>
-                <option value="large" data-i18n="sizeLarge">大</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="enablePhoneticFallback">音标补充功能</label>
-              <p class="setting-desc" data-i18n="phoneticFallbackDesc">当翻译服务未返回音标时，自动从其他来源获取</p>
-            </div>
-            <div class="setting-control">
-              <label class="switch">
-                <input type="checkbox" id="enablePhoneticFallback" checked>
                 <span class="slider"></span>
               </label>
             </div>
@@ -152,6 +135,51 @@
           </div>
         </section>
 
+        <!-- 交互设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="interactionSettings">交互设置</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showFloatingButton">显示浮动按钮</label>
+              <p class="setting-desc" data-i18n="showFloatingButtonDesc">选中文本后显示翻译和标注按钮</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showFloatingButton" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="floatingButtonSize">浮动按钮尺寸</label>
+              <p class="setting-desc" data-i18n="floatingButtonSizeDesc">调整选中文本后显示的按钮大小</p>
+            </div>
+            <div class="setting-control">
+              <select id="menuButtonSize" class="select-input">
+                <option value="small" data-i18n="sizeSmall">小</option>
+                <option value="medium" data-i18n="sizeMedium">中</option>
+                <option value="large" data-i18n="sizeLarge">大</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableContextMenu">右键菜单</label>
+              <p class="setting-desc" data-i18n="enableContextMenuDesc">在右键菜单中显示翻译和标注选项</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableContextMenu" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
         <!-- 翻译服务快速选择 -->
         <section class="section">
           <h3 class="section-title" data-i18n="translationService">翻译服务</h3>
@@ -159,7 +187,7 @@
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="currentService">当前服务</label>
-              <p class="setting-desc" data-i18n="currentServiceDesc">选择要使用的翻译服务</p>
+              <p class="setting-desc" data-i18n="currentServiceDesc">选择要使用的翻译服务提供商</p>
             </div>
             <div class="setting-control">
               <select id="currentProvider" class="select-input provider-select">
@@ -175,14 +203,46 @@
           <div id="quickProviderConfig" class="provider-config-box"></div>
         </section>
 
+        <!-- 音标设置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="phoneticSettings">音标设置</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enablePhoneticFallback">音标补充功能</label>
+              <p class="setting-desc" data-i18n="phoneticFallbackDesc">当翻译服务未返回音标时，自动从 FreeDictionary 获取</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enablePhoneticFallback" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="phoneticDisplay">音标显示类型</label>
+              <p class="setting-desc" data-i18n="phoneticDisplayDesc">选择显示美式、英式或同时显示两种音标</p>
+            </div>
+            <div class="setting-control">
+              <select id="phoneticDisplay" class="select-input">
+                <option value="us" data-i18n="phoneticUS">仅美式</option>
+                <option value="uk" data-i18n="phoneticUK">仅英式</option>
+                <option value="both" data-i18n="phoneticBoth">美式和英式</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
         <!-- 性能设置 -->
         <section class="section">
-          <h3 class="section-title" data-i18n="performanceSettings">性能</h3>
+          <h3 class="section-title" data-i18n="performanceSettings">性能设置</h3>
           
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="enableCache">启用翻译缓存</label>
-              <p class="setting-desc" data-i18n="enableCacheDesc">缓存翻译结果以提高性能并减少 API 调用</p>
+              <p class="setting-desc" data-i18n="enableCacheDesc">缓存翻译结果以提高响应速度并减少 API 调用</p>
             </div>
             <div class="setting-control">
               <label class="switch">
@@ -205,12 +265,12 @@
 
         <!-- 调试设置 -->
         <section class="section">
-          <h3 class="section-title" data-i18n="debugSettings">调试</h3>
+          <h3 class="section-title" data-i18n="debugSettings">开发者选项</h3>
           
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="enableDebugMode">调试模式</label>
-              <p class="setting-desc" data-i18n="enableDebugModeDesc">启用详细日志输出（仅用于开发）</p>
+              <p class="setting-desc" data-i18n="enableDebugModeDesc">在控制台输出详细日志信息（仅用于开发调试）</p>
             </div>
             <div class="setting-control">
               <label class="switch">
@@ -219,23 +279,6 @@
               </label>
             </div>
           </div>
-        </section>
-
-        <!-- 操作按钮 -->
-        <section class="section">
-          <h3 class="section-title" data-i18n="actions">操作</h3>
-          
-          <div class="button-group">
-            <button class="btn btn-secondary" id="resetButton">
-              <i data-lucide="refresh-cw" width="18" height="18"></i>
-              <span data-i18n="resetToDefaults">重置到默认值</span>
-            </button>
-            <button class="btn btn-danger" id="clearCacheButton">
-              <i data-lucide="trash-2" width="18" height="18"></i>
-              <span data-i18n="clearCache">清除缓存</span>
-            </button>
-          </div>
-          
         </section>
       </div>
 
@@ -604,109 +647,34 @@
           </div>
         </section>
       </div>
-        
-      <!-- 显示与外观页面 -->
-      <div id="page-display" class="page">
-        <h2 class="page-title" data-i18n="displaySettings">显示与外观</h2>
 
-        <!-- 翻译弹窗设置 -->
+
+      <!-- 标注功能页面 -->
+      <div id="page-annotation" class="page">
+        <h2 class="page-title" data-i18n="annotationSettings">标注功能</h2>
+        <p class="page-desc" data-i18n="annotationSettingsDesc">在原文上方显示音标和翻译的标注样式设置</p>
+
+        <!-- 显示内容 -->
         <section class="section">
-          <h3 class="section-title" data-i18n="translationPopup">翻译弹窗</h3>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="showPhonetics">显示音标</label>
-              <p class="setting-desc" data-i18n="showPhoneticsDesc">在翻译结果中显示发音音标</p>
-        </div>
-            <div class="setting-control">
-              <label class="switch">
-                <input type="checkbox" id="showPhonetics" checked>
-                <span class="slider"></span>
-              </label>
-        </div>
-      </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="enableAudio">显示发音按钮</label>
-              <p class="setting-desc" data-i18n="enableAudioDesc">显示音频发音按钮</p>
-        </div>
-            <div class="setting-control">
-              <label class="switch">
-          <input type="checkbox" id="enableAudio" checked>
-                <span class="slider"></span>
-              </label>
-        </div>
-      </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="showDefinitions">显示词义</label>
-              <p class="setting-desc" data-i18n="showDefinitionsDesc">显示单词的详细释义</p>
-            </div>
-            <div class="setting-control">
-              <label class="switch">
-                <input type="checkbox" id="showDefinitions" checked>
-                <span class="slider"></span>
-              </label>
-        </div>
-        </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="showExamples">显示例句</label>
-              <p class="setting-desc" data-i18n="showExamplesDesc">显示单词的使用例句</p>
-        </div>
-            <div class="setting-control">
-              <label class="switch">
-                <input type="checkbox" id="showExamples" checked>
-                <span class="slider"></span>
-              </label>
-        </div>
-        </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="maxExamples">最大例句数量</label>
-              <p class="setting-desc" data-i18n="maxExamplesDesc">最多显示的例句数量</p>
-            </div>
-            <div class="setting-control">
-              <input type="number" id="maxExamples" class="number-input" min="1" max="10" value="3">
-        </div>
-      </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <label class="setting-label" data-i18n="autoCloseDelay">自动关闭延迟</label>
-              <p class="setting-desc" data-i18n="autoCloseDelayDesc">翻译弹窗自动关闭的延迟时间（秒，0=不关闭）</p>
-        </div>
-            <div class="setting-control">
-              <input type="number" id="autoCloseDelay" class="number-input" min="0" max="60" value="10">
-        </div>
-      </div>
-        </section>
-
-        <!-- 标注设置 -->
-        <section class="section">
-          <h3 class="section-title" data-i18n="annotationStyle">标注样式</h3>
-
+          <h3 class="section-title" data-i18n="annotationContent">显示内容</h3>
+          
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="showPhoneticInAnnotation">显示音标</label>
-              <p class="setting-desc" data-i18n="annotationPhoneticsDesc">在标注中显示音标</p>
+              <p class="setting-desc" data-i18n="annotationPhoneticsDesc">在文字上方的标注中显示音标</p>
             </div>
             <div class="setting-control">
               <label class="switch">
                 <input type="checkbox" id="showPhoneticInAnnotation" checked>
                 <span class="slider"></span>
               </label>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="showTranslationInAnnotation">显示翻译</label>
-              <p class="setting-desc" data-i18n="annotationTranslationDesc">在标注中显示翻译内容</p>
+              <p class="setting-desc" data-i18n="annotationTranslationDesc">在文字上方的标注中显示翻译内容</p>
             </div>
             <div class="setting-control">
               <label class="switch">
@@ -719,7 +687,7 @@
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="showDefinitionsInAnnotation">显示释义</label>
-              <p class="setting-desc" data-i18n="annotationDefinitionsDesc">在标注中显示词义释义（⚠️ 可能超长影响体验）</p>
+              <p class="setting-desc" data-i18n="annotationDefinitionsDesc">在标注中显示词义释义（⚠️ 内容较长可能影响阅读体验）</p>
             </div>
             <div class="setting-control">
               <label class="switch">
@@ -732,20 +700,25 @@
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="showAudioInAnnotation">显示发音按钮</label>
-              <p class="setting-desc" data-i18n="annotationAudioDesc">在标注中显示发音按钮</p>
-      </div>
+              <p class="setting-desc" data-i18n="annotationAudioDesc">在标注中显示 🔊 按钮，点击可播放发音</p>
+            </div>
             <div class="setting-control">
               <label class="switch">
                 <input type="checkbox" id="enableAudioInAnnotation" checked>
                 <span class="slider"></span>
               </label>
-      </div>
-    </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 标注样式 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="annotationStyle">标注样式</h3>
 
           <div class="setting-row">
             <div class="setting-info">
-              <label class="setting-label" data-i18n="hidePhoneticForMultipleWords">多个单词时隐藏读音</label>
-              <p class="setting-desc" data-i18n="hidePhoneticForMultipleWordsDesc">选取多个英语单词时，不显示读音标注</p>
+              <label class="setting-label" data-i18n="hidePhoneticForMultipleWords">多词时隐藏音标</label>
+              <p class="setting-desc" data-i18n="hidePhoneticForMultipleWordsDesc">选中多个单词时，不显示音标标注（仅显示翻译）</p>
             </div>
             <div class="setting-control">
               <label class="switch">
@@ -754,7 +727,204 @@
               </label>
             </div>
           </div>
+
         </section>
+
+      </div>
+
+      <!-- 翻译详情页面 -->
+      <div id="page-translation-card" class="page">
+        <h2 class="page-title" data-i18n="translationCardSettings">翻译详情</h2>
+        <p class="page-desc" data-i18n="translationCardSettingsDesc">弹出翻译卡片窗口的内容设置</p>
+
+        <!-- 显示内容 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="cardContent">显示内容</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showPhonetics">显示音标</label>
+              <p class="setting-desc" data-i18n="showPhoneticsDesc">在翻译卡片中显示美式和英式发音音标</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showPhonetics" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableAudio">显示发音按钮</label>
+              <p class="setting-desc" data-i18n="enableAudioDesc">在翻译卡片中显示音频发音按钮 🔊</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableAudio" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showDefinitions">显示词义</label>
+              <p class="setting-desc" data-i18n="showDefinitionsDesc">显示单词的词性和详细释义</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showDefinitions" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="showExamples">显示例句</label>
+              <p class="setting-desc" data-i18n="showExamplesDesc">显示单词的使用例句和翻译</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="showExamples" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="maxExamples">最大例句数量</label>
+              <p class="setting-desc" data-i18n="maxExamplesDesc">最多显示的例句数量（1-10 条）</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="maxExamples" class="number-input" min="1" max="10" value="3">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="autoCloseDelay">自动关闭延迟</label>
+              <p class="setting-desc" data-i18n="autoCloseDelayDesc">翻译卡片自动关闭的延迟时间（秒，0 表示不自动关闭）</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="autoCloseDelay" class="number-input" min="0" max="60" value="10">
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 数据与隐私页面 -->
+      <div id="page-data" class="page">
+        <h2 class="page-title" data-i18n="dataSettings">数据与隐私</h2>
+        <p class="page-desc" data-i18n="dataSettingsDesc">管理您的数据和缓存</p>
+
+        <div class="info-box">
+          <i data-lucide="shield" width="16" height="16"></i>
+          <span data-i18n="privacyInfo">所有数据仅在本地和您的 Chrome 账号间同步，不会发送到第三方服务器。翻译 API 调用除外。</span>
+        </div>
+
+        <!-- 缓存管理 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="cacheManagement">缓存管理</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="cacheStatus">翻译缓存</label>
+              <p class="setting-desc" data-i18n="cacheStatusDesc">当前缓存使用情况</p>
+            </div>
+            <div class="setting-control">
+              <span id="cacheUsage" class="setting-value">0 MB / 10 MB</span>
+              <button class="btn btn-danger btn-sm" id="clearCacheButton">
+                <i data-lucide="trash-2" width="16" height="16"></i>
+                <span data-i18n="clearCache">清除缓存</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 数据导出/导入 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="dataTransfer">数据导出/导入</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="exportAllData">导出所有数据</label>
+              <p class="setting-desc" data-i18n="exportAllDataDesc">将设置和标注数据导出为 JSON 文件</p>
+            </div>
+            <div class="setting-control">
+              <button class="btn btn-secondary" id="exportAllData">
+                <i data-lucide="download" width="16" height="16"></i>
+                <span data-i18n="exportJSON">导出 JSON</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="importData">导入数据</label>
+              <p class="setting-desc" data-i18n="importDataDesc">从之前导出的 JSON 文件恢复数据</p>
+            </div>
+            <div class="setting-control">
+              <input type="file" id="importDataFile" accept=".json" style="display: none;">
+              <button class="btn btn-secondary" id="importDataButton">
+                <i data-lucide="upload" width="16" height="16"></i>
+                <span data-i18n="selectFile">选择文件...</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 重置 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="resetSettings">重置设置</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="resetToDefaults">恢复默认设置</label>
+              <p class="setting-desc" data-i18n="resetToDefaultsDesc">将所有设置恢复为默认值（不影响标注数据）</p>
+            </div>
+            <div class="setting-control">
+              <button class="btn btn-secondary" id="resetButton">
+                <i data-lucide="refresh-cw" width="16" height="16"></i>
+                <span data-i18n="reset">重置设置</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="clearAllData">清除所有数据</label>
+              <p class="setting-desc" data-i18n="clearAllDataDesc">⚠️ 危险操作：删除所有设置、缓存和标注数据，此操作不可恢复！</p>
+            </div>
+            <div class="setting-control">
+              <button class="btn btn-danger" id="clearAllDataButton">
+                <i data-lucide="alert-triangle" width="16" height="16"></i>
+                <span data-i18n="clearAll">清除全部</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+        
+      <!-- 显示与外观页面 (已废弃,内容已分离到标注功能和翻译详情) -->
+      <div id="page-display" class="page">
+        <div class="deprecated-page">
+          <i data-lucide="info" width="48" height="48"></i>
+          <h3 data-i18n="pageMovedTitle">页面已重新组织</h3>
+          <p data-i18n="pageMovedDesc">原"显示与外观"的设置已分离到以下两个页面：</p>
+          <div class="quick-links">
+            <a href="#annotation" class="link-card" data-page="annotation">
+              <i data-lucide="highlighter" width="24" height="24"></i>
+              <span data-i18n="annotationSettings">标注功能</span>
+            </a>
+            <a href="#translation-card" class="link-card" data-page="translation-card">
+              <i data-lucide="message-square" width="24" height="24"></i>
+              <span data-i18n="translationCardSettings">翻译详情</span>
+            </a>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -866,4 +1036,3 @@
   <script src="../lib/lucide-init.js"></script>
 </body>
 </html>
-
