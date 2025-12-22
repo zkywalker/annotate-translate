@@ -6,6 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Annotate Translate** is a Chrome Manifest V3 extension that provides text annotation and translation features on web pages. It supports multiple translation providers (Google Translate, Youdao, DeepL, AI-powered translation) with rich features including audio playback, phonetics, definitions, and examples.
 
+## UI Design Guidelines
+
+**IMPORTANT**: This extension follows a **simple, professional, and unobtrusive** design philosophy. Before implementing any UI features, read `UI_DESIGN_GUIDELINES.md` for detailed specifications.
+
+**Core Principles**:
+- ✅ Simple & flat design (GitHub/VS Code style)
+- ✅ Neutral colors (grays, blues), no flashy gradients
+- ✅ Minimal animations (200-300ms transitions only)
+- ✅ Professional tone (no excessive emojis or excitement)
+- ❌ NO bounce, rotate, scale, shimmer animations
+- ❌ NO colorful gradients or neon colors
+- ❌ NO overly decorative elements
+
 ## Development Commands
 
 ### Loading the Extension

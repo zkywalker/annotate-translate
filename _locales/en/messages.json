@@ -1669,6 +1669,198 @@
   "apiKeyNotSet": {
     "message": "Not Set",
     "description": "API key not set"
+  },
+  "contextMenuAnnotatePage": {
+    "message": "Enable Vocabulary Mode",
+    "description": "Context menu option to enable vocabulary mode"
+  },
+  "contextMenuRemoveAnnotations": {
+    "message": "Disable Vocabulary Mode",
+    "description": "Context menu option to disable vocabulary mode"
+  },
+  "vocabularyMode": {
+    "message": "Vocabulary Mode",
+    "description": "Vocabulary mode navigation label"
+  },
+  "vocabularyModeTitle": {
+    "message": "Vocabulary Mode",
+    "description": "Title for vocabulary mode settings section"
+  },
+  "enableVocabularyMode": {
+    "message": "Enable Vocabulary Mode",
+    "description": "Label for vocabulary mode enable toggle"
+  },
+  "vocabularyModeDescription": {
+    "message": "Automatically annotate words on the page based on your vocabulary level. Perfect for language learning while reading.",
+    "description": "Description of vocabulary mode feature"
+  },
+  "vocabularyModeEnable": {
+    "message": "Enable Vocabulary Mode",
+    "description": "Label for enabling vocabulary mode"
+  },
+  "vocabularyModeProvider": {
+    "message": "Vocabulary Database",
+    "description": "Label for vocabulary provider selection"
+  },
+  "vocabularyModeProviderCET": {
+    "message": "CET (College English Test)",
+    "description": "CET vocabulary provider"
+  },
+  "vocabularyModeProviderFrequency": {
+    "message": "Word Frequency",
+    "description": "Frequency-based vocabulary provider"
+  },
+  "vocabularyModeCETLevel": {
+    "message": "CET Level",
+    "description": "Label for CET level selection"
+  },
+  "vocabularyModeCETMode": {
+    "message": "Annotation Mode",
+    "description": "Label for CET annotation mode"
+  },
+  "vocabularyModeCETModeAbove": {
+    "message": "Above selected level",
+    "description": "Annotate words above the selected level"
+  },
+  "vocabularyModeCETModeExact": {
+    "message": "Exact level only",
+    "description": "Annotate words in the exact level only"
+  },
+  "vocabularyModeCETIncludeBase": {
+    "message": "Include base levels (CET-4)",
+    "description": "Option to include base vocabulary levels"
+  },
+  "vocabularyModeShowTranslation": {
+    "message": "Show translation in annotations",
+    "description": "Option to show translation in vocabulary annotations"
+  },
+  "vocabularyModeShowPhonetic": {
+    "message": "Show phonetics in annotations",
+    "description": "Option to show phonetics in vocabulary annotations"
+  },
+  "vocabularyModeAutoEnable": {
+    "message": "Auto-enable on page load",
+    "description": "Option to automatically enable vocabulary mode when page loads"
+  },
+  "vocabularyModeDesc": {
+    "message": "Automatically annotate words based on your vocabulary level, perfect for language learning while reading",
+    "description": "Description of vocabulary mode feature in settings"
+  },
+  "vocabularyModeSwitch": {
+    "message": "Feature Toggle",
+    "description": "Section title for vocabulary mode enable/disable"
+  },
+  "enableVocabularyModeDesc": {
+    "message": "Show 'Enable Vocabulary Mode' in context menu",
+    "description": "Description for vocabulary mode enable toggle"
+  },
+  "vocabularySelection": {
+    "message": "Vocabulary Selection",
+    "description": "Section title for vocabulary selection"
+  },
+  "targetVocabulary": {
+    "message": "Target Vocabulary",
+    "description": "Label for target vocabulary selection"
+  },
+  "targetVocabularyDesc": {
+    "message": "Select vocabulary types to annotate (multiple selection allowed)",
+    "description": "Description for target vocabulary selection"
+  },
+  "vocabularyMatchMode": {
+    "message": "Match Mode",
+    "description": "Label for vocabulary match mode"
+  },
+  "vocabularyMatchModeDesc": {
+    "message": "Matching rule when multiple vocabulary types are selected",
+    "description": "Description for match mode"
+  },
+  "matchModeAny": {
+    "message": "Contains any tag (Recommended)",
+    "description": "Match mode: any tag"
+  },
+  "matchModeAll": {
+    "message": "Contains all tags",
+    "description": "Match mode: all tags"
+  },
+  "matchModeExact": {
+    "message": "Exact match",
+    "description": "Match mode: exact"
+  },
+  "matchModeHint": {
+    "message": "Example: Select CET-6 + TOEFL",
+    "description": "Example hint for match mode"
+  },
+  "matchModeHintAny": {
+    "message": "• Any: Annotate words with CET-6 OR TOEFL tag",
+    "description": "Explanation for any mode"
+  },
+  "matchModeHintAll": {
+    "message": "• All: Only annotate words with both CET-6 AND TOEFL tags",
+    "description": "Explanation for all mode"
+  },
+  "matchModeHintExact": {
+    "message": "• Exact: Only annotate words with exactly these two tags",
+    "description": "Explanation for exact mode"
+  },
+  "includeBaseWords": {
+    "message": "Include Base Vocabulary",
+    "description": "Label for include base words option"
+  },
+  "includeBaseWordsDesc": {
+    "message": "Annotate CET-4 and other basic vocabulary",
+    "description": "Description for include base words"
+  },
+  "minCollinsStars": {
+    "message": "Minimum Collins Stars",
+    "description": "Label for minimum Collins stars"
+  },
+  "minCollinsStarsDesc": {
+    "message": "Only annotate words with specified star rating or higher (0 = no limit)",
+    "description": "Description for minimum Collins stars"
+  },
+  "collinsStarsHint": {
+    "message": "Collins stars: 1-5 indicates word importance, 0 = no limit",
+    "description": "Hint for Collins stars"
+  },
+  "vocabularyDataSource": {
+    "message": "Data Source",
+    "description": "Section title for vocabulary data source"
+  },
+  "dataSourceTitle": {
+    "message": "Vocabulary Source: ECDICT",
+    "description": "Data source title"
+  },
+  "dataSourceInfo": {
+    "message": "This extension uses <a href=\"https://github.com/skywind3000/ECDICT\" target=\"_blank\" rel=\"noopener\">ECDICT</a> open source dictionary data (MIT License), containing 14,942 tagged vocabulary entries.",
+    "description": "Data source information"
+  },
+  "dataSourceStats": {
+    "message": "• Core Vocabulary: 9,642 words (CET/GRE/Common words)",
+    "description": "Core vocabulary stats"
+  },
+  "dataSourceStatsAdvanced": {
+    "message": "• Advanced Vocabulary: 5,300 words (GRE/Specialized words, loaded on demand)",
+    "description": "Advanced vocabulary stats"
+  },
+  "vocabularyStats": {
+    "message": "Vocabulary Statistics",
+    "description": "Label for vocabulary statistics"
+  },
+  "vocabularyStatsDesc": {
+    "message": "Current loaded vocabulary count",
+    "description": "Description for vocabulary statistics"
+  },
+  "refreshStats": {
+    "message": "Refresh Statistics",
+    "description": "Button text for refresh statistics"
+  },
+  "statsNotAvailable": {
+    "message": "Statistics will be shown when pages are loaded",
+    "description": "Message when stats are not available"
+  },
+  "selectVocabularyTags": {
+    "message": "Click to select vocabulary types...",
+    "description": "Placeholder for tag selector"
   }
 }
 

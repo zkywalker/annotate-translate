@@ -1669,6 +1669,198 @@
   "apiKeyNotSet": {
     "message": "未设置",
     "description": "API key not set"
+  },
+  "contextMenuAnnotatePage": {
+    "message": "启用词汇模式",
+    "description": "Context menu option to annotate page vocabulary"
+  },
+  "contextMenuRemoveAnnotations": {
+    "message": "关闭词汇模式",
+    "description": "Context menu option to remove vocabulary annotations"
+  },
+  "vocabularyMode": {
+    "message": "词汇模式",
+    "description": "Vocabulary mode navigation label"
+  },
+  "vocabularyModeTitle": {
+    "message": "词汇模式",
+    "description": "Title for vocabulary mode settings section"
+  },
+  "enableVocabularyMode": {
+    "message": "启用词汇模式",
+    "description": "Label for vocabulary mode enable toggle"
+  },
+  "vocabularyModeDescription": {
+    "message": "根据您的词汇量设置自动标注页面上的单词，非常适合在阅读中学习语言。",
+    "description": "Description of vocabulary mode feature"
+  },
+  "vocabularyModeEnable": {
+    "message": "启用词汇模式",
+    "description": "Label for enabling vocabulary mode"
+  },
+  "vocabularyModeProvider": {
+    "message": "词库数据库",
+    "description": "Label for vocabulary provider selection"
+  },
+  "vocabularyModeProviderCET": {
+    "message": "CET（大学英语考试）",
+    "description": "CET vocabulary provider"
+  },
+  "vocabularyModeProviderFrequency": {
+    "message": "词频统计",
+    "description": "Frequency-based vocabulary provider"
+  },
+  "vocabularyModeCETLevel": {
+    "message": "CET 等级",
+    "description": "Label for CET level selection"
+  },
+  "vocabularyModeCETMode": {
+    "message": "标注模式",
+    "description": "Label for CET annotation mode"
+  },
+  "vocabularyModeCETModeAbove": {
+    "message": "高于所选等级",
+    "description": "Annotate words above the selected level"
+  },
+  "vocabularyModeCETModeExact": {
+    "message": "仅所选等级",
+    "description": "Annotate words in the exact level only"
+  },
+  "vocabularyModeCETIncludeBase": {
+    "message": "包含基础等级（CET-4）",
+    "description": "Option to include base vocabulary levels"
+  },
+  "vocabularyModeShowTranslation": {
+    "message": "在标注中显示翻译",
+    "description": "Option to show translation in vocabulary annotations"
+  },
+  "vocabularyModeShowPhonetic": {
+    "message": "在标注中显示音标",
+    "description": "Option to show phonetics in vocabulary annotations"
+  },
+  "vocabularyModeAutoEnable": {
+    "message": "页面加载时自动启用",
+    "description": "Option to automatically enable vocabulary mode when page loads"
+  },
+  "vocabularyModeDesc": {
+    "message": "根据词汇水平自动标注页面单词，适合英语学习",
+    "description": "Description of vocabulary mode feature in settings"
+  },
+  "vocabularyModeSwitch": {
+    "message": "功能开关",
+    "description": "Section title for vocabulary mode enable/disable"
+  },
+  "enableVocabularyModeDesc": {
+    "message": "在右键菜单中显示「启用词汇模式」选项",
+    "description": "Description for vocabulary mode enable toggle"
+  },
+  "vocabularySelection": {
+    "message": "词汇选择",
+    "description": "Section title for vocabulary selection"
+  },
+  "targetVocabulary": {
+    "message": "目标词汇",
+    "description": "Label for target vocabulary selection"
+  },
+  "targetVocabularyDesc": {
+    "message": "选择要标注的词汇类型（可多选）",
+    "description": "Description for target vocabulary selection"
+  },
+  "vocabularyMatchMode": {
+    "message": "匹配模式",
+    "description": "Label for vocabulary match mode"
+  },
+  "vocabularyMatchModeDesc": {
+    "message": "当选择多个词汇类型时的匹配规则",
+    "description": "Description for match mode"
+  },
+  "matchModeAny": {
+    "message": "包含任一标签（推荐）",
+    "description": "Match mode: any tag"
+  },
+  "matchModeAll": {
+    "message": "包含所有标签",
+    "description": "Match mode: all tags"
+  },
+  "matchModeExact": {
+    "message": "精确匹配",
+    "description": "Match mode: exact"
+  },
+  "matchModeHint": {
+    "message": "例：选择 CET-6 + TOEFL",
+    "description": "Example hint for match mode"
+  },
+  "matchModeHintAny": {
+    "message": "• 任一：标注含有 CET-6 或 TOEFL 标签的词",
+    "description": "Explanation for any mode"
+  },
+  "matchModeHintAll": {
+    "message": "• 所有：只标注同时含有 CET-6 和 TOEFL 的词",
+    "description": "Explanation for all mode"
+  },
+  "matchModeHintExact": {
+    "message": "• 精确：只标注恰好这两个标签的词",
+    "description": "Explanation for exact mode"
+  },
+  "includeBaseWords": {
+    "message": "包含基础词汇",
+    "description": "Label for include base words option"
+  },
+  "includeBaseWordsDesc": {
+    "message": "是否标注 CET-4 等基础词汇",
+    "description": "Description for include base words"
+  },
+  "minCollinsStars": {
+    "message": "最低柯林斯星级",
+    "description": "Label for minimum Collins stars"
+  },
+  "minCollinsStarsDesc": {
+    "message": "只标注重要程度达到指定星级的词（0 = 不限制）",
+    "description": "Description for minimum Collins stars"
+  },
+  "collinsStarsHint": {
+    "message": "柯林斯星级：1-5星表示词汇重要性，0表示无限制",
+    "description": "Hint for Collins stars"
+  },
+  "vocabularyDataSource": {
+    "message": "数据来源",
+    "description": "Section title for vocabulary data source"
+  },
+  "dataSourceTitle": {
+    "message": "词库来源：ECDICT",
+    "description": "Data source title"
+  },
+  "dataSourceInfo": {
+    "message": "本扩展使用 <a href=\"https://github.com/skywind3000/ECDICT\" target=\"_blank\" rel=\"noopener\">ECDICT</a> 开源词典数据（MIT License），包含 14,942 个带标签词汇。",
+    "description": "Data source information"
+  },
+  "dataSourceStats": {
+    "message": "• 核心词库：9,642词 (CET/考研/常用词)",
+    "description": "Core vocabulary stats"
+  },
+  "dataSourceStatsAdvanced": {
+    "message": "• 高级词库：5,300词 (GRE/专业词汇，按需加载)",
+    "description": "Advanced vocabulary stats"
+  },
+  "vocabularyStats": {
+    "message": "词库统计",
+    "description": "Label for vocabulary statistics"
+  },
+  "vocabularyStatsDesc": {
+    "message": "当前加载的词汇数量",
+    "description": "Description for vocabulary statistics"
+  },
+  "refreshStats": {
+    "message": "刷新统计",
+    "description": "Button text for refresh statistics"
+  },
+  "statsNotAvailable": {
+    "message": "统计信息将在页面加载时显示",
+    "description": "Message when stats are not available"
+  },
+  "selectVocabularyTags": {
+    "message": "点击选择词汇类型...",
+    "description": "Placeholder for tag selector"
   }
 }
 

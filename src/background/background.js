@@ -70,6 +70,36 @@ chrome.runtime.onInstalled.addListener((details) => {
       },
       debug: {
         enableDebugMode: false
+      },
+      vocabulary: {
+        enabled: false,
+        provider: 'cet',
+        providers: {
+          cet: {
+            levels: ['cet6'],
+            mode: 'above',
+            includeBase: false
+          },
+          frequency: {
+            threshold: 5000,
+            mode: 'below'
+          },
+          custom: {
+            wordList: [],
+            source: 'user'
+          }
+        },
+        scanning: {
+          mode: 'manual',
+          autoScanDelay: 1000,
+          scanDynamicContent: true
+        },
+        annotationStyle: {
+          showPhonetic: true,
+          showTranslation: true,
+          showLevel: true,
+          style: 'ruby'
+        }
       }
     });
 
@@ -102,6 +132,20 @@ function createContextMenus() {
       title: 'Annotate "%s"',
       contexts: ['selection']
     });
+
+    // Vocabulary annotation menus (for full page)
+    chrome.contextMenus.create({
+      id: 'annotate-page',
+      title: chrome.i18n.getMessage('contextMenuAnnotatePage') || 'Annotate Page Vocabulary',
+      contexts: ['page']
+    });
+
+    chrome.contextMenus.create({
+      id: 'remove-annotations',
+      title: chrome.i18n.getMessage('contextMenuRemoveAnnotations') || 'Remove Vocabulary Annotations',
+      contexts: ['page']
+    });
+
     console.log('[Annotate-Translate BG] Context menus created');
   });
 }
@@ -140,6 +184,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         console.error('[Annotate-Translate BG] Could not send annotate message:', chrome.runtime.lastError.message);
       } else {
         console.log('[Annotate-Translate BG] Annotate message sent successfully');
+      }
+    });
+  } else if (info.menuItemId === 'annotate-page') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'annotate_page'
+    }, function(response) {
+      if (chrome.runtime.lastError) {
+        console.error('[Annotate-Translate BG] Could not send annotate_page message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Annotate page message sent successfully:', response);
+      }
+    });
+  } else if (info.menuItemId === 'remove-annotations') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'remove_annotations'
+    }, function(response) {
+      if (chrome.runtime.lastError) {
+        console.error('[Annotate-Translate BG] Could not send remove_annotations message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('[Annotate-Translate BG] Remove annotations message sent successfully:', response);
       }
     });
   }

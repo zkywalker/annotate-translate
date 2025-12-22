@@ -73,7 +73,23 @@ const elements = {
   
   // 调试设置
   enableDebugMode: document.getElementById('enableDebugMode'),
-  
+
+  // 词汇模式设置
+  enableVocabularyMode: document.getElementById('enableVocabularyMode'),
+  vocabCet4: document.getElementById('vocabCet4'),
+  vocabCet6: document.getElementById('vocabCet6'),
+  vocabKy: document.getElementById('vocabKy'),
+  vocabGk: document.getElementById('vocabGk'),
+  vocabToefl: document.getElementById('vocabToefl'),
+  vocabIelts: document.getElementById('vocabIelts'),
+  vocabGre: document.getElementById('vocabGre'),
+  vocabZk: document.getElementById('vocabZk'),
+  vocabularyMatchMode: document.getElementById('vocabularyMatchMode'),
+  includeBaseWords: document.getElementById('includeBaseWords'),
+  minCollinsStars: document.getElementById('minCollinsStars'),
+  refreshVocabularyStats: document.getElementById('refreshVocabularyStats'),
+  vocabularyStatsDisplay: document.getElementById('vocabularyStatsDisplay'),
+
   // 服务提供者按钮
   setGoogleAsProvider: document.getElementById('setGoogleAsProvider'),
   setYoudaoAsProvider: document.getElementById('setYoudaoAsProvider'),
@@ -307,7 +323,28 @@ function applySettingsToUI() {
   
   // 调试设置
   if (elements.enableDebugMode) elements.enableDebugMode.checked = settings.debug.enableDebugMode;
-  
+
+  // 词汇模式设置
+  if (elements.enableVocabularyMode) elements.enableVocabularyMode.checked = settings.vocabulary?.enabled ?? true;
+
+  // 加载目标标签（多选框）
+  const targetTags = settings.vocabulary?.providers?.unified?.targetTags || ['cet6'];
+  if (elements.vocabCet4) elements.vocabCet4.checked = targetTags.includes('cet4');
+  if (elements.vocabCet6) elements.vocabCet6.checked = targetTags.includes('cet6');
+  if (elements.vocabKy) elements.vocabKy.checked = targetTags.includes('ky');
+  if (elements.vocabGk) elements.vocabGk.checked = targetTags.includes('gk');
+  if (elements.vocabToefl) elements.vocabToefl.checked = targetTags.includes('toefl');
+  if (elements.vocabIelts) elements.vocabIelts.checked = targetTags.includes('ielts');
+  if (elements.vocabGre) elements.vocabGre.checked = targetTags.includes('gre');
+  if (elements.vocabZk) elements.vocabZk.checked = targetTags.includes('zk');
+
+  // 加载匹配模式
+  if (elements.vocabularyMatchMode) elements.vocabularyMatchMode.value = settings.vocabulary?.providers?.unified?.mode || 'any';
+
+  // 加载其他选项
+  if (elements.includeBaseWords) elements.includeBaseWords.checked = settings.vocabulary?.providers?.unified?.includeBase ?? false;
+  if (elements.minCollinsStars) elements.minCollinsStars.value = settings.vocabulary?.providers?.unified?.minCollins || 0;
+
   // 更新快速配置区域
   updateQuickProviderConfig();
   
@@ -393,6 +430,36 @@ function collectSettingsFromUI() {
     },
     debug: {
       enableDebugMode: elements.enableDebugMode?.checked ?? settings.debug?.enableDebugMode ?? false
+    },
+    vocabulary: {
+      enabled: elements.enableVocabularyMode?.checked ?? settings.vocabulary?.enabled ?? true,
+      provider: 'unified', // 固定使用 unified provider
+      providers: {
+        unified: {
+          targetTags: [
+            elements.vocabCet4?.checked && 'cet4',
+            elements.vocabCet6?.checked && 'cet6',
+            elements.vocabKy?.checked && 'ky',
+            elements.vocabGk?.checked && 'gk',
+            elements.vocabToefl?.checked && 'toefl',
+            elements.vocabIelts?.checked && 'ielts',
+            elements.vocabGre?.checked && 'gre',
+            elements.vocabZk?.checked && 'zk'
+          ].filter(Boolean), // 过滤掉 false 值
+          mode: elements.vocabularyMatchMode?.value ?? settings.vocabulary?.providers?.unified?.mode ?? 'any',
+          includeBase: elements.includeBaseWords?.checked ?? settings.vocabulary?.providers?.unified?.includeBase ?? false,
+          minCollins: parseInt(elements.minCollinsStars?.value, 10) ?? settings.vocabulary?.providers?.unified?.minCollins ?? 0
+        },
+        // 保留旧的 CET 和 Frequency 配置以便向后兼容
+        cet: settings.vocabulary?.providers?.cet ?? {
+          levels: ['cet6'],
+          mode: 'above',
+          includeBase: false
+        },
+        frequency: settings.vocabulary?.providers?.frequency ?? {
+          threshold: 5000
+        }
+      }
     }
   };
 }
@@ -794,13 +861,17 @@ function setupEventListeners() {
   
   // 自动保存的字段（Switch 和 Select）
   const autoSaveFields = [
-    'enableTranslate', 'enableAnnotate', 'targetLanguage', 
+    'enableTranslate', 'enableAnnotate', 'targetLanguage',
     'currentProvider', 'deeplUseFreeApi', 'showPhonetics', 'enableAudio',
-    'showDefinitions', 'showExamples', 'enablePhoneticFallback', 
+    'showDefinitions', 'showExamples', 'enablePhoneticFallback',
     'menuButtonSize', 'showPhoneticInAnnotation', 'showTranslationInAnnotation',
     'showDefinitionsInAnnotation', 'enableAudioInAnnotation',
     'hidePhoneticForMultipleWords',
-    'enableCache', 'enableDebugMode', 'openaiPromptFormat', 'openaiUseContext'
+    'enableCache', 'enableDebugMode', 'openaiPromptFormat', 'openaiUseContext',
+    // 词汇模式字段
+    'enableVocabularyMode', 'vocabCet4', 'vocabCet6', 'vocabKy', 'vocabGk',
+    'vocabToefl', 'vocabIelts', 'vocabGre', 'vocabZk',
+    'vocabularyMatchMode', 'includeBaseWords', 'minCollinsStars'
   ];
   
   autoSaveFields.forEach(id => {
@@ -932,7 +1003,15 @@ function setupEventListeners() {
   if (elements.clearCacheButton) {
     elements.clearCacheButton.addEventListener('click', clearCache);
   }
-  
+
+  // 词汇模式：刷新统计按钮
+  if (elements.refreshVocabularyStats) {
+    elements.refreshVocabularyStats.addEventListener('click', refreshVocabularyStats);
+  }
+
+  // 标签选择器初始化
+  setupTagSelector();
+
   // 提示词编辑器相关
   setupPromptEditorListeners();
 }
@@ -1286,6 +1365,124 @@ function resetPromptToDefault() {
 }
 
 // 初始化
+/**
+ * 刷新词汇统计（占位函数）
+ * 注意：设置页面无法直接访问 content script 的 vocabularyService
+ * 此功能仅作为UI占位，实际统计需要在内容页面查看
+ */
+function refreshVocabularyStats() {
+  if (!elements.vocabularyStatsDisplay) return;
+
+  elements.vocabularyStatsDisplay.innerHTML = `
+    <p style="color: var(--text-secondary);">
+      <strong>提示：</strong>词库统计信息需要在网页上查看<br>
+      <small>请打开任意网页，按 F12 打开控制台，运行：</small><br>
+      <code style="display: block; margin-top: 4px; padding: 4px; background: var(--bg-tertiary); border-radius: 4px;">vocabularyService.getStats()</code>
+    </p>
+  `;
+}
+
+/**
+ * 设置标签选择器
+ */
+function setupTagSelector() {
+  const selector = document.getElementById('vocabularyTagSelector');
+  const input = selector?.querySelector('.tag-selector-input');
+  const dropdown = document.getElementById('vocabularyTagDropdown');
+  const tagsList = document.getElementById('selectedTagsList');
+  const checkboxes = dropdown?.querySelectorAll('input[type="checkbox"]');
+
+  if (!selector || !input || !dropdown || !tagsList || !checkboxes) return;
+
+  // 标签名称映射
+  const tagNames = {
+    'cet4': 'CET-4',
+    'cet6': 'CET-6',
+    'ky': '考研',
+    'gk': '高考',
+    'toefl': 'TOEFL',
+    'ielts': 'IELTS',
+    'gre': 'GRE',
+    'zk': '中考'
+  };
+
+  // 更新标签显示
+  function updateTagsDisplay() {
+    const selectedTags = Array.from(checkboxes)
+      .filter(cb => cb.checked)
+      .map(cb => ({ value: cb.value, label: tagNames[cb.value] || cb.value }));
+
+    if (selectedTags.length === 0) {
+      tagsList.innerHTML = '<span class="tag-placeholder" data-i18n="selectVocabularyTags">点击选择词汇类型...</span>';
+    } else {
+      tagsList.innerHTML = selectedTags.map(tag => `
+        <span class="selected-tag" data-value="${tag.value}">
+          ${tag.label}
+          <span class="tag-remove" data-value="${tag.value}">×</span>
+        </span>
+      `).join('');
+
+      // 添加删除标签的事件监听
+      tagsList.querySelectorAll('.tag-remove').forEach(removeBtn => {
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = removeBtn.dataset.value;
+          const checkbox = dropdown.querySelector(`input[value="${value}"]`);
+          if (checkbox) {
+            checkbox.checked = false;
+            updateTagsDisplay();
+            saveSettings();
+          }
+        });
+      });
+    }
+
+    // 重新本地化占位符
+    if (selectedTags.length === 0) {
+      const placeholder = tagsList.querySelector('.tag-placeholder');
+      if (placeholder) localizeElement(placeholder);
+    }
+  }
+
+  // 切换下拉菜单
+  function toggleDropdown(e) {
+    e.stopPropagation();
+    selector.classList.toggle('open');
+  }
+
+  // 点击输入框
+  input.addEventListener('click', toggleDropdown);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleDropdown(e);
+    }
+  });
+
+  // 复选框变化
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      updateTagsDisplay();
+      saveSettings();
+    });
+  });
+
+  // 点击下拉选项时不关闭菜单
+  dropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // 点击外部关闭菜单
+  document.addEventListener('click', (e) => {
+    if (!selector.contains(e.target)) {
+      selector.classList.remove('open');
+    }
+  });
+
+  // 初始化显示
+  updateTagsDisplay();
+}
+
 document.addEventListener('DOMContentLoaded', init);
 
 // 监听 hash 变化

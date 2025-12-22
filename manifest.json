@@ -40,7 +40,13 @@
         "src/providers/prompt-templates.js",
         "src/providers/base-ai-provider.js",
         "src/providers/openai-provider.js",
+        "src/providers/vocabulary/base-provider.js",
+        "src/providers/vocabulary/cet-provider.js",
+        "src/providers/vocabulary/frequency-provider.js",
+        "src/providers/vocabulary/unified-provider.js",
         "src/services/translation-service.js",
+        "src/services/vocabulary-service.js",
+        "src/services/annotation-scanner.js",
         "src/content/translation-ui.js",
         "src/content/content.js"
       ],
@@ -62,7 +68,10 @@
         "assets/icons/icon_logo_google.svg",
         "assets/icons/icon_logo_youdao.svg",
         "assets/icons/icon_logo_deepl.svg",
-        "assets/icons/icon_logo_ai.svg"
+        "assets/icons/icon_logo_ai.svg",
+        "src/data/vocabularies/vocabulary-core.json",
+        "src/data/vocabularies/vocabulary-advanced.json",
+        "src/data/vocabularies/vocabulary-frequency.json"
       ],
       "matches": ["<all_urls>"]
     }

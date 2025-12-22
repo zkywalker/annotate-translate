@@ -1,6 +1,25 @@
 // Content Script for Annotate Translate Extension
 // Note: Utility functions (safeGetMessage, isExtensionContextValid) are now imported from message-helper.js
 
+// 深度合并两个对象
+function deepMerge(target, source) {
+  const result = { ...target };
+
+  for (const key in source) {
+    if (source.hasOwnProperty(key)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        // 递归合并对象
+        result[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        // 直接赋值（包括数组和基本类型）
+        result[key] = source[key];
+      }
+    }
+  }
+
+  return result;
+}
+
 // 全局设置对象 - 使用新的扁平化结构
 let settings = {
   general: {
@@ -44,6 +63,36 @@ let settings = {
   },
   debug: {
     enableDebugMode: false
+  },
+  vocabulary: {
+    enabled: false,
+    provider: 'cet',
+    providers: {
+      cet: {
+        levels: ['cet6'],
+        mode: 'above',
+        includeBase: false
+      },
+      frequency: {
+        threshold: 5000,
+        mode: 'below'
+      },
+      custom: {
+        wordList: [],
+        source: 'user'
+      }
+    },
+    scanning: {
+      mode: 'manual',
+      autoScanDelay: 1000,
+      scanDynamicContent: true
+    },
+    annotationStyle: {
+      showPhonetic: true,
+      showTranslation: true,
+      showLevel: true,
+      style: 'ruby'
+    }
   }
 };
 
@@ -104,13 +153,26 @@ const $ = {
   get enableCache() { return settings.performance?.enableCache ?? true; },
   get cacheSize() { return settings.performance?.cacheSize ?? 100; },
   get debugMode() { return settings.debug?.enableDebugMode ?? false; },
-  get showConsoleLogs() { return settings.debug?.enableDebugMode ?? false; }
+  get showConsoleLogs() { return settings.debug?.enableDebugMode ?? false; },
+  // 词库标注相关
+  get vocabularyEnabled() { return settings.vocabulary?.enabled ?? false; },
+  get vocabularyProvider() { return settings.vocabulary?.provider ?? 'cet'; },
+  get vocabularyCETLevels() { return settings.vocabulary?.providers?.cet?.levels ?? ['cet6']; },
+  get vocabularyCETMode() { return settings.vocabulary?.providers?.cet?.mode ?? 'above'; },
+  get vocabularyCETIncludeBase() { return settings.vocabulary?.providers?.cet?.includeBase ?? false; },
+  get vocabularyFrequencyThreshold() { return settings.vocabulary?.providers?.frequency?.threshold ?? 5000; },
+  get vocabularyFrequencyMode() { return settings.vocabulary?.providers?.frequency?.mode ?? 'below'; },
+  get vocabularyScanMode() { return settings.vocabulary?.scanning?.mode ?? 'manual'; },
+  get vocabularyShowPhonetic() { return settings.vocabulary?.annotationStyle?.showPhonetic ?? true; },
+  get vocabularyShowTranslation() { return settings.vocabulary?.annotationStyle?.showTranslation ?? true; },
+  get vocabularyShowLevel() { return settings.vocabulary?.annotationStyle?.showLevel ?? true; }
 };
 
 let annotations = new Map();
 let lastSelection = null; // 保存最后一次选择的Range
 let translationUI = null; // TranslationUI实例
 let currentTooltip = null; // 当前显示的翻译卡片
+let annotationScanner = null; // AnnotationScanner实例
 
 // Initialize the extension
 init();
@@ -150,10 +212,12 @@ async function init() {
       });
     });
 
-    // 如果有存储的设置，使用存储的设置
+    // 如果有存储的设置，合并到默认设置（保留新增字段）
     if (items.general) {
-      settings = items;
-      console.log('[Annotate-Translate] Settings loaded:', settings);
+      // 深度合并：保留默认settings中的字段，用storage中的值覆盖
+      settings = deepMerge(settings, items);
+      console.log('[Annotate-Translate] Settings loaded from storage');
+      console.log('[Annotate-Translate] Merged settings:', settings);
     } else {
       console.log('[Annotate-Translate] No settings found, using defaults');
     }
@@ -163,6 +227,12 @@ async function init() {
 
     // 初始化TranslationUI - After settings are loaded
     initializeTranslationUI();
+
+    // 初始化词库服务 - After settings are loaded
+    await initializeVocabularyService();
+
+    // 初始化AnnotationScanner - After vocabulary service is initialized
+    initializeAnnotationScanner();
 
     // Listen for text selection - Only after settings are loaded
     document.addEventListener('mouseup', handleTextSelection);
@@ -176,6 +246,8 @@ async function init() {
     // Continue with defaults even if settings loading fails
     applyTranslationSettings();
     initializeTranslationUI();
+    await initializeVocabularyService();
+    initializeAnnotationScanner();
     document.addEventListener('mouseup', handleTextSelection);
     chrome.runtime.onMessage.addListener(handleMessage);
   }
@@ -187,7 +259,7 @@ function initializeTranslationUI() {
     console.error('[Annotate-Translate] TranslationUI not loaded!');
     return;
   }
-  
+
   translationUI = new TranslationUI({
     showPhonetics: $.showPhonetics,
     showDefinitions: $.showDefinitions,
@@ -195,8 +267,114 @@ function initializeTranslationUI() {
     maxExamples: $.maxExamples,
     enableAudio: $.enableAudio
   });
-  
+
   console.log('[Annotate-Translate] TranslationUI initialized');
+}
+
+// 初始化词库服务
+async function initializeVocabularyService() {
+  console.log('[VocabularyService] Starting initialization...');
+  console.log('[VocabularyService] vocabularyService defined?', typeof vocabularyService !== 'undefined');
+  console.log('[VocabularyService] settings.vocabulary:', settings.vocabulary);
+
+  if (typeof vocabularyService === 'undefined') {
+    console.warn('[Annotate-Translate] VocabularyService not loaded, vocabulary features will be unavailable');
+    return;
+  }
+
+  try {
+    // 注册统一词库（新 - 推荐使用）
+    if (typeof UnifiedVocabularyProvider !== 'undefined') {
+      const unifiedProvider = new UnifiedVocabularyProvider('unified');
+      vocabularyService.registerProvider('unified', unifiedProvider);
+      console.log('[VocabularyService] Unified provider registered');
+    } else {
+      console.warn('[VocabularyService] UnifiedVocabularyProvider not defined');
+    }
+
+    // 注册CET词库（旧 - 向后兼容）
+    if (typeof CETVocabularyProvider !== 'undefined') {
+      const cetProvider = new CETVocabularyProvider();
+      vocabularyService.registerProvider('cet', cetProvider);
+      console.log('[VocabularyService] CET provider registered');
+    } else {
+      console.warn('[VocabularyService] CETVocabularyProvider not defined');
+    }
+
+    // 注册词频词库（旧 - 向后兼容）
+    if (typeof FrequencyVocabularyProvider !== 'undefined') {
+      const frequencyProvider = new FrequencyVocabularyProvider();
+      vocabularyService.registerProvider('frequency', frequencyProvider);
+      console.log('[VocabularyService] Frequency provider registered');
+    } else {
+      console.warn('[VocabularyService] FrequencyVocabularyProvider not defined');
+    }
+
+    // 设置活跃provider
+    // 优先使用 unified，如果设置中是 cet/frequency 则自动升级
+    let providerName = $.vocabularyProvider || 'unified';
+    let providerOptions = {};
+
+    // 自动升级旧配置并转换选项格式
+    if (providerName === 'cet' && typeof UnifiedVocabularyProvider !== 'undefined') {
+      console.log('[VocabularyService] Auto-upgrading from "cet" to "unified" provider');
+
+      // 将 CET 配置转换为 Unified 格式
+      const cetConfig = settings.vocabulary?.providers?.cet || {};
+      providerOptions = {
+        targetTags: cetConfig.levels || ['cet6'],  // CET levels as target tags
+        mode: 'any',  // 'any' tag match (CET-6 or higher)
+        includeBase: cetConfig.includeBase || false,
+        minCollins: 0
+      };
+
+      providerName = 'unified';
+      console.log('[VocabularyService] Converted CET options to unified format:', providerOptions);
+    } else if (providerName === 'unified') {
+      // Unified provider 使用默认配置
+      providerOptions = settings.vocabulary?.providers?.unified || {
+        targetTags: ['cet6', 'toefl', 'ielts'],  // 默认标注 CET-6/TOEFL/IELTS
+        mode: 'any',
+        includeBase: false,
+        minCollins: 0
+      };
+    } else {
+      // 其他 provider 使用原始配置
+      providerOptions = settings.vocabulary?.providers?.[providerName] || {};
+    }
+
+    console.log('[VocabularyService] About to set active provider:', providerName, providerOptions);
+
+    await vocabularyService.setActiveProvider(providerName, providerOptions);
+    console.log(`[VocabularyService] Active provider set to: ${providerName}`, providerOptions);
+
+    if ($.vocabularyEnabled) {
+      console.log('[VocabularyService] Vocabulary annotation feature is ENABLED');
+    } else {
+      console.log('[VocabularyService] Vocabulary annotation feature is DISABLED (can be enabled in settings)');
+    }
+
+    console.log('[Annotate-Translate] Vocabulary service initialized successfully');
+  } catch (error) {
+    console.error('[VocabularyService] Initialization failed:', error);
+    console.error('[VocabularyService] Error stack:', error.stack);
+  }
+}
+
+// 初始化AnnotationScanner
+function initializeAnnotationScanner() {
+  if (typeof AnnotationScanner === 'undefined') {
+    console.warn('[Annotate-Translate] AnnotationScanner not loaded, vocabulary annotation features will be unavailable');
+    return;
+  }
+
+  if (typeof vocabularyService === 'undefined') {
+    console.warn('[Annotate-Translate] VocabularyService not available, cannot initialize AnnotationScanner');
+    return;
+  }
+
+  annotationScanner = new AnnotationScanner(vocabularyService, translationService);
+  console.log('[Annotate-Translate] AnnotationScanner initialized');
 }
 
 // 应用翻译设置
@@ -1481,76 +1659,91 @@ function isMultipleEnglishWords(text) {
   return words && words.length > 1;
 }
 
+/**
+ * 创建 Ruby 元素（不进行 DOM 操作）
+ * 供 annotation-scanner 批量处理时使用
+ * @param {string} baseText - 基础文本
+ * @param {string} annotationText - 标注文本
+ * @param {Object} result - 翻译结果对象
+ * @returns {HTMLElement} ruby 元素
+ */
+function createRubyElement(baseText, annotationText, result = null) {
+  // Create ruby element structure
+  const ruby = document.createElement('ruby');
+  ruby.className = 'annotate-translate-ruby';
+  ruby.setAttribute('data-annotation', annotationText);
+  ruby.setAttribute('data-base-text', baseText);
+
+  // Add base text
+  ruby.textContent = baseText;
+
+  // Create rt (ruby text) element for annotation
+  const rt = document.createElement('rt');
+  rt.className = 'annotate-translate-rt';
+
+  // 检查是否应该隐藏读音（当文本为多个英语单词且设置启用时）
+  const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(baseText);
+
+  // Add annotation text
+  const textSpan = document.createElement('span');
+  textSpan.textContent = annotationText;
+  rt.appendChild(textSpan);
+
+  // Add audio button if phonetics available and annotation audio is enabled
+  // 如果设置为隐藏多个单词的读音，则不显示音频按钮
+  if (result && result.phonetics && result.phonetics.length > 0 &&
+      $.enableAudioInAnnotation && !shouldHidePhonetic) {
+    const audioButton = createAudioButton(result.phonetics, baseText);
+    rt.appendChild(audioButton);
+  }
+
+  ruby.appendChild(rt);
+
+  // Store annotation with full result data
+  annotations.set(ruby, {
+    base: baseText,
+    annotation: annotationText,
+    phonetics: result ? result.phonetics : null,
+    fullResult: result  // 保存完整的翻译结果
+  });
+
+  // Add click event to show detailed translation
+  if (result && (result.definitions || result.examples)) {
+    ruby.style.cursor = 'pointer';
+    ruby.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
+
+    ruby.addEventListener('click', (e) => {
+      // 如果点击的是音频按钮，不显示详细弹窗
+      if (e.target.closest('.annotate-audio-button')) {
+        return;
+      }
+
+      e.stopPropagation();
+      showDetailedTranslation(ruby, result);
+    });
+  }
+
+  return ruby;
+}
+
 // Create ruby tag annotation
 function createRubyAnnotation(range, baseText, annotationText, result = null) {
   try {
     console.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
-    
-    // Create ruby element structure
-    const ruby = document.createElement('ruby');
-    ruby.className = 'annotate-translate-ruby';
-    ruby.setAttribute('data-annotation', annotationText);
-    ruby.setAttribute('data-base-text', baseText);
-    
-    // Add base text
-    ruby.textContent = baseText;
-    
-    // Create rt (ruby text) element for annotation
-    const rt = document.createElement('rt');
-    rt.className = 'annotate-translate-rt';
-    
-    // 检查是否应该隐藏读音（当文本为多个英语单词且设置启用时）
-    const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(baseText);
-    
-    // Add annotation text
-    const textSpan = document.createElement('span');
-    textSpan.textContent = annotationText;
-    rt.appendChild(textSpan);
-    
-    // Add audio button if phonetics available and annotation audio is enabled
-    // 如果设置为隐藏多个单词的读音，则不显示音频按钮
-    if (result && result.phonetics && result.phonetics.length > 0 && 
-        $.enableAudioInAnnotation && !shouldHidePhonetic) {
-      const audioButton = createAudioButton(result.phonetics, baseText);
-      rt.appendChild(audioButton);
-    }
-    
-    ruby.appendChild(rt);
-    
+
+    // Use the helper function to create ruby element
+    const ruby = createRubyElement(baseText, annotationText, result);
+
     // Replace the selected text with the ruby element
     range.deleteContents();
     range.insertNode(ruby);
-    
-    // Store annotation with full result data
-    annotations.set(ruby, {
-      base: baseText,
-      annotation: annotationText,
-      phonetics: result ? result.phonetics : null,
-      fullResult: result  // 保存完整的翻译结果
-    });
-    
-    // Add click event to show detailed translation
-    if (result && (result.definitions || result.examples)) {
-      ruby.style.cursor = 'pointer';
-      ruby.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
-      
-      ruby.addEventListener('click', (e) => {
-        // 如果点击的是音频按钮，不显示详细弹窗
-        if (e.target.closest('.annotate-audio-button')) {
-          return;
-        }
-        
-        e.stopPropagation();
-        showDetailedTranslation(ruby, result);
-      });
-    }
-    
+
     // Save annotation to storage
     saveAnnotation(baseText, annotationText);
-    
+
     // Clear selection
     window.getSelection().removeAllRanges();
-    
+
     console.log('[Annotate-Translate] Ruby annotation created successfully');
   } catch (e) {
     console.error('[Annotate-Translate] Failed to create ruby annotation:', e);
@@ -1817,6 +2010,51 @@ function handleMessage(request, sender, sendResponse) {
     console.log('[Annotate-Translate] Translating text:', request.text);
     translateText(request.text);
     sendResponse({success: true});
+  } else if (request.action === 'annotate_page') {
+    // Handle vocabulary annotation action
+    console.log('[Annotate-Translate] Annotating page vocabulary');
+
+    // 获取词汇配置信息
+    const vocabularyConfig = {
+      provider: vocabularyService.activeProvider ? vocabularyService.activeProvider.name : 'unknown',
+      options: vocabularyService.activeOptions || {}
+    };
+
+    // 调试：打印扫描选项
+    const scanOptions = {
+      fetchTranslation: $.vocabularyShowTranslation,
+      fetchPhonetic: $.vocabularyShowPhonetic,
+      sourceLang: 'en',
+      targetLang: $.targetLanguage,
+      vocabularyConfig: vocabularyConfig  // 传递词汇配置信息
+    };
+    console.log('[Annotate-Translate] Scan options:', scanOptions);
+    console.log('[Annotate-Translate] TranslationService available:', !!translationService);
+
+    if (annotationScanner) {
+      annotationScanner.scanPage(scanOptions).then(result => {
+        console.log('[Annotate-Translate] Annotation result:', result);
+        sendResponse(result);
+      }).catch(error => {
+        console.error('[Annotate-Translate] Annotation failed:', error);
+        sendResponse({ status: 'error', error: error.message });
+      });
+    } else {
+      console.error('[Annotate-Translate] AnnotationScanner not initialized');
+      sendResponse({ status: 'error', error: 'AnnotationScanner not initialized' });
+    }
+    return true; // 异步响应
+  } else if (request.action === 'remove_annotations') {
+    // Handle remove annotations action
+    console.log('[Annotate-Translate] Removing vocabulary annotations');
+    if (annotationScanner) {
+      const count = annotationScanner.removeAnnotations();
+      console.log(`[Annotate-Translate] Removed ${count} annotations`);
+      sendResponse({ status: 'success', count });
+    } else {
+      console.error('[Annotate-Translate] AnnotationScanner not initialized');
+      sendResponse({ status: 'error', error: 'AnnotationScanner not initialized' });
+    }
   }
   return true;
 }

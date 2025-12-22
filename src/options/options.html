@@ -63,6 +63,13 @@
 
       <div class="nav-divider"></div>
 
+      <a href="#vocabulary" class="nav-item" data-page="vocabulary">
+        <i data-lucide="book-open" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="vocabularyMode">词汇模式</span>
+      </a>
+
+      <div class="nav-divider"></div>
+
       <a href="#data" class="nav-item" data-page="data">
         <i data-lucide="database" class="nav-icon" width="20" height="20"></i>
         <span data-i18n="dataSettings">数据与隐私</span>
@@ -713,6 +720,171 @@
             </div>
             <div class="setting-control">
               <input type="number" id="autoCloseDelay" class="number-input" min="0" max="60" value="10">
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 词汇模式页面 -->
+      <div id="page-vocabulary" class="page">
+        <h2 class="page-title" data-i18n="vocabularyMode">词汇模式</h2>
+        <p class="page-desc" data-i18n="vocabularyModeDesc">根据词汇水平自动标注页面单词，适合英语学习</p>
+
+        <!-- 总开关 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="vocabularyModeSwitch">功能开关</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="enableVocabularyMode">启用词汇模式</label>
+              <p class="setting-desc" data-i18n="enableVocabularyModeDesc">在右键菜单中显示"启用词汇模式"选项</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="enableVocabularyMode" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 词汇选择 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="vocabularySelection">词汇选择</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="targetVocabulary">目标词汇</label>
+              <p class="setting-desc" data-i18n="targetVocabularyDesc">选择要标注的词汇类型（可多选）</p>
+            </div>
+            <div class="setting-control">
+              <!-- 标签选择器 -->
+              <div class="tag-selector" id="vocabularyTagSelector">
+                <div class="tag-selector-input" tabindex="0">
+                  <div class="tag-list" id="selectedTagsList">
+                    <!-- 选中的标签将显示在这里 -->
+                    <span class="tag-placeholder" data-i18n="selectVocabularyTags">点击选择词汇类型...</span>
+                  </div>
+                  <i class="tag-selector-arrow" data-lucide="chevron-down" width="16" height="16"></i>
+                </div>
+                <div class="tag-selector-dropdown" id="vocabularyTagDropdown">
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="cet4" id="vocabCet4">
+                    <span class="tag-option-label">CET-4</span>
+                    <span class="tag-option-desc">大学英语四级</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="cet6" id="vocabCet6" checked>
+                    <span class="tag-option-label">CET-6</span>
+                    <span class="tag-option-desc">大学英语六级</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="ky" id="vocabKy">
+                    <span class="tag-option-label">考研</span>
+                    <span class="tag-option-desc">研究生入学考试</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="gk" id="vocabGk">
+                    <span class="tag-option-label">高考</span>
+                    <span class="tag-option-desc">高中毕业考试</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="toefl" id="vocabToefl">
+                    <span class="tag-option-label">TOEFL</span>
+                    <span class="tag-option-desc">托福</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="ielts" id="vocabIelts">
+                    <span class="tag-option-label">IELTS</span>
+                    <span class="tag-option-desc">雅思</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="gre" id="vocabGre">
+                    <span class="tag-option-label">GRE</span>
+                    <span class="tag-option-desc">研究生入学考试</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="checkbox" name="vocabTag" value="zk" id="vocabZk">
+                    <span class="tag-option-label">中考</span>
+                    <span class="tag-option-desc">初中毕业考试</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="vocabularyMatchMode">匹配模式</label>
+              <p class="setting-desc" data-i18n="vocabularyMatchModeDesc">当选择多个词汇类型时的匹配规则</p>
+            </div>
+            <div class="setting-control">
+              <select id="vocabularyMatchMode" class="select-input">
+                <option value="any" data-i18n="matchModeAny">包含任一标签（推荐）</option>
+                <option value="all" data-i18n="matchModeAll">包含所有标签</option>
+                <option value="exact" data-i18n="matchModeExact">精确匹配</option>
+              </select>
+              <p class="setting-hint">
+                <span data-i18n="matchModeHint">例：选择 CET-6 + TOEFL</span><br>
+                <span data-i18n="matchModeHintAny">• 任一：标注含有 CET-6 或 TOEFL 标签的词</span><br>
+                <span data-i18n="matchModeHintAll">• 所有：只标注同时含有 CET-6 和 TOEFL 的词</span><br>
+                <span data-i18n="matchModeHintExact">• 精确：只标注恰好这两个标签的词</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="includeBaseWords">包含基础词汇</label>
+              <p class="setting-desc" data-i18n="includeBaseWordsDesc">是否标注 CET-4 等基础词汇</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="includeBaseWords">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="minCollinsStars">最低柯林斯星级</label>
+              <p class="setting-desc" data-i18n="minCollinsStarsDesc">只标注重要程度达到指定星级的词（0 = 不限制）</p>
+            </div>
+            <div class="setting-control">
+              <input type="number" id="minCollinsStars" class="number-input" min="0" max="5" value="0">
+              <p class="setting-hint" data-i18n="collinsStarsHint">柯林斯星级：1-5星表示词汇重要性，0表示无限制</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 数据来源 -->
+        <section class="section">
+          <h3 class="section-title" data-i18n="vocabularyDataSource">数据来源</h3>
+
+          <div class="info-box">
+            <i data-lucide="database" width="16" height="16"></i>
+            <div>
+              <p><strong data-i18n="dataSourceTitle">词库来源：ECDICT</strong></p>
+              <p data-i18n-html="dataSourceInfo">本扩展使用 <a href="https://github.com/skywind3000/ECDICT" target="_blank" rel="noopener">ECDICT</a> 开源词典数据（MIT License），包含 14,942 个带标签词汇。</p>
+              <p data-i18n="dataSourceStats">• 核心词库：9,642词 (CET/考研/常用词)</p>
+              <p data-i18n="dataSourceStatsAdvanced">• 高级词库：5,300词 (GRE/专业词汇，按需加载)</p>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <label class="setting-label" data-i18n="vocabularyStats">词库统计</label>
+              <p class="setting-desc" data-i18n="vocabularyStatsDesc">当前加载的词汇数量</p>
+            </div>
+            <div class="setting-control">
+              <button class="btn btn-secondary" id="refreshVocabularyStats">
+                <i data-lucide="refresh-cw" width="16" height="16"></i>
+                <span data-i18n="refreshStats">刷新统计</span>
+              </button>
+              <div id="vocabularyStatsDisplay" class="stats-display">
+                <span data-i18n="statsNotAvailable">统计信息将在页面加载时显示</span>
+              </div>
             </div>
           </div>
         </section>

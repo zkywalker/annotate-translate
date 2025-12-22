@@ -28,6 +28,46 @@ const DEFAULT_SETTINGS = {
     hidePhoneticForMultipleWords: false // 多词时隐藏音标
   },
 
+  // 词库自动标注设置
+  vocabulary: {
+    enabled: false,                    // 是否启用自动标注
+    provider: 'cet',                   // 当前使用的词库: 'cet' | 'frequency' | 'custom'
+
+    providers: {
+      // CET（四六级）词库
+      cet: {
+        levels: ['cet6'],              // 需要标注的级别: 'cet4' | 'cet6' | 'tem4' | 'tem8'
+        mode: 'above',                 // 'above' | 'exact' | 'below'
+        includeBase: false             // 是否包含基础级别（cet4）
+      },
+
+      // 词频词库
+      frequency: {
+        threshold: 5000,               // 词频排名阈值
+        mode: 'below'                  // 'below' | 'above'
+      },
+
+      // 自定义词库
+      custom: {
+        wordList: [],                  // 用户自定义词表
+        source: 'user'
+      }
+    },
+
+    scanning: {
+      mode: 'manual',                  // 'auto' | 'manual' | 'viewport'
+      autoScanDelay: 1000,             // 自动扫描延迟（ms）
+      scanDynamicContent: true         // 监听DOM变化
+    },
+
+    annotationStyle: {
+      showPhonetic: true,              // 标注中显示音标
+      showTranslation: true,           // 标注中显示翻译
+      showLevel: true,                 // 标注中显示级别标签
+      style: 'ruby'                    // 'ruby' | 'highlight' | 'underline'
+    }
+  },
+
   // 翻译详情卡片设置
   translationCard: {
     // 显示内容
