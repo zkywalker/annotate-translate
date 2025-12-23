@@ -529,6 +529,26 @@
           </div>
         </section>
 
+        <!-- Token 使用统计 -->
+        <section class="section">
+          <div class="section-header">
+            <h3 class="section-title" data-i18n="tokenUsageStats">Token 使用统计</h3>
+            <button class="btn btn-secondary btn-sm" id="resetAllTokenStats">
+              <i data-lucide="rotate-ccw" width="16" height="16"></i>
+              <span data-i18n="resetStats">重置统计</span>
+            </button>
+          </div>
+
+          <div id="tokenStatsList" class="token-stats-list">
+            <!-- Token 统计卡片将通过 JS 动态生成 -->
+          </div>
+
+          <div id="noTokenStatsMessage" class="empty-state" style="display: none;">
+            <i data-lucide="bar-chart" width="48" height="48"></i>
+            <p data-i18n="noTokenStats">暂无使用记录</p>
+          </div>
+        </section>
+
         <!-- 帮助信息 -->
         <section class="section">
           <div class="info-box">
@@ -1245,6 +1265,7 @@
   <script src="../utils/settings-schema.js"></script>
   <script src="../providers/prompt-templates.js"></script>
   <script src="../utils/i18n-helper.js"></script>
+  <script src="../services/token-stats-service.js"></script>
   <script src="ai-providers-manager.js"></script>
   <script src="options.js"></script>
   <!-- Initialize Lucide Icons -->

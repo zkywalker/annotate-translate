@@ -1420,3 +1420,101 @@ body {
   color: var(--text-primary);
 }
 
+/* ============================================
+   Token Statistics
+   ============================================ */
+
+.token-stats-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.token-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.token-stat-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.token-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.token-stat-provider {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.token-stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+.stat-value.stat-highlight {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.stat-value.stat-cost {
+  color: #22863a;
+  font-weight: 600;
+}
+
+.stat-row.stat-meta {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.stat-row.stat-meta .stat-label,
+.stat-row.stat-meta .stat-value {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.reset-provider-stats {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.reset-provider-stats:hover {
+  opacity: 1;
+  color: #d73a49;
+}
+

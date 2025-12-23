@@ -1618,6 +1618,21 @@ class OpenAITranslateProvider extends TranslationProvider {
       // 构建标注文本
       result.annotationText = this.buildAnnotationText(result);
 
+      // 记录 token 使用量
+      if (typeof tokenStatsService !== 'undefined' && result.metadata) {
+        const { promptTokens, completionTokens, tokensUsed, cost } = result.metadata;
+        if (promptTokens || completionTokens || tokensUsed) {
+          tokenStatsService.recordUsage(this.providerName, {
+            promptTokens: promptTokens || 0,
+            completionTokens: completionTokens || 0,
+            totalTokens: tokensUsed || (promptTokens + completionTokens),
+            cost: cost || 0
+          }).catch(err => {
+            console.warn('[OpenAI Adapter] Failed to record token usage:', err);
+          });
+        }
+      }
+
       console.log('[OpenAI Adapter] Translation completed:', result);
       return result;
 

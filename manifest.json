@@ -47,6 +47,7 @@
         "src/services/translation-service.js",
         "src/services/vocabulary-service.js",
         "src/services/annotation-scanner.js",
+        "src/services/token-stats-service.js",
         "src/content/translation-ui.js",
         "src/content/content.js"
       ],
