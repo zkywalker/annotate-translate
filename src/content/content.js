@@ -1820,33 +1820,11 @@ function clearAnnotationsByText(text) {
 
   if (removedCount > 0) {
     console.log(`[Annotate-Translate] Removed ${removedCount} annotation(s)`);
-    // Show a brief confirmation message
-    showToast(safeGetMessage('annotationsCleared', null, `${removedCount} annotation(s) cleared`));
   } else {
     console.log('[Annotate-Translate] No annotations found for text:', text);
-    showToast(safeGetMessage('noAnnotationsFound', null, 'No annotations found'));
   }
 }
 
-/**
- * Show a toast message
- * @param {string} message - Message to display
- */
-function showToast(message) {
-  const toast = document.createElement('div');
-  toast.className = 'annotate-translate-toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-
-  // Trigger fade-in
-  setTimeout(() => toast.classList.add('show'), 10);
-
-  // Auto remove after 2 seconds
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 2000);
-}
 
 // Audio cache for better performance
 const audioCache = new Map(); // Cache Audio objects

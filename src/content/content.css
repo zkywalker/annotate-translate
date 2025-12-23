@@ -239,32 +239,6 @@
   height: 14px;
 }
 
-/* Toast notification */
-.annotate-translate-toast {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background-color: rgba(32, 33, 36, 0.95);
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 999999;
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-
-.annotate-translate-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 /* 确保翻译UI组件在tooltip内正常显示 */
 .annotate-translate-tooltip .translation-result-container,
 .annotate-translate-tooltip .translation-simple-container {
@@ -539,62 +513,6 @@ ruby.annotate-translate-ruby rt.annotate-translate-rt span {
 
 .annotate-translate-menu .menu-button-secondary:hover {
   background-color: #2d8e47;
-}
-
-/* Toast notification styles */
-.annotate-translate-toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10001;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 250px;
-  max-width: 400px;
-  opacity: 0;
-  transform: translateX(100px);
-  transition: all 0.3s ease-out;
-  pointer-events: none;
-}
-
-.annotate-translate-toast.toast-visible {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-.annotate-translate-toast .toast-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.annotate-translate-toast .toast-message {
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-  line-height: 1.4;
-}
-
-/* Toast type variants */
-.annotate-translate-toast.toast-error {
-  border-left: 4px solid #d93025;
-}
-
-.annotate-translate-toast.toast-success {
-  border-left: 4px solid #34a853;
-}
-
-.annotate-translate-toast.toast-loading {
-  border-left: 4px solid #1a73e8;
-}
-
-.annotate-translate-toast.toast-info {
-  border-left: 4px solid #5f6368;
 }
 
 /* ==================== Vocabulary Annotation Progress ==================== */
