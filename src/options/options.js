@@ -132,9 +132,6 @@ async function init() {
   // 设置事件监听器
   setupEventListeners();
 
-  // 加载 token 统计
-  await loadTokenStats();
-
   // 处理 URL hash 导航
   handleHashNavigation();
 
@@ -1017,19 +1014,6 @@ function setupEventListeners() {
 
   // 提示词编辑器相关
   setupPromptEditorListeners();
-
-  // Token 统计：重置所有统计按钮
-  const resetAllTokenStatsBtn = document.getElementById('resetAllTokenStats');
-  if (resetAllTokenStatsBtn) {
-    resetAllTokenStatsBtn.addEventListener('click', async () => {
-      if (confirm('确定要重置所有 AI 提供商的 Token 统计数据吗？此操作不可恢复。')) {
-        if (typeof tokenStatsService !== 'undefined') {
-          await tokenStatsService.resetAllStats();
-          await loadTokenStats();
-        }
-      }
-    });
-  }
 }
 
 /**
@@ -1497,115 +1481,6 @@ function setupTagSelector() {
 
   // 初始化显示
   updateTagsDisplay();
-}
-
-// ============================================
-// Token Statistics Functions
-// ============================================
-
-/**
- * Load and display token usage statistics
- */
-async function loadTokenStats() {
-  if (typeof tokenStatsService === 'undefined') {
-    console.warn('[Options] TokenStatsService not available');
-    return;
-  }
-
-  try {
-    await tokenStatsService.initialize();
-    const stats = await tokenStatsService.getAllStats();
-    displayTokenStats(stats);
-  } catch (error) {
-    console.error('[Options] Failed to load token stats:', error);
-  }
-}
-
-/**
- * Display token statistics in UI
- */
-function displayTokenStats(stats) {
-  const container = document.getElementById('tokenStatsList');
-  const emptyMessage = document.getElementById('noTokenStatsMessage');
-
-  if (!container) return;
-
-  const providerNames = Object.keys(stats);
-
-  if (providerNames.length === 0) {
-    container.innerHTML = '';
-    if (emptyMessage) emptyMessage.style.display = 'block';
-    return;
-  }
-
-  if (emptyMessage) emptyMessage.style.display = 'none';
-
-  container.innerHTML = providerNames.map(providerName => {
-    const stat = stats[providerName];
-    const lastUpdatedDate = new Date(stat.lastUpdated).toLocaleString();
-
-    return `
-      <div class="token-stat-card">
-        <div class="token-stat-header">
-          <h4 class="token-stat-provider">${escapeHtml(providerName)}</h4>
-          <button class="btn btn-ghost btn-sm reset-provider-stats" data-provider="${escapeHtml(providerName)}">
-            <i data-lucide="x" width="14" height="14"></i>
-          </button>
-        </div>
-        <div class="token-stat-body">
-          <div class="stat-row">
-            <span class="stat-label">总请求数：</span>
-            <span class="stat-value">${stat.requestCount.toLocaleString()}</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">输入 Token：</span>
-            <span class="stat-value">${tokenStatsService.formatTokenCount(stat.totalInputTokens)}</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">输出 Token：</span>
-            <span class="stat-value">${tokenStatsService.formatTokenCount(stat.totalOutputTokens)}</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">总 Token：</span>
-            <span class="stat-value stat-highlight">${tokenStatsService.formatTokenCount(stat.totalTokens)}</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">估算费用：</span>
-            <span class="stat-value stat-cost">${tokenStatsService.formatCost(stat.totalCost)}</span>
-          </div>
-          <div class="stat-row stat-meta">
-            <span class="stat-label">最后更新：</span>
-            <span class="stat-value">${lastUpdatedDate}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  // Re-initialize Lucide icons for new content
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-
-  // Add event listeners for individual reset buttons
-  container.querySelectorAll('.reset-provider-stats').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const providerName = e.currentTarget.dataset.provider;
-      if (confirm(`确定要重置 ${providerName} 的统计数据吗？`)) {
-        await tokenStatsService.resetProviderStats(providerName);
-        await loadTokenStats();
-      }
-    });
-  });
-}
-
-/**
- * Helper function to escape HTML
- */
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -1861,6 +1861,27 @@
   "selectVocabularyTags": {
     "message": "Click to select vocabulary types...",
     "description": "Placeholder for tag selector"
+  },
+
+  "tokenUsage": {
+    "message": "Token Usage",
+    "description": "Token usage section title"
+  },
+  "requests": {
+    "message": "Requests",
+    "description": "Number of requests"
+  },
+  "inputTokens": {
+    "message": "Input",
+    "description": "Input tokens"
+  },
+  "outputTokens": {
+    "message": "Output",
+    "description": "Output tokens"
+  },
+  "reset": {
+    "message": "Reset",
+    "description": "Reset button text"
   }
 }
 

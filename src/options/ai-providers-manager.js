@@ -157,9 +157,83 @@ class AIProvidersManager {
     // 绑定卡片事件
     this.bindCardEvents();
 
+    // 加载并显示 token 统计
+    this.loadTokenStats();
+
     // 初始化 Lucide 图标
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
+    }
+  }
+
+  async loadTokenStats() {
+    if (typeof tokenStatsService === 'undefined') {
+      return;
+    }
+
+    try {
+      await tokenStatsService.initialize();
+      const allStats = await tokenStatsService.getAllStats();
+
+      // 为每个 provider 填充 token 统计
+      this.providers.forEach(provider => {
+        const stats = allStats[provider.name];
+        const container = document.querySelector(`.provider-token-stats[data-provider-name="${provider.name}"]`);
+
+        if (container) {
+          if (stats && stats.requestCount > 0) {
+            container.innerHTML = `
+              <div class="token-stats-header">
+                <span class="token-stats-title" data-i18n="tokenUsage">Token 用量</span>
+                <button class="btn btn-ghost btn-xs reset-token-stats" data-provider-name="${this.escapeHtml(provider.name)}">
+                  <i data-lucide="rotate-ccw" width="12" height="12"></i>
+                  <span data-i18n="reset">重置</span>
+                </button>
+              </div>
+              <div class="token-stats-grid">
+                <div class="token-stat-item">
+                  <span class="token-stat-label" data-i18n="requests">请求数</span>
+                  <span class="token-stat-value">${stats.requestCount.toLocaleString()}</span>
+                </div>
+                <div class="token-stat-item">
+                  <span class="token-stat-label" data-i18n="inputTokens">输入</span>
+                  <span class="token-stat-value">${tokenStatsService.formatTokenCount(stats.totalInputTokens)}</span>
+                </div>
+                <div class="token-stat-item">
+                  <span class="token-stat-label" data-i18n="outputTokens">输出</span>
+                  <span class="token-stat-value">${tokenStatsService.formatTokenCount(stats.totalOutputTokens)}</span>
+                </div>
+              </div>
+            `;
+
+            // 绑定重置按钮事件
+            const resetBtn = container.querySelector('.reset-token-stats');
+            if (resetBtn) {
+              resetBtn.addEventListener('click', async () => {
+                const providerName = resetBtn.dataset.providerName;
+                if (confirm(`确定要重置 ${providerName} 的 Token 统计吗？`)) {
+                  await tokenStatsService.resetProviderStats(providerName);
+                  this.loadTokenStats();
+                }
+              });
+            }
+          } else {
+            container.innerHTML = '';
+          }
+        }
+      });
+
+      // Apply i18n to dynamically generated content
+      if (typeof localizeHtmlPage === 'function') {
+        localizeHtmlPage();
+      }
+
+      // Re-initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    } catch (error) {
+      console.error('[AI Providers Manager] Failed to load token stats:', error);
     }
   }
 
@@ -215,6 +289,10 @@ class AIProvidersManager {
             <div class="provider-detail-label">格式</div>
             <div class="provider-detail-value">${provider.promptFormat === 'jsonFormat' ? 'JSON' : '简单'}</div>
           </div>
+        </div>
+
+        <div class="provider-token-stats" data-provider-name="${this.escapeHtml(provider.name)}">
+          <!-- Token stats will be injected here -->
         </div>
 
         <div class="provider-card-footer">

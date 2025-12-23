@@ -1861,6 +1861,27 @@
   "selectVocabularyTags": {
     "message": "点击选择词汇类型...",
     "description": "Placeholder for tag selector"
+  },
+
+  "tokenUsage": {
+    "message": "Token 用量",
+    "description": "Token usage section title"
+  },
+  "requests": {
+    "message": "请求数",
+    "description": "Number of requests"
+  },
+  "inputTokens": {
+    "message": "输入",
+    "description": "Input tokens"
+  },
+  "outputTokens": {
+    "message": "输出",
+    "description": "Output tokens"
+  },
+  "reset": {
+    "message": "重置",
+    "description": "Reset button text"
   }
 }
 
