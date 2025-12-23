@@ -1796,11 +1796,8 @@ function clearAnnotationsByText(text) {
 
     if (baseText && baseText.trim().toLowerCase() === normalizedText) {
       try {
-        // Get the original text content
-        const textContent = ruby.textContent;
-
-        // Create a text node with the original content
-        const textNode = document.createTextNode(textContent);
+        // Create a text node with the original base text (not ruby.textContent which includes annotations)
+        const textNode = document.createTextNode(baseText);
 
         // Replace ruby element with plain text
         if (ruby.parentNode) {
