@@ -1882,6 +1882,19 @@
   "reset": {
     "message": "重置",
     "description": "Reset button text"
+  },
+
+  "clearAnnotations": {
+    "message": "清除标注",
+    "description": "Clear annotations button"
+  },
+  "annotationsCleared": {
+    "message": "已清除标注",
+    "description": "Annotations cleared message"
+  },
+  "noAnnotationsFound": {
+    "message": "未找到标注",
+    "description": "No annotations found message"
   }
 }
 

@@ -1035,7 +1035,25 @@ async function translateText(text) {
       currentTooltip = null;
     });
     element.appendChild(closeBtn);
-    
+
+    // 添加清除标注按钮
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'translation-clear-btn';
+    clearBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"/>
+        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+        <line x1="10" x2="10" y1="11" y2="17"/>
+        <line x1="14" x2="14" y1="11" y2="17"/>
+      </svg>
+    `;
+    clearBtn.title = safeGetMessage('clearAnnotations', null, 'Clear annotations');
+    clearBtn.addEventListener('click', () => {
+      clearAnnotationsByText(result.originalText);
+    });
+    element.appendChild(clearBtn);
+
     // 自动关闭（如果配置了）
     if ($.autoCloseDelay && $.autoCloseDelay > 0) {
       setTimeout(() => {
@@ -1774,6 +1792,78 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
     console.error('[Annotate-Translate] Failed to create ruby annotation:', e);
     alert('Failed to annotate text. Please try selecting the text again.');
   }
+}
+
+/**
+ * Clear annotations by text
+ * Remove all ruby annotations that match the given text
+ * @param {string} text - The base text to search for
+ */
+function clearAnnotationsByText(text) {
+  console.log('[Annotate-Translate] Clearing annotations for text:', text);
+
+  // Normalize text for comparison (trim and lowercase)
+  const normalizedText = text.trim().toLowerCase();
+  let removedCount = 0;
+
+  // Find all ruby elements with matching text
+  const rubyElements = document.querySelectorAll('.annotate-translate-ruby');
+
+  rubyElements.forEach(ruby => {
+    const baseText = ruby.getAttribute('data-base-text');
+
+    if (baseText && baseText.trim().toLowerCase() === normalizedText) {
+      try {
+        // Get the original text content
+        const textContent = ruby.textContent;
+
+        // Create a text node with the original content
+        const textNode = document.createTextNode(textContent);
+
+        // Replace ruby element with plain text
+        if (ruby.parentNode) {
+          ruby.parentNode.replaceChild(textNode, ruby);
+
+          // Remove from annotations map
+          annotations.delete(ruby);
+
+          removedCount++;
+          console.log('[Annotate-Translate] Removed annotation for:', baseText);
+        }
+      } catch (error) {
+        console.error('[Annotate-Translate] Failed to remove annotation:', error);
+      }
+    }
+  });
+
+  if (removedCount > 0) {
+    console.log(`[Annotate-Translate] Removed ${removedCount} annotation(s)`);
+    // Show a brief confirmation message
+    showToast(safeGetMessage('annotationsCleared', null, `${removedCount} annotation(s) cleared`));
+  } else {
+    console.log('[Annotate-Translate] No annotations found for text:', text);
+    showToast(safeGetMessage('noAnnotationsFound', null, 'No annotations found'));
+  }
+}
+
+/**
+ * Show a toast message
+ * @param {string} message - Message to display
+ */
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'annotate-translate-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Trigger fade-in
+  setTimeout(() => toast.classList.add('show'), 10);
+
+  // Auto remove after 2 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
 }
 
 // Audio cache for better performance

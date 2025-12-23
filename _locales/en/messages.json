@@ -1882,6 +1882,19 @@
   "reset": {
     "message": "Reset",
     "description": "Reset button text"
+  },
+
+  "clearAnnotations": {
+    "message": "Clear Annotations",
+    "description": "Clear annotations button"
+  },
+  "annotationsCleared": {
+    "message": "Annotations Cleared",
+    "description": "Annotations cleared message"
+  },
+  "noAnnotationsFound": {
+    "message": "No Annotations Found",
+    "description": "No annotations found message"
   }
 }
 
