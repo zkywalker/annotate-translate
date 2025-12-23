@@ -234,6 +234,9 @@ async function init() {
     // 初始化AnnotationScanner - After vocabulary service is initialized
     initializeAnnotationScanner();
 
+    // 设置页面卸载监听器
+    setupPageUnloadHandler();
+
     // Listen for text selection - Only after settings are loaded
     document.addEventListener('mouseup', handleTextSelection);
 
@@ -248,6 +251,7 @@ async function init() {
     initializeTranslationUI();
     await initializeVocabularyService();
     initializeAnnotationScanner();
+    setupPageUnloadHandler();
     document.addEventListener('mouseup', handleTextSelection);
     chrome.runtime.onMessage.addListener(handleMessage);
   }
@@ -375,6 +379,27 @@ function initializeAnnotationScanner() {
 
   annotationScanner = new AnnotationScanner(vocabularyService, translationService);
   console.log('[Annotate-Translate] AnnotationScanner initialized');
+}
+
+// 设置页面卸载监听器，在页面刷新或关闭时中断翻译任务
+function setupPageUnloadHandler() {
+  window.addEventListener('beforeunload', () => {
+    if (annotationScanner) {
+      const aborted = annotationScanner.abort();
+      if (aborted) {
+        console.log('[Annotate-Translate] Aborted translation tasks due to page unload');
+      }
+    }
+  });
+
+  // 也监听 pagehide 事件（用于更好的支持移动端和 bfcache）
+  window.addEventListener('pagehide', () => {
+    if (annotationScanner) {
+      annotationScanner.abort();
+    }
+  });
+
+  console.log('[Annotate-Translate] Page unload handlers set up');
 }
 
 // 应用翻译设置
