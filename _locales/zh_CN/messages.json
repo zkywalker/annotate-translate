@@ -1425,23 +1425,27 @@
     "description": "Cache status"
   },
   "cacheStatusDesc": {
-    "message": "当前缓存使用情况",
+    "message": "缓存可以加快重复翻译的速度",
     "description": "Cache status description"
+  },
+  "dataBackup": {
+    "message": "数据备份",
+    "description": "Data backup section title"
   },
   "dataTransfer": {
     "message": "数据导出/导入",
-    "description": "Data transfer section title"
+    "description": "Data transfer section title (deprecated)"
   },
   "exportAllData": {
-    "message": "导出所有数据",
+    "message": "导出数据",
     "description": "Export all data"
   },
   "exportAllDataDesc": {
-    "message": "将设置和标注数据导出为 JSON 文件",
+    "message": "导出设置和标注数据（建议定期备份）",
     "description": "Export all data description"
   },
   "exportJSON": {
-    "message": "导出 JSON",
+    "message": "导出",
     "description": "Export JSON button"
   },
   "importData": {
@@ -1449,23 +1453,31 @@
     "description": "Import data"
   },
   "importDataDesc": {
-    "message": "从之前导出的 JSON 文件恢复数据",
+    "message": "从备份文件恢复数据",
     "description": "Import data description"
   },
   "selectFile": {
-    "message": "选择文件...",
+    "message": "导入",
     "description": "Select file button"
+  },
+  "resetAndClear": {
+    "message": "重置与清除",
+    "description": "Reset and clear section title"
   },
   "resetSettings": {
     "message": "重置设置",
-    "description": "Reset settings section title"
+    "description": "Reset settings section title (deprecated)"
+  },
+  "resetToDefaults": {
+    "message": "重置设置",
+    "description": "Reset to defaults label"
   },
   "resetToDefaultsDesc": {
-    "message": "将所有设置恢复为默认值（不影响标注数据）",
+    "message": "恢复所有设置为默认值（保留标注数据）",
     "description": "Reset to defaults description"
   },
   "reset": {
-    "message": "重置设置",
+    "message": "重置",
     "description": "Reset button"
   },
   "clearAllData": {
@@ -1473,7 +1485,7 @@
     "description": "Clear all data"
   },
   "clearAllDataDesc": {
-    "message": "⚠️ 危险操作：删除所有设置、缓存和标注数据，此操作不可恢复！",
+    "message": "⚠️ 危险：删除所有设置、缓存和标注数据（不可恢复）",
     "description": "Clear all data description"
   },
   "clearAll": {

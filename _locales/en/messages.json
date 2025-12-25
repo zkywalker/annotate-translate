@@ -1425,23 +1425,27 @@
     "description": "Cache status"
   },
   "cacheStatusDesc": {
-    "message": "Current cache usage",
+    "message": "Cache speeds up repeated translations",
     "description": "Cache status description"
+  },
+  "dataBackup": {
+    "message": "Data Backup",
+    "description": "Data backup section title"
   },
   "dataTransfer": {
     "message": "Data Export/Import",
-    "description": "Data transfer section title"
+    "description": "Data transfer section title (deprecated)"
   },
   "exportAllData": {
-    "message": "Export All Data",
+    "message": "Export Data",
     "description": "Export all data"
   },
   "exportAllDataDesc": {
-    "message": "Export settings and annotation data as JSON file",
+    "message": "Export settings and annotations (recommended for regular backup)",
     "description": "Export all data description"
   },
   "exportJSON": {
-    "message": "Export JSON",
+    "message": "Export",
     "description": "Export JSON button"
   },
   "importData": {
@@ -1449,23 +1453,31 @@
     "description": "Import data"
   },
   "importDataDesc": {
-    "message": "Restore data from previously exported JSON file",
+    "message": "Restore data from backup file",
     "description": "Import data description"
   },
   "selectFile": {
-    "message": "Select File...",
+    "message": "Import",
     "description": "Select file button"
+  },
+  "resetAndClear": {
+    "message": "Reset & Clear",
+    "description": "Reset and clear section title"
   },
   "resetSettings": {
     "message": "Reset Settings",
-    "description": "Reset settings section title"
+    "description": "Reset settings section title (deprecated)"
+  },
+  "resetToDefaults": {
+    "message": "Reset Settings",
+    "description": "Reset to defaults label"
   },
   "resetToDefaultsDesc": {
-    "message": "Restore all settings to default values (annotations not affected)",
+    "message": "Restore all settings to defaults (keeps annotations)",
     "description": "Reset to defaults description"
   },
   "reset": {
-    "message": "Reset Settings",
+    "message": "Reset",
     "description": "Reset button"
   },
   "clearAllData": {
@@ -1473,7 +1485,7 @@
     "description": "Clear all data"
   },
   "clearAllDataDesc": {
-    "message": "⚠️ Dangerous operation: Delete all settings, cache and annotation data. This cannot be undone!",
+    "message": "⚠️ Danger: Delete all settings, cache and annotations (cannot be undone)",
     "description": "Clear all data description"
   },
   "clearAll": {
