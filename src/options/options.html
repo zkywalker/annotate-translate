@@ -903,15 +903,15 @@
         <!-- 缓存管理 -->
         <section class="section">
           <h3 class="section-title" data-i18n="cacheManagement">缓存管理</h3>
-          
+
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="cacheStatus">翻译缓存</label>
-              <p class="setting-desc" data-i18n="cacheStatusDesc">当前缓存使用情况</p>
+              <p class="setting-desc" data-i18n="cacheStatusDesc">缓存可以加快重复翻译的速度</p>
             </div>
             <div class="setting-control">
-              <span id="cacheUsage" class="setting-value">0 MB / 10 MB</span>
-              <button class="btn btn-danger btn-sm" id="clearCacheButton">
+              <span id="cacheUsage" class="setting-value">计算中...</span>
+              <button class="btn btn-secondary btn-sm" id="clearCacheButton">
                 <i data-lucide="trash-2" width="16" height="16"></i>
                 <span data-i18n="clearCache">清除缓存</span>
               </button>
@@ -919,19 +919,19 @@
           </div>
         </section>
 
-        <!-- 数据导出/导入 -->
+        <!-- 数据备份 -->
         <section class="section">
-          <h3 class="section-title" data-i18n="dataTransfer">数据导出/导入</h3>
-          
+          <h3 class="section-title" data-i18n="dataBackup">数据备份</h3>
+
           <div class="setting-row">
             <div class="setting-info">
-              <label class="setting-label" data-i18n="exportAllData">导出所有数据</label>
-              <p class="setting-desc" data-i18n="exportAllDataDesc">将设置和标注数据导出为 JSON 文件</p>
+              <label class="setting-label" data-i18n="exportAllData">导出数据</label>
+              <p class="setting-desc" data-i18n="exportAllDataDesc">导出设置和标注数据（建议定期备份）</p>
             </div>
             <div class="setting-control">
               <button class="btn btn-secondary" id="exportAllData">
                 <i data-lucide="download" width="16" height="16"></i>
-                <span data-i18n="exportJSON">导出 JSON</span>
+                <span data-i18n="exportJSON">导出</span>
               </button>
             </div>
           </div>
@@ -939,31 +939,31 @@
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="importData">导入数据</label>
-              <p class="setting-desc" data-i18n="importDataDesc">从之前导出的 JSON 文件恢复数据</p>
+              <p class="setting-desc" data-i18n="importDataDesc">从备份文件恢复数据</p>
             </div>
             <div class="setting-control">
               <input type="file" id="importDataFile" accept=".json" style="display: none;">
               <button class="btn btn-secondary" id="importDataButton">
                 <i data-lucide="upload" width="16" height="16"></i>
-                <span data-i18n="selectFile">选择文件...</span>
+                <span data-i18n="selectFile">导入</span>
               </button>
             </div>
           </div>
         </section>
 
-        <!-- 重置 -->
+        <!-- 重置与清除 -->
         <section class="section">
-          <h3 class="section-title" data-i18n="resetSettings">重置设置</h3>
-          
+          <h3 class="section-title" data-i18n="resetAndClear">重置与清除</h3>
+
           <div class="setting-row">
             <div class="setting-info">
-              <label class="setting-label" data-i18n="resetToDefaults">恢复默认设置</label>
-              <p class="setting-desc" data-i18n="resetToDefaultsDesc">将所有设置恢复为默认值（不影响标注数据）</p>
+              <label class="setting-label" data-i18n="resetToDefaults">重置设置</label>
+              <p class="setting-desc" data-i18n="resetToDefaultsDesc">恢复所有设置为默认值（保留标注数据）</p>
             </div>
             <div class="setting-control">
               <button class="btn btn-secondary" id="resetButton">
                 <i data-lucide="refresh-cw" width="16" height="16"></i>
-                <span data-i18n="reset">重置设置</span>
+                <span data-i18n="reset">重置</span>
               </button>
             </div>
           </div>
@@ -971,7 +971,7 @@
           <div class="setting-row">
             <div class="setting-info">
               <label class="setting-label" data-i18n="clearAllData">清除所有数据</label>
-              <p class="setting-desc" data-i18n="clearAllDataDesc">⚠️ 危险操作：删除所有设置、缓存和标注数据，此操作不可恢复！</p>
+              <p class="setting-desc" data-i18n="clearAllDataDesc">⚠️ 危险：删除所有设置、缓存和标注数据（不可恢复）</p>
             </div>
             <div class="setting-control">
               <button class="btn btn-danger" id="clearAllDataButton">
