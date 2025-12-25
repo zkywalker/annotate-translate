@@ -14,6 +14,7 @@ class AnnotationScanner {
     this.observer = null;
     this.annotatedNodes = new Set(); // 跟踪已标注的节点
     this.isScanning = false;
+    this.abortController = null; // 用于中断翻译请求
   }
 
   /**
@@ -41,6 +42,8 @@ class AnnotationScanner {
     }
 
     this.isScanning = true;
+    // 创建新的 AbortController 用于中断请求
+    this.abortController = new AbortController();
 
     try {
       console.log('[AnnotationScanner] Starting page scan...');
@@ -108,6 +111,7 @@ class AnnotationScanner {
       };
     } finally {
       this.isScanning = false;
+      this.abortController = null;
     }
   }
 
@@ -212,20 +216,41 @@ class AnnotationScanner {
     let errorCount = 0;
     const errors = []; // 收集错误信息
 
-    // 获取翻译提供者名称
+    // 获取翻译提供者信息
     const providerName = this.translationService?.activeProvider || 'Unknown';
+    let providerDisplayName = providerName;
+
+    // 对于 OpenAI provider，获取用户自定义的显示名称
+    try {
+      const provider = this.translationService?.getActiveProvider();
+      if (provider && providerName.toLowerCase() === 'openai' && provider.providerName) {
+        providerDisplayName = provider.providerName;
+      }
+    } catch (error) {
+      console.warn('[AnnotationScanner] Failed to get provider display name:', error);
+    }
 
     // 创建进度显示面板
-    const progressPanel = this.createProgressPanel(total, vocabularyConfig, providerName);
+    const progressPanel = this.createProgressPanel(total, vocabularyConfig, providerName, providerDisplayName);
 
     // 批量获取翻译（带进度更新）
     const promises = annotations.map(async (annotation, index) => {
       try {
+        // 检查是否被中断
+        if (this.abortController?.signal.aborted) {
+          throw new Error('Translation aborted');
+        }
+
         // 获取词库元数据
         const metadata = this.vocabularyService.getMetadata(annotation.word);
 
         // 获取翻译
         if (fetchTranslation && this.translationService) {
+          // 再次检查是否被中断
+          if (this.abortController?.signal.aborted) {
+            throw new Error('Translation aborted');
+          }
+
           console.log(`[AnnotationScanner] Fetching translation for "${annotation.word}" (${sourceLang} → ${targetLang})`);
 
           const translation = await this.translationService.translate(
@@ -282,18 +307,32 @@ class AnnotationScanner {
    * 创建进度显示面板（简洁版）
    * @private
    */
-  createProgressPanel(total, vocabularyConfig, providerName) {
+  createProgressPanel(total, vocabularyConfig, providerName, providerDisplayName = null) {
     // 格式化翻译提供者信息
     let providerText = '';
     if (providerName) {
       const providerLabels = {
         'google': 'Google Translate',
         'youdao': 'Youdao',
-        'deepl': 'DeepL',
-        'openai': 'OpenAI'
+        'deepl': 'DeepL'
       };
-      const displayName = providerLabels[providerName.toLowerCase()] || providerName;
-      providerText = `<span class="progress-provider">Provider: ${displayName}</span>`;
+
+      let displayText = '';
+      const providerLower = providerName.toLowerCase();
+
+      if (providerLower === 'openai') {
+        // 对于 OpenAI provider，使用和翻译面板一致的格式
+        // 使用 i18n 获取 "AI翻译" 文本
+        const aiTranslationText = (typeof safeGetMessage === 'function')
+          ? safeGetMessage('aiTranslation', null, 'AI翻译')
+          : 'AI翻译';
+        const customName = providerDisplayName || 'OpenAI';
+        displayText = `${aiTranslationText} · ${customName}`;
+      } else {
+        displayText = providerLabels[providerLower] || providerName;
+      }
+
+      providerText = `<span class="progress-provider">${displayText}</span>`;
     }
 
     // 格式化词汇配置信息
@@ -520,6 +559,27 @@ class AnnotationScanner {
     }
 
     return appliedCount;
+  }
+
+  /**
+   * 中断当前正在进行的扫描和翻译
+   */
+  abort() {
+    if (this.abortController) {
+      console.log('[AnnotationScanner] Aborting current scan...');
+      this.abortController.abort();
+      this.isScanning = false;
+      this.abortController = null;
+
+      // 移除进度面板
+      const progressPanel = document.querySelector('.vocab-annotation-progress');
+      if (progressPanel) {
+        progressPanel.remove();
+      }
+
+      return true;
+    }
+    return false;
   }
 
   /**

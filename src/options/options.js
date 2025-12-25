@@ -99,7 +99,14 @@ const elements = {
   // 操作按钮
   resetButton: document.getElementById('resetButton'),
   clearCacheButton: document.getElementById('clearCacheButton'),
-  
+  exportAllData: document.getElementById('exportAllData'),
+  importDataButton: document.getElementById('importDataButton'),
+  importDataFile: document.getElementById('importDataFile'),
+  clearAllDataButton: document.getElementById('clearAllDataButton'),
+
+  // 缓存显示
+  cacheUsage: document.getElementById('cacheUsage'),
+
   // 保存提示
   saveIndicator: document.getElementById('saveIndicator')
 };
@@ -131,10 +138,13 @@ async function init() {
   
   // 设置事件监听器
   setupEventListeners();
-  
+
   // 处理 URL hash 导航
   handleHashNavigation();
-  
+
+  // 更新缓存使用情况显示
+  updateCacheUsage();
+
   console.log('[Options] Initialization complete');
 }
 
@@ -1004,6 +1014,27 @@ function setupEventListeners() {
     elements.clearCacheButton.addEventListener('click', clearCache);
   }
 
+  // 导出数据按钮
+  if (elements.exportAllData) {
+    elements.exportAllData.addEventListener('click', exportData);
+  }
+
+  // 导入数据按钮
+  if (elements.importDataButton) {
+    elements.importDataButton.addEventListener('click', () => {
+      elements.importDataFile.click();
+    });
+  }
+
+  if (elements.importDataFile) {
+    elements.importDataFile.addEventListener('change', importData);
+  }
+
+  // 清除所有数据按钮
+  if (elements.clearAllDataButton) {
+    elements.clearAllDataButton.addEventListener('click', clearAllData);
+  }
+
   // 词汇模式：刷新统计按钮
   if (elements.refreshVocabularyStats) {
     elements.refreshVocabularyStats.addEventListener('click', refreshVocabularyStats);
@@ -1044,24 +1075,30 @@ function resetSettings() {
 /**
  * 清除缓存
  */
-function clearCache() {
+async function clearCache() {
   const confirmMessage = '确定要清除所有翻译缓存吗？';
   if (!confirm(confirmMessage)) return;
-  
+
   console.log('[Options] Clearing cache...');
-  
-  // 发送消息到 background script
-  chrome.runtime.sendMessage({
-    action: 'clearCache'
-  }, (response) => {
-    if (response && response.success) {
-      console.log('[Options] Cache cleared successfully');
-      alert('缓存已清除！');
-    } else {
-      console.error('[Options] Failed to clear cache');
-      alert('清除缓存失败');
+
+  try {
+    // 清除local storage中的缓存数据
+    const allData = await chrome.storage.local.get(null);
+    const cacheKeys = Object.keys(allData).filter(key => key.startsWith('cache_'));
+
+    if (cacheKeys.length > 0) {
+      await chrome.storage.local.remove(cacheKeys);
+      console.log(`[Options] Cleared ${cacheKeys.length} cache entries`);
     }
-  });
+
+    // 更新显示
+    await updateCacheUsage();
+
+    alert(`缓存已清除！共清除 ${cacheKeys.length} 条缓存记录。`);
+  } catch (error) {
+    console.error('[Options] Failed to clear cache:', error);
+    alert('清除缓存失败：' + error.message);
+  }
 }
 
 /**
@@ -1481,6 +1518,151 @@ function setupTagSelector() {
 
   // 初始化显示
   updateTagsDisplay();
+}
+
+/**
+ * 更新缓存使用情况显示
+ */
+async function updateCacheUsage() {
+  if (!elements.cacheUsage) return;
+
+  try {
+    // 获取所有存储数据
+    const allData = await chrome.storage.local.get(null);
+
+    // 计算大小（简单估算）
+    const dataStr = JSON.stringify(allData);
+    const bytes = new Blob([dataStr]).size;
+    const kb = bytes / 1024;
+    const mb = kb / 1024;
+
+    // 格式化显示
+    let sizeText;
+    if (mb >= 1) {
+      sizeText = `${mb.toFixed(2)} MB`;
+    } else if (kb >= 1) {
+      sizeText = `${kb.toFixed(2)} KB`;
+    } else {
+      sizeText = `${bytes} B`;
+    }
+
+    // 获取条目数
+    const cacheKeys = Object.keys(allData).filter(key => key.startsWith('cache_'));
+    const cacheCount = cacheKeys.length;
+
+    elements.cacheUsage.textContent = `${sizeText} (${cacheCount} 条)`;
+  } catch (error) {
+    console.error('[Options] Failed to calculate cache size:', error);
+    elements.cacheUsage.textContent = '计算失败';
+  }
+}
+
+/**
+ * 导出数据
+ */
+async function exportData() {
+  try {
+    // 获取所有sync和local存储数据
+    const syncData = await chrome.storage.sync.get(null);
+    const localData = await chrome.storage.local.get(null);
+
+    const exportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      sync: syncData,
+      local: localData
+    };
+
+    // 创建下载链接
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // 生成文件名
+    const date = new Date().toISOString().split('T')[0];
+    const filename = `annotate-translate-backup-${date}.json`;
+
+    // 下载文件
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    console.log('[Options] Data exported successfully');
+  } catch (error) {
+    console.error('[Options] Failed to export data:', error);
+    alert('导出失败：' + error.message);
+  }
+}
+
+/**
+ * 导入数据
+ */
+async function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const confirmMessage = '导入数据将覆盖所有现有设置和标注。确定要继续吗？';
+  if (!confirm(confirmMessage)) {
+    event.target.value = ''; // 清空文件选择
+    return;
+  }
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    // 验证数据格式
+    if (!data.version || !data.sync || !data.local) {
+      throw new Error('无效的备份文件格式');
+    }
+
+    // 导入sync数据
+    await chrome.storage.sync.clear();
+    await chrome.storage.sync.set(data.sync);
+
+    // 导入local数据
+    await chrome.storage.local.clear();
+    await chrome.storage.local.set(data.local);
+
+    console.log('[Options] Data imported successfully');
+    alert('数据导入成功！页面将重新加载。');
+
+    // 重新加载页面
+    window.location.reload();
+  } catch (error) {
+    console.error('[Options] Failed to import data:', error);
+    alert('导入失败：' + error.message);
+  } finally {
+    event.target.value = ''; // 清空文件选择
+  }
+}
+
+/**
+ * 清除所有数据
+ */
+async function clearAllData() {
+  const confirmMessage = '⚠️ 警告：此操作将删除所有设置、缓存和标注数据，且不可恢复！\n\n确定要继续吗？';
+  if (!confirm(confirmMessage)) return;
+
+  const doubleConfirm = '请再次确认：真的要删除所有数据吗？';
+  if (!confirm(doubleConfirm)) return;
+
+  try {
+    // 清除所有存储
+    await chrome.storage.sync.clear();
+    await chrome.storage.local.clear();
+
+    console.log('[Options] All data cleared');
+    alert('所有数据已清除！页面将重新加载。');
+
+    // 重新加载页面
+    window.location.reload();
+  } catch (error) {
+    console.error('[Options] Failed to clear all data:', error);
+    alert('清除失败：' + error.message);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

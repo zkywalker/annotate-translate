@@ -234,6 +234,9 @@ async function init() {
     // 初始化AnnotationScanner - After vocabulary service is initialized
     initializeAnnotationScanner();
 
+    // 设置页面卸载监听器
+    setupPageUnloadHandler();
+
     // Listen for text selection - Only after settings are loaded
     document.addEventListener('mouseup', handleTextSelection);
 
@@ -248,6 +251,7 @@ async function init() {
     initializeTranslationUI();
     await initializeVocabularyService();
     initializeAnnotationScanner();
+    setupPageUnloadHandler();
     document.addEventListener('mouseup', handleTextSelection);
     chrome.runtime.onMessage.addListener(handleMessage);
   }
@@ -375,6 +379,27 @@ function initializeAnnotationScanner() {
 
   annotationScanner = new AnnotationScanner(vocabularyService, translationService);
   console.log('[Annotate-Translate] AnnotationScanner initialized');
+}
+
+// 设置页面卸载监听器，在页面刷新或关闭时中断翻译任务
+function setupPageUnloadHandler() {
+  window.addEventListener('beforeunload', () => {
+    if (annotationScanner) {
+      const aborted = annotationScanner.abort();
+      if (aborted) {
+        console.log('[Annotate-Translate] Aborted translation tasks due to page unload');
+      }
+    }
+  });
+
+  // 也监听 pagehide 事件（用于更好的支持移动端和 bfcache）
+  window.addEventListener('pagehide', () => {
+    if (annotationScanner) {
+      annotationScanner.abort();
+    }
+  });
+
+  console.log('[Annotate-Translate] Page unload handlers set up');
 }
 
 // 应用翻译设置
@@ -1010,7 +1035,7 @@ async function translateText(text) {
       currentTooltip = null;
     });
     element.appendChild(closeBtn);
-    
+
     // 自动关闭（如果配置了）
     if ($.autoCloseDelay && $.autoCloseDelay > 0) {
       setTimeout(() => {
@@ -1751,6 +1776,53 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
   }
 }
 
+/**
+ * Clear annotations by text
+ * Remove all ruby annotations that match the given text
+ * @param {string} text - The base text to search for
+ */
+function clearAnnotationsByText(text) {
+  console.log('[Annotate-Translate] Clearing annotations for text:', text);
+
+  // Normalize text for comparison (trim and lowercase)
+  const normalizedText = text.trim().toLowerCase();
+  let removedCount = 0;
+
+  // Find all ruby elements with matching text
+  const rubyElements = document.querySelectorAll('.annotate-translate-ruby');
+
+  rubyElements.forEach(ruby => {
+    const baseText = ruby.getAttribute('data-base-text');
+
+    if (baseText && baseText.trim().toLowerCase() === normalizedText) {
+      try {
+        // Create a text node with the original base text (not ruby.textContent which includes annotations)
+        const textNode = document.createTextNode(baseText);
+
+        // Replace ruby element with plain text
+        if (ruby.parentNode) {
+          ruby.parentNode.replaceChild(textNode, ruby);
+
+          // Remove from annotations map
+          annotations.delete(ruby);
+
+          removedCount++;
+          console.log('[Annotate-Translate] Removed annotation for:', baseText);
+        }
+      } catch (error) {
+        console.error('[Annotate-Translate] Failed to remove annotation:', error);
+      }
+    }
+  });
+
+  if (removedCount > 0) {
+    console.log(`[Annotate-Translate] Removed ${removedCount} annotation(s)`);
+  } else {
+    console.log('[Annotate-Translate] No annotations found for text:', text);
+  }
+}
+
+
 // Audio cache for better performance
 const audioCache = new Map(); // Cache Audio objects
 const audioCacheMaxSize = AUDIO_CACHE_MAX_SIZE; // Max cached audio files
@@ -2099,7 +2171,29 @@ function showDetailedTranslation(rubyElement, result) {
     currentTooltip = null;
   });
   element.appendChild(closeBtn);
-  
+
+  // 添加清除标注按钮
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'translation-clear-btn';
+  clearBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18"/>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      <line x1="10" x2="10" y1="11" y2="17"/>
+      <line x1="14" x2="14" y1="11" y2="17"/>
+    </svg>
+  `;
+  clearBtn.title = safeGetMessage('clearAnnotations', null, 'Clear annotations');
+  clearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearAnnotationsByText(result.originalText);
+    // Close the popup after clearing annotations
+    element.remove();
+    currentTooltip = null;
+  });
+  element.appendChild(clearBtn);
+
   // 点击外部关闭
   setTimeout(() => {
     const closeHandler = (e) => {
