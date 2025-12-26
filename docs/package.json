@@ -1,0 +1,22 @@
+{
+  "name": "annotate-translate-docs",
+  "version": "1.0.0",
+  "description": "Annotate Translate - 网页文本标注与翻译 Chrome 扩展开发者文档",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "keywords": [
+    "chrome-extension",
+    "translation",
+    "annotation",
+    "vitepress",
+    "documentation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vitepress": "^1.0.0"
+  }
+}
