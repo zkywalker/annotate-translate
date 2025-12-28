@@ -76,7 +76,7 @@ class VocabularyService {
   /**
    * 判断单词是否应该标注
    * @param {string} word - 要检查的单词
-   * @param {Object} context - 上下文信息（可选）
+   * @param {Object} context - 上下文信息（预留参数，当前未使用）
    * @returns {boolean}
    */
   shouldAnnotate(word, context = {}) {
@@ -88,16 +88,17 @@ class VocabularyService {
     const normalized = this.activeProvider.normalizeWord(word);
 
     // 检查缓存
-    const cacheKey = `${normalized}:${JSON.stringify(this.activeOptions)}`;
+    const providerName = this.activeProvider.name;
+    const optionsHash = JSON.stringify(this.activeOptions);
+    const cacheKey = `${normalized}:${providerName}:${optionsHash}`;
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
 
-    // 查询提供商
+    // 查询提供商（注意：provider 不接受 context 参数）
     const result = this.activeProvider.shouldAnnotate(
       normalized,
-      this.activeOptions,
-      context
+      this.activeOptions
     );
 
     // 写入缓存
@@ -122,15 +123,15 @@ class VocabularyService {
   }
 
   /**
-   * 获取单词详细信息
+   * 获取单词元数据
    */
-  getWordInfo(word) {
+  getMetadata(word) {
     if (!this.activeProvider) {
       return null;
     }
 
     const normalized = this.activeProvider.normalizeWord(word);
-    return this.activeProvider.getWordInfo(normalized);
+    return this.activeProvider.getMetadata(normalized);
   }
 
   /**
@@ -175,8 +176,10 @@ class BaseVocabularyProvider {
 
   /**
    * 判断单词是否应该标注
+   * @param {string} word - 单词
+   * @param {Object} options - 配置选项
    */
-  shouldAnnotate(word, options, context) {
+  shouldAnnotate(word, options) {
     throw new Error('Must implement shouldAnnotate()');
   }
 
@@ -188,9 +191,9 @@ class BaseVocabularyProvider {
   }
 
   /**
-   * 获取单词详细信息
+   * 获取单词元数据
    */
-  getWordInfo(word) {
+  getMetadata(word) {
     return this.vocabulary.get(word) || null;
   }
 }
@@ -233,46 +236,41 @@ class UnifiedVocabularyProvider extends BaseVocabularyProvider {
 
   /**
    * 判断单词是否应该标注
+   * @param {string} word - 单词
+   * @param {Object} options - 配置选项
    */
-  shouldAnnotate(word, options, context = {}) {
+  shouldAnnotate(word, options = {}) {
     const entry = this.vocabulary.get(word);
     if (!entry) return false;
 
     const {
       targetTags = [],      // 目标词库标签，如 ['cet4', 'cet6']
+      mode = 'any',         // 匹配模式：any（任一）、all（全部）、exact（精确）
       minCollins = 0,       // 最低 Collins 星级
-      maxCollins = 5,       // 最高 Collins 星级
-      minFrequency = 0,     // 最低词频
-      excludeKnown = false  // 排除已知单词（未实现）
+      includeBase = false   // 是否包含基础级别
     } = options;
 
     // 1. 检查词库标签
     if (targetTags.length > 0) {
-      const hasTag = targetTags.some(tag => entry.tags?.includes(tag));
+      const hasTag = entry.tags.some(tag => targetTags.includes(tag));
       if (!hasTag) return false;
     }
 
     // 2. 检查 Collins 星级
     const collins = entry.collins || 0;
-    if (collins < minCollins || collins > maxCollins) {
+    if (collins < minCollins) {
       return false;
     }
 
-    // 3. 检查词频
-    const frequency = entry.frequency || 0;
-    if (frequency < minFrequency) {
-      return false;
-    }
-
-    // 4. 其他条件...
+    // 3. 其他条件...
 
     return true;
   }
 
   /**
-   * 获取单词详细信息
+   * 获取单词元数据
    */
-  getWordInfo(word) {
+  getMetadata(word) {
     const entry = this.vocabulary.get(word);
     if (!entry) return null;
 
@@ -627,11 +625,11 @@ await vocabularyService.setActiveProvider('unified', {
 
 // 检查单词
 const shouldAnnotate = vocabularyService.shouldAnnotate('abandon');
-console.log(shouldAnnotate); // true（如果在 TOEFL/IELTS 词库中）
+console.log(shouldAnnotate); // true（如果在目标词库中）
 
-// 获取单词信息
-const info = vocabularyService.getWordInfo('abandon');
-console.log(info);
+// 获取单词元数据
+const metadata = vocabularyService.getMetadata('abandon');
+console.log(metadata);
 // {
 //   word: 'abandon',
 //   tags: ['cet4', 'cet6', 'toefl', 'ielts'],

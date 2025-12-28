@@ -38,6 +38,12 @@ _(待扩展发布到 Chrome Web Store 后提供)_
 
 ---
 
+<div style="text-align: center; margin: 2rem 0;">
+  <img src="/images/annotation-translate-demo.gif" alt="Annotation and Translation Demo" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
+</div>
+
+---
+
 ## 基本使用
 
 ### 1. 翻译选中文本
