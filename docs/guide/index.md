@@ -6,35 +6,17 @@
 
 Annotate Translate 是一个强大的 Chrome 浏览器扩展，提供网页文本翻译和标注功能。它支持多个翻译提供商、AI 驱动的翻译、词库系统等高级功能。
 
+<div style="text-align: center; margin: 2rem 0;">
+  <img src="/images/annotation-translate-demo.gif" alt="Annotation and Translation Demo" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
+</div>
+
 ## 核心功能
 
-### 🌐 翻译功能
-
-选中网页文本即可翻译，支持：
-- 多个翻译提供商（Google、Youdao、DeepL、AI）
-- 音标显示和音频播放
-- 词义和例句
-- 自动语言检测
-
-[详细了解翻译功能 →](/guide/translation)
-
-### 📝 标注功能
-
-为选中文本添加 Ruby 标注，永久保存在页面上：
-- 显示音标和翻译
-- 支持自定义标注内容
-- 标注数据管理
-
-[详细了解标注功能 →](/guide/annotation)
-
-### 📚 词汇模式
-
-根据词库自动标注页面中的重点词汇：
-- 支持 CET-4/6、TOEFL、IELTS、GRE 等词库
-- 批量翻译和标注
-- 学习模式
-
-[详细了解词汇模式 →](/guide/vocabulary-mode)
+- **多提供商支持** - Google、有道、DeepL、AI 翻译
+- **AI 驱动翻译** - OpenAI 兼容接口，上下文感知
+- **智能标注** - 自动标注音标和翻译，永久保存
+- **音频播放** - 支持发音朗读，多种音频源
+- **词汇模式** - 批量标注词库单词，支持 CET、TOEFL、GRE
 
 ## 快速导航
 

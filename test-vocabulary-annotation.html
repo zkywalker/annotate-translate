@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vocabulary Annotation Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.8;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #34495e;
+      margin-top: 30px;
+    }
+
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #ecf0f1;
+      border-left: 4px solid #3498db;
+      border-radius: 4px;
+    }
+
+    .word-level {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.8em;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .cet4 { background: #e8f5e9; color: #2e7d32; }
+    .cet6 { background: #fff3e0; color: #ef6c00; }
+    .tem4 { background: #fce4ec; color: #c2185b; }
+    .tem8 { background: #f3e5f5; color: #7b1fa2; }
+
+    ruby {
+      ruby-align: center;
+    }
+
+    rt {
+      font-size: 0.6em;
+      color: #666;
+    }
+
+    .controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    .controls button {
+      display: block;
+      width: 100%;
+      margin: 5px 0;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .controls button:hover {
+      background: #2980b9;
+    }
+
+    .controls button.remove {
+      background: #e74c3c;
+    }
+
+    .controls button.remove:hover {
+      background: #c0392b;
+    }
+
+    .stats {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h3 style="margin-top: 0;">Vocabulary Annotation Test</h3>
+    <button id="annotateBtn">Annotate Page</button>
+    <button id="removeBtn" class="remove">Remove Annotations</button>
+    <div class="stats" id="stats">
+      Ready to annotate
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Vocabulary Annotation Test Page</h1>
+
+    <p>This page is designed to test the automatic vocabulary annotation feature. The extension should identify and annotate words based on the selected vocabulary provider and settings.</p>
+
+    <div class="test-section">
+      <h2>CET-4 Level Words <span class="word-level cet4">CET-4</span></h2>
+      <p>
+        The ability to communicate effectively is essential in modern society.
+        People need to develop good habits and maintain a positive attitude.
+        We should accept responsibility and make progress every day.
+        Education plays an important role in personal development.
+      </p>
+    </div>
+
+    <div class="test-section">
+      <h2>CET-6 Level Words <span class="word-level cet6">CET-6</span></h2>
+      <p>
+        The government needs to implement comprehensive policies to address environmental issues.
+        Scientists must acknowledge the complexity of climate change and develop sustainable solutions.
+        Academic research requires accurate data analysis and rigorous methodology.
+        We should advocate for renewable energy and reduce carbon emissions.
+      </p>
+    </div>
+
+    <div class="test-section">
+      <h2>TEM-4 Level Words <span class="word-level tem4">TEM-4</span></h2>
+      <p>
+        The aesthetic qualities of architecture reflect cultural values and historical context.
+        Adolescent psychology involves complex emotional and cognitive development.
+        Economic adversaries often compete for market dominance through aggressive strategies.
+        Philosophers use analogy to illustrate abstract concepts and ambiguous theories.
+      </p>
+    </div>
+
+    <div class="test-section">
+      <h2>Mixed Difficulty Text</h2>
+      <p>
+        The rapid advancement of technology has transformed modern communication.
+        Social media platforms facilitate instant interaction, but they also raise concerns about privacy and data security.
+        Educators must adapt their teaching methods to accommodate diverse learning styles.
+        The accumulation of knowledge requires persistent effort and intellectual curiosity.
+      </p>
+      <p>
+        Environmental degradation poses significant challenges to sustainable development.
+        Governments need to allocate resources efficiently and implement regulatory frameworks.
+        International cooperation is essential to address global issues like climate change and poverty.
+        Scientific innovation can provide solutions, but it requires substantial investment in research and development.
+      </p>
+    </div>
+
+    <div class="test-section">
+      <h2>Common Words (Should NOT be annotated by default)</h2>
+      <p>
+        The quick brown fox jumps over the lazy dog.
+        This is a simple sentence with very common words.
+        We can see the sun and the moon in the sky.
+        I like to read books and write stories.
+      </p>
+    </div>
+
+    <div class="test-section">
+      <h2>Instructions for Testing</h2>
+      <ol>
+        <li>Right-click on the page and select "Annotate Page" (or use the button above)</li>
+        <li>Check that CET-6 and above words are annotated (based on default settings)</li>
+        <li>Verify that annotations show phonetics, translations, and level tags</li>
+        <li>Test different vocabulary providers in the extension settings</li>
+        <li>Try different difficulty thresholds (CET-4, CET-6, TEM-4, TEM-8)</li>
+        <li>Test the frequency-based vocabulary provider with different thresholds</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // Simple test controls
+    document.getElementById('annotateBtn').addEventListener('click', async () => {
+      const stats = document.getElementById('stats');
+      stats.textContent = 'Triggering annotation...';
+
+      // Send message to content script (if available)
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          await chrome.runtime.sendMessage({ action: 'annotate_page' });
+          stats.textContent = 'Annotation triggered!';
+        } catch (e) {
+          stats.textContent = 'Error: ' + e.message;
+        }
+      } else {
+        stats.textContent = 'Extension not loaded';
+      }
+    });
+
+    document.getElementById('removeBtn').addEventListener('click', async () => {
+      const stats = document.getElementById('stats');
+      stats.textContent = 'Removing annotations...';
+
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          await chrome.runtime.sendMessage({ action: 'remove_annotations' });
+          stats.textContent = 'Annotations removed!';
+        } catch (e) {
+          stats.textContent = 'Error: ' + e.message;
+        }
+      } else {
+        stats.textContent = 'Extension not loaded';
+      }
+    });
+  </script>
+</body>
+</html>
