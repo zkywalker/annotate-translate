@@ -14,7 +14,7 @@ export default defineConfig({
   ],
 
   themeConfig: {
-    logo: '/images/logo.png',
+    logo: '/images/logo.svg',
 
     nav: [
       { text: '指南', link: '/guide/' },
