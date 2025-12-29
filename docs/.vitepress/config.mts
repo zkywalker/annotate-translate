@@ -5,6 +5,7 @@ export default defineConfig({
   description: '网页文本标注与翻译 Chrome 扩展 - 开发者文档',
   lang: 'zh-CN',
   base: '/annotate-translate/',
+  ignoreDeadLinks: true,
 
   head: [
     ['link', { rel: 'icon', href: '/annotate-translate/favicon.ico' }],
