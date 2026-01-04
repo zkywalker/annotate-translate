@@ -1,6 +1,10 @@
 # Annotate Translate
 
+![Vibe Coding](assets/vibe_coding.svg)
+
 一个功能丰富的 Chrome 浏览器扩展，支持网页文本翻译、标注和词汇学习。
+
+> A vibe coding project
 
 ![Annotation and Translation Demo](docs/images/annotation-translate-demo.gif)
 
