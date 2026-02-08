@@ -267,70 +267,83 @@
   background-color: #fdd835;
 }
 
-/* Ruby annotation styles */
-ruby.annotate-translate-ruby {
-  /* 使用 ruby 显示模式，让浏览器原生处理对齐 */
-  ruby-align: center;
+/* Overlay annotation styles - 叠加式注释（不占用空间） */
+.annotated-text {
   position: relative;
-  /* 不使用 inline-block，使用默认的 ruby 显示方式 */
-  display: ruby;
-  /* 保持原文本的正常宽度，不被标注撑开 */
-  white-space: nowrap;
-  /* 默认样式，可能会被 JavaScript 修改为 pointer */
+  display: inline-block;
   cursor: default;
-  /* 添加过渡效果 */
   transition: all 0.2s ease;
+  vertical-align: baseline;
+  /* 不增加行间距，使用默认排版 */
+  /* 确保元素之间有正常的空格 */
+  word-spacing: normal;
+  white-space: pre-wrap;
 }
 
-/* 可点击的标注样式 */
-ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover {
+/* 可点击的注释样式 */
+.annotated-text.clickable {
+  cursor: pointer;
+}
+
+.annotated-text.clickable:hover {
   background-color: rgba(26, 115, 232, 0.05);
   border-radius: 3px;
-  padding: 0 2px;
-  margin: 0 -2px;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: -2px;
+  margin-right: -2px;
 }
 
-ruby.annotate-translate-ruby[style*="cursor: pointer"]:active {
+.annotated-text.clickable:active {
   background-color: rgba(26, 115, 232, 0.1);
 }
 
-ruby.annotate-translate-ruby rt.annotate-translate-rt {
-  /* 标注文本样式 */
+/* 注释叠加层 - 绝对定位，不占用文档流空间 */
+.annotation-overlay {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 100%;
+  /* 负值让注释向下移动，紧贴甚至重叠到原文上 */
+  margin-bottom: -8px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+
+  /* 注释文本样式 - 更小的字体 */
   font-size: 0.5em;
   color: #1a73e8;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1;
   -webkit-user-select: none;
   user-select: none;
-  /* 使用 ruby-text 显示，确保居中对齐 */
-  display: ruby-text;
-  ruby-position: over;
-  /* 标注文本居中对齐 */
   text-align: center;
-  /* 防止标注文本换行 */
-  white-space: nowrap;
-  /* 如果标注比原文长，允许溢出显示 */
-  overflow: visible;
-  /* 添加文字阴影，提高小字可读性 */
+
+  /* 添加文字阴影，提高可读性 */
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.8),
                0 1px 1px rgba(255, 255, 255, 0.9),
                1px 0 1px rgba(255, 255, 255, 0.9),
                -1px 0 1px rgba(255, 255, 255, 0.9),
                0 -1px 1px rgba(255, 255, 255, 0.9);
+
   /* 添加过渡效果 */
   transition: color 0.2s ease, font-weight 0.2s ease, text-shadow 0.2s ease;
 }
 
-ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-translate-rt {
-  /* 可以稍微加深颜色，提示可点击 */
+/* 悬停时增强注释效果 */
+.annotated-text.clickable:hover .annotation-overlay {
   color: #1557b0;
   font-weight: 600;
-  /* 悬停时增强阴影效果 */
   text-shadow: 0 0 3px rgba(255, 255, 255, 1),
-               0 1px 2px rgba(255, 255, 255, 1),
+               0 1px 2px rgba(255, 255, 1),
                1px 0 2px rgba(255, 255, 255, 1),
                -1px 0 2px rgba(255, 255, 255, 1),
                0 -1px 2px rgba(255, 255, 255, 1);
+}
+
+/* 注释内容容器 */
+.annotation-overlay span {
+  display: inline;
 }
 
 /* Dialog styles for multiple matches */
@@ -483,11 +496,6 @@ ruby.annotate-translate-ruby[style*="cursor: pointer"]:hover rt.annotate-transla
   50% {
     transform: scale(1.15);
   }
-}
-
-/* Ensure rt content is displayed inline */
-ruby.annotate-translate-ruby rt.annotate-translate-rt span {
-  display: inline;
 }
 
 /* Annotation detail popup specific styles */

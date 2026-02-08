@@ -1133,7 +1133,7 @@ function findFirstOccurrence(text) {
         // Skip script, style elements and existing annotations
         if (node.parentElement.tagName === 'SCRIPT' ||
             node.parentElement.tagName === 'STYLE' ||
-            node.parentElement.closest('ruby.annotate-translate-ruby')) {
+            node.parentElement.closest('.annotated-text')) {
           return NodeFilter.FILTER_REJECT;
         }
         return node.nodeValue.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
@@ -1253,7 +1253,7 @@ function findAllOccurrences(text) {
       acceptNode: function(node) {
         if (node.parentElement.tagName === 'SCRIPT' ||
             node.parentElement.tagName === 'STYLE' ||
-            node.parentElement.closest('ruby.annotate-translate-ruby')) {
+            node.parentElement.closest('.annotated-text')) {
           return NodeFilter.FILTER_REJECT;
         }
         return node.nodeValue.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
@@ -1338,9 +1338,9 @@ function findAndAnnotateText(text) {
     {
       acceptNode: function(node) {
         // Skip script and style elements
-        if (node.parentElement.tagName === 'SCRIPT' || 
+        if (node.parentElement.tagName === 'SCRIPT' ||
             node.parentElement.tagName === 'STYLE' ||
-            node.parentElement.closest('ruby.annotate-translate-ruby')) {
+            node.parentElement.closest('.annotated-text')) {
           return NodeFilter.FILTER_REJECT;
         }
         return node.nodeValue.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
@@ -1693,18 +1693,19 @@ function isMultipleEnglishWords(text) {
  * @returns {HTMLElement} ruby 元素
  */
 function createRubyElement(baseText, annotationText, result = null) {
-  // Create ruby element structure
-  const ruby = document.createElement('ruby');
-  ruby.className = 'annotate-translate-ruby';
-  ruby.setAttribute('data-annotation', annotationText);
-  ruby.setAttribute('data-base-text', baseText);
+  // Create container element with relative positioning
+  const container = document.createElement('span');
+  container.className = 'annotated-text';
+  container.setAttribute('data-annotation', annotationText);
+  container.setAttribute('data-base-text', baseText);
 
-  // Add base text
-  ruby.textContent = baseText;
+  // Add base text as a text node (not textContent to preserve proper spacing)
+  const textNode = document.createTextNode(baseText);
+  container.appendChild(textNode);
 
-  // Create rt (ruby text) element for annotation
-  const rt = document.createElement('rt');
-  rt.className = 'annotate-translate-rt';
+  // Create overlay element for annotation (absolute positioning)
+  const overlay = document.createElement('span');
+  overlay.className = 'annotation-overlay';
 
   // 检查是否应该隐藏读音（当文本为多个英语单词且设置启用时）
   const shouldHidePhonetic = $.hidePhoneticForMultipleWords && isMultipleEnglishWords(baseText);
@@ -1712,20 +1713,20 @@ function createRubyElement(baseText, annotationText, result = null) {
   // Add annotation text
   const textSpan = document.createElement('span');
   textSpan.textContent = annotationText;
-  rt.appendChild(textSpan);
+  overlay.appendChild(textSpan);
 
   // Add audio button if phonetics available and annotation audio is enabled
   // 如果设置为隐藏多个单词的读音，则不显示音频按钮
   if (result && result.phonetics && result.phonetics.length > 0 &&
       $.enableAudioInAnnotation && !shouldHidePhonetic) {
     const audioButton = createAudioButton(result.phonetics, baseText);
-    rt.appendChild(audioButton);
+    overlay.appendChild(audioButton);
   }
 
-  ruby.appendChild(rt);
+  container.appendChild(overlay);
 
   // Store annotation with full result data
-  annotations.set(ruby, {
+  annotations.set(container, {
     base: baseText,
     annotation: annotationText,
     phonetics: result ? result.phonetics : null,
@@ -1734,21 +1735,21 @@ function createRubyElement(baseText, annotationText, result = null) {
 
   // Add click event to show detailed translation
   if (result && (result.definitions || result.examples)) {
-    ruby.style.cursor = 'pointer';
-    ruby.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
+    container.classList.add('clickable');
+    container.setAttribute('title', safeGetMessage('clickToViewDetails', null, 'Click to view detailed translation'));
 
-    ruby.addEventListener('click', (e) => {
+    container.addEventListener('click', (e) => {
       // 如果点击的是音频按钮，不显示详细弹窗
       if (e.target.closest('.annotate-audio-button')) {
         return;
       }
 
       e.stopPropagation();
-      showDetailedTranslation(ruby, result);
+      showDetailedTranslation(container, result);
     });
   }
 
-  return ruby;
+  return container;
 }
 
 // Create ruby tag annotation
@@ -1756,22 +1757,25 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
   try {
     console.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
 
-    // Use the helper function to create ruby element
-    const ruby = createRubyElement(baseText, annotationText, result);
+    // Get the actual text from the range (including trailing spaces)
+    const rangeText = range.toString();
 
-    // Replace the selected text with the ruby element
+    // Use the helper function to create annotated element
+    const annotatedElement = createRubyElement(rangeText, annotationText, result);
+
+    // Replace the selected text with the annotated element
     range.deleteContents();
-    range.insertNode(ruby);
+    range.insertNode(annotatedElement);
 
-    // Save annotation to storage
+    // Save annotation to storage (use trimmed baseText for storage key)
     saveAnnotation(baseText, annotationText);
 
     // Clear selection
     window.getSelection().removeAllRanges();
 
-    console.log('[Annotate-Translate] Ruby annotation created successfully');
+    console.log('[Annotate-Translate] Annotation created successfully');
   } catch (e) {
-    console.error('[Annotate-Translate] Failed to create ruby annotation:', e);
+    console.error('[Annotate-Translate] Failed to create annotation:', e);
     alert('Failed to annotate text. Please try selecting the text again.');
   }
 }
@@ -1788,23 +1792,23 @@ function clearAnnotationsByText(text) {
   const normalizedText = text.trim().toLowerCase();
   let removedCount = 0;
 
-  // Find all ruby elements with matching text
-  const rubyElements = document.querySelectorAll('.annotate-translate-ruby');
+  // Find all annotated elements with matching text
+  const annotatedElements = document.querySelectorAll('.annotated-text');
 
-  rubyElements.forEach(ruby => {
-    const baseText = ruby.getAttribute('data-base-text');
+  annotatedElements.forEach(element => {
+    const baseText = element.getAttribute('data-base-text');
 
     if (baseText && baseText.trim().toLowerCase() === normalizedText) {
       try {
-        // Create a text node with the original base text (not ruby.textContent which includes annotations)
+        // Create a text node with the original base text
         const textNode = document.createTextNode(baseText);
 
-        // Replace ruby element with plain text
-        if (ruby.parentNode) {
-          ruby.parentNode.replaceChild(textNode, ruby);
+        // Replace annotated element with plain text
+        if (element.parentNode) {
+          element.parentNode.replaceChild(textNode, element);
 
           // Remove from annotations map
-          annotations.delete(ruby);
+          annotations.delete(element);
 
           removedCount++;
           console.log('[Annotate-Translate] Removed annotation for:', baseText);
@@ -2220,17 +2224,17 @@ function clearAllAnnotations() {
     }
     parent.removeChild(highlight);
   });
-  
-  // Clear ruby annotations
-  const rubyElements = document.querySelectorAll('ruby.annotate-translate-ruby');
-  rubyElements.forEach(ruby => {
-    const baseText = ruby.getAttribute('data-base-text') || ruby.textContent;
+
+  // Clear overlay-style annotations
+  const annotatedElements = document.querySelectorAll('.annotated-text');
+  annotatedElements.forEach(element => {
+    const baseText = element.getAttribute('data-base-text') || element.firstChild?.textContent || element.textContent;
     const textNode = document.createTextNode(baseText);
-    ruby.parentNode.replaceChild(textNode, ruby);
+    element.parentNode.replaceChild(textNode, element);
   });
-  
+
   annotations.clear();
-  
+
   // Clear from storage
   if (isExtensionContextValid()) {
     try {

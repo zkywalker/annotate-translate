@@ -225,9 +225,9 @@ const CSS_CLASS_MENU = 'annotate-translate-menu';
 const CSS_CLASS_TOOLTIP = 'annotate-translate-tooltip';
 
 /**
- * CSS class for ruby annotations
+ * CSS class for overlay-style annotations
  */
-const CSS_CLASS_RUBY = 'annotate-translate-ruby';
+const CSS_CLASS_ANNOTATED_TEXT = 'annotated-text';
 
 /**
  * CSS class for loading state
@@ -340,7 +340,7 @@ if (typeof module !== 'undefined' && module.exports) {
     // CSS Class Names
     CSS_CLASS_MENU,
     CSS_CLASS_TOOLTIP,
-    CSS_CLASS_RUBY,
+    CSS_CLASS_ANNOTATED_TEXT,
     CSS_CLASS_LOADING,
     CSS_CLASS_ERROR,
     CSS_CLASS_PLAYING,
