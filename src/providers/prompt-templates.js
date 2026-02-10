@@ -256,11 +256,14 @@ Text to translate: {text}
    * @returns {Object|null} 解析后的结果
    */
   static parseJsonResponse(response) {
+    // Step 1: 清理响应 - 去除 markdown 代码块标记
+    let cleaned = response.trim();
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?\s*```\s*$/i, '');
+    cleaned = cleaned.trim();
+
+    // Step 2: 尝试直接 JSON.parse
     try {
-      // 尝试直接解析
-      const parsed = JSON.parse(response);
-      
-      // 验证必需字段
+      const parsed = JSON.parse(cleaned);
       if (parsed.translation) {
         return {
           translation: parsed.translation,
@@ -268,27 +271,57 @@ Text to translate: {text}
           definitions: Array.isArray(parsed.definitions) ? parsed.definitions : []
         };
       }
-      
-      return null;
-    } catch (error) {
-      // 尝试提取 JSON（可能被其他文本包围）
-      try {
-        const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.translation) {
-            return {
-              translation: parsed.translation,
-              phonetic: parsed.phonetic || '',
-              definitions: Array.isArray(parsed.definitions) ? parsed.definitions : []
-            };
+    } catch (e) {
+      // 继续尝试后续方法
+    }
+
+    // Step 3: 尝试用正则提取 JSON 块（可能被其他文本包围）
+    try {
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.translation) {
+          return {
+            translation: parsed.translation,
+            phonetic: parsed.phonetic || '',
+            definitions: Array.isArray(parsed.definitions) ? parsed.definitions : []
+          };
+        }
+      }
+    } catch (e) {
+      // 继续尝试后续方法
+    }
+
+    // Step 4: 正则逐字段提取（处理截断或格式异常的 JSON）
+    try {
+      const translationMatch = cleaned.match(/"translation"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      if (translationMatch) {
+        const translation = translationMatch[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+
+        let phonetic = '';
+        const phoneticMatch = cleaned.match(/"phonetic"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (phoneticMatch) {
+          phonetic = phoneticMatch[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+        }
+
+        let definitions = [];
+        const defsMatch = cleaned.match(/"definitions"\s*:\s*\[([\s\S]*?)(?:\]|$)/);
+        if (defsMatch) {
+          const defStrings = defsMatch[1].match(/"((?:[^"\\]|\\.)*)"/g);
+          if (defStrings) {
+            definitions = defStrings.map(s => s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\'));
           }
         }
-      } catch (e) {
-        console.error('[Prompt Templates] Failed to parse JSON response:', error);
+
+        console.log('[Prompt Templates] Extracted fields via regex fallback:', { translation, phonetic, definitions });
+        return { translation, phonetic, definitions };
       }
-      return null;
+    } catch (e) {
+      console.error('[Prompt Templates] Failed to extract fields from response:', e);
     }
+
+    console.error('[Prompt Templates] All parsing methods failed for response:', response.substring(0, 200));
+    return null;
   }
 
   /**

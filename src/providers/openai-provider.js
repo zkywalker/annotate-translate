@@ -157,7 +157,7 @@ class OpenAIProvider extends BaseAIProvider {
         metadata: {}
       };
     }
-    console.warn('[OpenAI Provider] JSON parse failed, using simple format');
+    console.warn('[OpenAI Provider] JSON parse failed, using simple format. Raw response:', rawResponse);
     return this.parseSimpleResponse(rawResponse, originalText, sourceLang, targetLang);
   }
 
