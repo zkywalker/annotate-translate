@@ -256,8 +256,10 @@ Text to translate: {text}
    * @returns {Object|null} 解析后的结果
    */
   static parseJsonResponse(response) {
-    // Step 1: 清理响应 - 去除 markdown 代码块标记
+    // Step 1: 清理响应 - 去除思考标签和 markdown 代码块标记
     let cleaned = response.trim();
+    // 去除 <think>...</think> 等思考标签（Gemini 等模型可能包含）
+    cleaned = cleaned.replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, '');
     cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?\s*```\s*$/i, '');
     cleaned = cleaned.trim();
 
@@ -275,17 +277,38 @@ Text to translate: {text}
       // 继续尝试后续方法
     }
 
-    // Step 3: 尝试用正则提取 JSON 块（可能被其他文本包围）
+    // Step 3: 定位 "translation" 关键字，用大括号深度计数精准提取 JSON 块
+    // 适用于思考内容中包含 {} 的情况（如 Gemini 等模型）
     try {
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        if (parsed.translation) {
-          return {
-            translation: parsed.translation,
-            phonetic: parsed.phonetic || '',
-            definitions: Array.isArray(parsed.definitions) ? parsed.definitions : []
-          };
+      const translationKeyIndex = cleaned.indexOf('"translation"');
+      if (translationKeyIndex !== -1) {
+        // 从 "translation" 往前找最近的 {
+        const braceStart = cleaned.lastIndexOf('{', translationKeyIndex);
+        if (braceStart !== -1) {
+          // 从 { 开始，用深度计数找配对的 }
+          let depth = 0;
+          let braceEnd = -1;
+          for (let i = braceStart; i < cleaned.length; i++) {
+            if (cleaned[i] === '{') depth++;
+            else if (cleaned[i] === '}') {
+              depth--;
+              if (depth === 0) {
+                braceEnd = i;
+                break;
+              }
+            }
+          }
+          if (braceEnd !== -1) {
+            const jsonStr = cleaned.substring(braceStart, braceEnd + 1);
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.translation) {
+              return {
+                translation: parsed.translation,
+                phonetic: parsed.phonetic || '',
+                definitions: Array.isArray(parsed.definitions) ? parsed.definitions : []
+              };
+            }
+          }
         }
       }
     } catch (e) {
