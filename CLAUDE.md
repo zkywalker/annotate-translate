@@ -246,3 +246,19 @@ When debugging translation issues:
 2. Verify API keys in storage: Open DevTools > Application > Storage > Chrome Storage
 3. Test provider connectivity via options page "Test Connection" buttons
 4. Check background service worker console for CORS proxy errors
+
+## Document-Driven Development
+
+This project uses document-driven development. Design documents under `docs/design/` are the single source of truth.
+
+### Before Writing Code
+- Before modifying code, look for design documents in `docs/design/` whose scope matches the current module
+- If a related document is found, read it in full before coding
+- When code conflicts with a document, the document takes precedence
+- New features must run `/dd design` to generate a design document first; do not skip design and code directly
+
+### Available Commands
+- `/dd help` -- Check project documentation status and get next step suggestions
+- `/dd design <requirement>` -- Generate design documents from requirements
+- `/dd dev [doc-path]` -- Implement code following design documents
+- `/dd review` -- Check code-document consistency

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'Annotate Translate',
   description: '网页文本标注与翻译 Chrome 扩展 - 开发者文档',
   lang: 'zh-CN',
@@ -18,12 +19,16 @@ export default defineConfig({
     nav: [
       { text: '指南', link: '/guide/' },
       { text: '开发文档', link: '/development/' },
+      { text: '设计文档', link: '/design/' },
       { text: 'API 参考', link: '/api/' },
       { text: '示例', link: '/recipes/' },
-      { text: '贡献', link: '/contributing' },
       {
-        text: '相关链接',
+        text: '更多',
         items: [
+          { text: '产品文档', link: '/product/' },
+          { text: '业务文档', link: '/business/' },
+          { text: 'ADR', link: '/adr/' },
+          { text: '贡献', link: '/contributing' },
           { text: 'GitHub 仓库', link: 'https://github.com/zkywalker/annotate-translate' },
           { text: '问题反馈', link: 'https://github.com/zkywalker/annotate-translate/issues' }
         ]
@@ -63,6 +68,15 @@ export default defineConfig({
         }
       ],
 
+      '/design/': [
+        {
+          text: '设计文档',
+          items: [
+            { text: '概览', link: '/design/' }
+          ]
+        }
+      ],
+
       '/api/': [
         {
           text: 'API 参考',
@@ -79,6 +93,34 @@ export default defineConfig({
           items: [
             { text: '概览', link: '/recipes/' },
             { text: '添加新翻译提供商', link: '/recipes/add-new-provider' }
+          ]
+        }
+      ],
+
+      '/product/': [
+        {
+          text: '产品文档',
+          items: [
+            { text: '概览', link: '/product/' }
+          ]
+        }
+      ],
+
+      '/business/': [
+        {
+          text: '业务文档',
+          items: [
+            { text: '概览', link: '/business/' }
+          ]
+        }
+      ],
+
+      '/adr/': [
+        {
+          text: 'ADR',
+          items: [
+            { text: '概览', link: '/adr/' },
+            { text: 'Template', link: '/adr/000-template' }
           ]
         }
       ]
@@ -151,4 +193,4 @@ export default defineConfig({
       dark: 'github-dark'
     }
   }
-})
+}))
