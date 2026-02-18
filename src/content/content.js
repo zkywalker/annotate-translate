@@ -37,7 +37,7 @@ let settings = {
     showTranslation: true,
     showDefinitions: false,
     enableAudio: true,
-    hidePhoneticForMultipleWords: false
+    hidePhoneticForMultipleWords: true
   },
   translationCard: {
     showPhonetics: true,
@@ -1680,8 +1680,8 @@ function isMultipleEnglishWords(text) {
   // 匹配连续的字母（可能包含连字符和撇号）
   const words = trimmedText.match(/[a-zA-Z]+(?:[-'][a-zA-Z]+)*/g);
   
-  // 如果找到多于一个单词，返回 true
-  return words && words.length > 1;
+  // 如果找到多于两个单词，返回 true
+  return words && words.length > 2;
 }
 
 /**

@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS = {
     enableAudio: true,         // 显示发音按钮
 
     // 标注样式
-    hidePhoneticForMultipleWords: false // 多词时隐藏音标
+    hidePhoneticForMultipleWords: true // 超过两个词时隐藏音标
   },
 
   // 词库自动标注设置

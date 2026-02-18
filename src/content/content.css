@@ -471,6 +471,7 @@
   color: #5f6368;
   opacity: 0.8;
   border-radius: 3px;
+  pointer-events: auto;
 }
 
 .annotate-audio-button:hover {
