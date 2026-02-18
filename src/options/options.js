@@ -10,6 +10,7 @@ const elements = {
   // 通用设置
   enableTranslate: document.getElementById('enableTranslate'),
   enableAnnotate: document.getElementById('enableAnnotate'),
+  enableDoubleClickAnnotate: document.getElementById('enableDoubleClickAnnotate'),
   uiLanguage: document.getElementById('uiLanguage'),
   targetLanguage: document.getElementById('targetLanguage'),
   currentProvider: document.getElementById('currentProvider'),
@@ -288,6 +289,7 @@ function applySettingsToUI() {
   // 通用设置
   if (elements.enableTranslate) elements.enableTranslate.checked = settings.general.enableTranslate;
   if (elements.enableAnnotate) elements.enableAnnotate.checked = settings.general.enableAnnotate;
+  if (elements.enableDoubleClickAnnotate) elements.enableDoubleClickAnnotate.checked = settings.general.enableDoubleClickAnnotate ?? true;
   if (elements.uiLanguage) elements.uiLanguage.value = settings.general.uiLanguage;
   if (elements.targetLanguage) elements.targetLanguage.value = settings.general.targetLanguage;
   if (elements.currentProvider) elements.currentProvider.value = settings.providers.current;
@@ -370,6 +372,7 @@ function collectSettingsFromUI() {
     general: {
       enableTranslate: elements.enableTranslate?.checked ?? settings.general?.enableTranslate ?? true,
       enableAnnotate: elements.enableAnnotate?.checked ?? settings.general?.enableAnnotate ?? true,
+      enableDoubleClickAnnotate: elements.enableDoubleClickAnnotate?.checked ?? settings.general?.enableDoubleClickAnnotate ?? true,
       uiLanguage: elements.uiLanguage?.value ?? settings.general?.uiLanguage ?? 'auto',
       targetLanguage: elements.targetLanguage?.value ?? settings.general?.targetLanguage ?? 'zh-CN',
       showFloatingButton: settings.general?.showFloatingButton ?? true,
@@ -871,7 +874,7 @@ function setupEventListeners() {
   
   // 自动保存的字段（Switch 和 Select）
   const autoSaveFields = [
-    'enableTranslate', 'enableAnnotate', 'targetLanguage',
+    'enableTranslate', 'enableAnnotate', 'enableDoubleClickAnnotate', 'targetLanguage',
     'currentProvider', 'deeplUseFreeApi', 'showPhonetics', 'enableAudio',
     'showDefinitions', 'showExamples', 'enablePhoneticFallback',
     'menuButtonSize', 'showPhoneticInAnnotation', 'showTranslationInAnnotation',

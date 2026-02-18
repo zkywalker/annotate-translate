@@ -232,6 +232,10 @@
     "message": "標注設定",
     "description": "Annotation settings section title"
   },
+  "annotationSettingsDesc": {
+    "message": "在原文上方顯示音標和翻譯的標注樣式設定",
+    "description": "Annotation settings description"
+  },
   "showPhoneticInAnnotation": {
     "message": "在標注中顯示音標 + 翻譯",
     "description": "Show phonetic in annotation label"

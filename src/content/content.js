@@ -30,7 +30,8 @@ let settings = {
     showFloatingButton: true,
     enableContextMenu: true,
     phoneticDisplay: 'both',
-    enablePhoneticFallback: true
+    enablePhoneticFallback: true,
+    enableDoubleClickAnnotate: true
   },
   annotation: {
     showPhonetics: true,
@@ -100,6 +101,7 @@ let settings = {
 const $ = {
   get enableTranslate() { return settings.general?.enableTranslate ?? true; },
   get enableAnnotate() { return settings.general?.enableAnnotate ?? true; },
+  get enableDoubleClickAnnotate() { return settings.general?.enableDoubleClickAnnotate ?? true; },
   get targetLanguage() { return settings.general?.targetLanguage ?? 'zh-CN'; },
   get translationProvider() { return settings.providers?.current ?? 'google'; },
   set translationProvider(val) { if (settings.providers) settings.providers.current = val; },
@@ -239,6 +241,7 @@ async function init() {
 
     // Listen for text selection - Only after settings are loaded
     document.addEventListener('mouseup', handleTextSelection);
+    document.addEventListener('dblclick', handleDoubleClick);
 
     // Listen for messages from popup
     chrome.runtime.onMessage.addListener(handleMessage);
@@ -253,6 +256,7 @@ async function init() {
     initializeAnnotationScanner();
     setupPageUnloadHandler();
     document.addEventListener('mouseup', handleTextSelection);
+    document.addEventListener('dblclick', handleDoubleClick);
     chrome.runtime.onMessage.addListener(handleMessage);
   }
 }
@@ -634,6 +638,29 @@ function handleTextSelection(event) {
     hideContextMenu();
     lastSelection = null;
   }
+}
+
+// Handle double-click to auto-annotate a word
+function handleDoubleClick(event) {
+  if (!$.enableDoubleClickAnnotate || !$.enableAnnotate) return;
+
+  // Skip if click is inside extension UI or already annotated text
+  if (event.target.closest('.annotate-translate-menu') ||
+      event.target.closest('.annotate-translate-tooltip') ||
+      event.target.closest('.annotated-text')) {
+    return;
+  }
+
+  const selection = window.getSelection();
+  const selectedText = selection.toString().trim();
+  if (!selectedText || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0).cloneRange();
+
+  // Hide the floating menu since we're annotating directly
+  hideContextMenu();
+
+  promptAndAnnotate(range, selectedText);
 }
 
 // Show context menu for selected text

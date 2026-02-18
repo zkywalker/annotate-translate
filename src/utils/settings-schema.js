@@ -13,7 +13,8 @@ const DEFAULT_SETTINGS = {
     showFloatingButton: true,
     enableContextMenu: true,
     phoneticDisplay: 'both', // 'us' | 'uk' | 'both'
-    enablePhoneticFallback: true // 音标补充功能
+    enablePhoneticFallback: true, // 音标补充功能
+    enableDoubleClickAnnotate: true // 双击单词自动标注
   },
 
   // 标注功能设置

@@ -297,6 +297,10 @@
     "message": "Annotation Settings",
     "description": "Annotation settings section title"
   },
+  "annotationSettingsDesc": {
+    "message": "Configure annotation style for phonetics and translation displayed above the original text",
+    "description": "Annotation settings description"
+  },
   "annotationStyle": {
     "message": "Annotation Style",
     "description": "Annotation style section title"

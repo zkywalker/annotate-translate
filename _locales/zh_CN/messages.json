@@ -297,6 +297,10 @@
     "message": "标注设置",
     "description": "Annotation settings section title"
   },
+  "annotationSettingsDesc": {
+    "message": "在原文上方显示音标和翻译的标注样式设置",
+    "description": "Annotation settings description"
+  },
   "annotationStyle": {
     "message": "标注样式",
     "description": "Annotation style section title"
