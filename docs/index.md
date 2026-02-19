@@ -58,6 +58,9 @@ features:
 - [API 参考](/api/) - 完整的 API 文档
 - [实战示例](/recipes/) - 添加新功能的 Step-by-step 教程
 - [设计文档](/design/) - UI 规范、数据结构设计
+- [模块文档](/modules/) - 各模块的现状文档（DD）
+- [规格文档](/specs/) - 开发规格（DD）
+- [架构决策](/adr/) - 架构决策记录（ADR）
 
 ### 🚀 快速开始
 

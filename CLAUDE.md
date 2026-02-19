@@ -246,3 +246,24 @@ When debugging translation issues:
 2. Verify API keys in storage: Open DevTools > Application > Storage > Chrome Storage
 3. Test provider connectivity via options page "Test Connection" buttons
 4. Check background service worker console for CORS proxy errors
+
+## Document-Driven Development
+
+本项目使用文档驱动开发，维护两种文档：
+
+### Spec（规格）
+- 临时性文档，位于 `docs/specs/`，在开发前创建，开发后归档
+- 定义做什么、不做什么、验收标准，指导 AI 按意图实现
+- 命令: `/dd spec <需求>` 创建
+
+### Doc（模块文档）
+- 持久性文档，位于 `docs/modules/`，描述系统现状和设计理由
+- 修改任何代码前，先查找并阅读关联的模块文档
+- 代码与文档冲突时，确认后更新文档或修正代码
+
+### 工作流
+- `/dd help` — 查看项目文档状态和下一步建议
+- `/dd spec <需求>` — 创建规格（显著变更时）
+- `/dd dev` — 按规格或文档实现代码（基于 spec 时自动进入 plan mode）
+- `/dd sync` — 开发后更新模块文档、归档规格、检查一致性
+- `/dd sync --check` — 只检查不修改，输出健康报告

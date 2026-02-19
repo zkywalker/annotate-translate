@@ -21,6 +21,7 @@ export default defineConfig({
       { text: '开发文档', link: '/development/' },
       { text: 'API 参考', link: '/api/' },
       { text: '示例', link: '/recipes/' },
+      { text: '模块文档', link: '/modules/' },
       { text: '贡献', link: '/contributing' },
       {
         text: '相关链接',
@@ -80,6 +81,46 @@ export default defineConfig({
           items: [
             { text: '概览', link: '/recipes/' },
             { text: '添加新翻译提供商', link: '/recipes/add-new-provider' }
+          ]
+        }
+      ],
+
+      '/modules/': [
+        {
+          text: '模块文档',
+          items: [
+            { text: '概览', link: '/modules/' },
+            { text: '翻译服务', link: '/modules/translation-service' },
+            { text: '内容脚本', link: '/modules/content' },
+            { text: '词库系统', link: '/modules/vocabulary' }
+          ]
+        }
+      ],
+
+      '/specs/': [
+        {
+          text: '规格文档',
+          items: [
+            { text: '概览', link: '/specs/' }
+          ]
+        }
+      ],
+
+      '/adr/': [
+        {
+          text: '架构决策记录',
+          items: [
+            { text: '概览', link: '/adr/' },
+            { text: 'ADR 模板', link: '/adr/000-template' }
+          ]
+        }
+      ],
+
+      '/design/': [
+        {
+          text: '设计文档',
+          items: [
+            { text: '概览', link: '/design/' }
           ]
         }
       ]
