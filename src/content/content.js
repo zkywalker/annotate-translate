@@ -618,16 +618,70 @@ function applyTranslationSettings() {
   }
 }
 
+// Check if an element is an editable field (input, textarea, contentEditable)
+function isEditableElement(element) {
+  if (!element) return false;
+  const tagName = element.tagName?.toLowerCase();
+  if (tagName === 'input') {
+    const type = (element.type || 'text').toLowerCase();
+    return ['text', 'email', 'search', 'url', 'tel', 'password', 'number'].includes(type);
+  }
+  if (tagName === 'textarea') return true;
+  if (element.isContentEditable) return true;
+  // Check parent contentEditable
+  return !!element.closest('[contenteditable="true"], [contenteditable=""]');
+}
+
+// Detect if text is likely already in the target language using Unicode script heuristics
+// Returns true if the text appears to be in the same language as targetLang
+function isTargetLanguageText(text, targetLang) {
+  if (!text || !targetLang) return false;
+
+  const lang = targetLang.toLowerCase();
+
+  // Determine dominant script of the text
+  const cjkCount = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
+  const hiraganaKatakana = (text.match(/[\u3040-\u309f\u30a0-\u30ff]/g) || []).length;
+  const koreanCount = (text.match(/[\uac00-\ud7af\u1100-\u11ff]/g) || []).length;
+  const cyrillicCount = (text.match(/[\u0400-\u04ff]/g) || []).length;
+  const latinCount = (text.match(/[a-zA-Z]/g) || []).length;
+  const arabicCount = (text.match(/[\u0600-\u06ff]/g) || []).length;
+
+  const totalAlpha = cjkCount + hiraganaKatakana + koreanCount + cyrillicCount + latinCount + arabicCount;
+  if (totalAlpha === 0) return false; // Purely numeric/symbol text, don't skip
+
+  // Check if text's dominant script matches target language
+  if ((lang.startsWith('zh') || lang === 'cmn') && cjkCount / totalAlpha > 0.5) return true;
+  if (lang.startsWith('ja') && (cjkCount + hiraganaKatakana) / totalAlpha > 0.5) return true;
+  if (lang.startsWith('ko') && (koreanCount + cjkCount) / totalAlpha > 0.5) return true;
+  if (lang.startsWith('ru') && cyrillicCount / totalAlpha > 0.5) return true;
+  if (lang.startsWith('ar') && arabicCount / totalAlpha > 0.5) return true;
+  if (lang.startsWith('en') && latinCount / totalAlpha > 0.5) return true;
+
+  return false;
+}
+
 // Handle text selection events
 function handleTextSelection(event) {
   // 如果点击在悬浮窗内，不处理
   if (event.target.closest('.annotate-translate-menu')) {
     return;
   }
-  
+
+  // Skip editable elements (input, textarea, contentEditable)
+  if (isEditableElement(event.target)) {
+    return;
+  }
+
   const selectedText = window.getSelection().toString().trim();
-  
+
   if (selectedText && ($.enableTranslate || $.enableAnnotate)) {
+    // Skip if text is already in target language
+    if (isTargetLanguageText(selectedText, $.targetLanguage)) {
+      hideContextMenu();
+      lastSelection = null;
+      return;
+    }
     // 保存当前选择的Range
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
@@ -651,9 +705,19 @@ function handleDoubleClick(event) {
     return;
   }
 
+  // Skip editable elements (input, textarea, contentEditable)
+  if (isEditableElement(event.target)) {
+    return;
+  }
+
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
   if (!selectedText || selection.rangeCount === 0) return;
+
+  // Skip if text is already in target language
+  if (isTargetLanguageText(selectedText, $.targetLanguage)) {
+    return;
+  }
 
   const range = selection.getRangeAt(0).cloneRange();
 
