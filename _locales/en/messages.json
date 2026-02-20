@@ -475,6 +475,29 @@
     "message": "Annotation failed",
     "description": "Annotation failed error title"
   },
+  "pleaseReselectText": {
+    "message": "Please select the text again",
+    "description": "Prompt to reselect text when annotation range is lost"
+  },
+  "textNotFound": {
+    "message": "Could not find the text on the page.",
+    "description": "Error when annotate-all cannot locate the text"
+  },
+  "annotatingAll": {
+    "message": "Annotating $1 occurrences...",
+    "description": "Progress message when annotating all occurrences",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "annotatedCount": {
+    "message": "Successfully annotated $1 of $2 occurrences",
+    "description": "Result message after annotating all occurrences",
+    "placeholders": {
+      "1": { "content": "$1", "example": "4" },
+      "2": { "content": "$2", "example": "5" }
+    }
+  },
   "cannotClearOnThisPage": {
     "message": "Cannot clear annotations on this page.",
     "description": "Cannot clear annotations error"

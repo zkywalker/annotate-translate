@@ -475,6 +475,29 @@
     "message": "标注失败",
     "description": "Annotation failed error title"
   },
+  "pleaseReselectText": {
+    "message": "请重新选择文本",
+    "description": "Prompt to reselect text when annotation range is lost"
+  },
+  "textNotFound": {
+    "message": "无法在页面上找到该文本。",
+    "description": "Error when annotate-all cannot locate the text"
+  },
+  "annotatingAll": {
+    "message": "正在标注 $1 处...",
+    "description": "Progress message when annotating all occurrences",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "annotatedCount": {
+    "message": "已成功标注 $1/$2 处",
+    "description": "Result message after annotating all occurrences",
+    "placeholders": {
+      "1": { "content": "$1", "example": "4" },
+      "2": { "content": "$2", "example": "5" }
+    }
+  },
   "cannotClearOnThisPage": {
     "message": "无法在此页面清除标注。",
     "description": "Cannot clear annotations error"
