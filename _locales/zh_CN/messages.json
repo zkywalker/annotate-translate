@@ -1694,6 +1694,10 @@
     "message": "关闭词汇模式",
     "description": "Context menu option to remove vocabulary annotations"
   },
+  "contextMenuDoubleClickAnnotate": {
+    "message": "双击标注",
+    "description": "Context menu toggle for double-click annotation"
+  },
   "vocabularyMode": {
     "message": "词汇模式",
     "description": "Vocabulary mode navigation label"

@@ -146,6 +146,18 @@ function createContextMenus() {
       contexts: ['page']
     });
 
+    // Double-click annotate toggle
+    chrome.storage.sync.get({ general: {} }, (items) => {
+      const enabled = items.general?.enableDoubleClickAnnotate ?? true;
+      chrome.contextMenus.create({
+        id: 'toggle-double-click-annotate',
+        type: 'checkbox',
+        title: chrome.i18n.getMessage('contextMenuDoubleClickAnnotate') || 'Double-click to Annotate',
+        checked: enabled,
+        contexts: ['page', 'selection']
+      });
+    });
+
     console.log('[Annotate-Translate BG] Context menus created');
   });
 }
@@ -162,6 +174,24 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
   
+  if (info.menuItemId === 'toggle-double-click-annotate') {
+    const enabled = info.checked;
+    chrome.storage.sync.get({ general: {} }, (items) => {
+      const general = { ...items.general, enableDoubleClickAnnotate: enabled };
+      chrome.storage.sync.set({ general }, () => {
+        // Notify all tabs about the setting change
+        chrome.tabs.query({}, (tabs) => {
+          tabs.forEach((t) => {
+            chrome.tabs.sendMessage(t.id, { action: 'updateSettings' }, () => {
+              if (chrome.runtime.lastError) { /* tab may not have content script */ }
+            });
+          });
+        });
+      });
+    });
+    return;
+  }
+
   if (info.menuItemId === 'translate-text') {
     chrome.tabs.sendMessage(tab.id, {
       action: 'translate',
@@ -410,6 +440,16 @@ async function handleOpenAITranslate(params) {
     throw error;
   }
 }
+
+// Sync context menu checkbox when settings change from options page
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync' && changes.general) {
+    const enabled = changes.general.newValue?.enableDoubleClickAnnotate ?? true;
+    chrome.contextMenus.update('toggle-double-click-annotate', { checked: enabled }, () => {
+      if (chrome.runtime.lastError) { /* menu may not exist yet */ }
+    });
+  }
+});
 
 // Listen for tab updates to inject content script if needed
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

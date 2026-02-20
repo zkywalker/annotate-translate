@@ -171,6 +171,10 @@
   "clickToViewDetails": {
     "message": "クリックして詳細な翻訳を表示",
     "description": "Tooltip for clickable annotations"
+  },
+  "contextMenuDoubleClickAnnotate": {
+    "message": "ダブルクリックで注釈",
+    "description": "Context menu toggle for double-click annotation"
   }
 }
 

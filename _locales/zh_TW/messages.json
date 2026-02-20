@@ -498,6 +498,10 @@
   "languageChangedReload": {
     "message": "語言已變更！正在重新載入頁面...",
     "description": "Message shown when language is changed"
+  },
+  "contextMenuDoubleClickAnnotate": {
+    "message": "雙擊標註",
+    "description": "Context menu toggle for double-click annotation"
   }
 }
 

@@ -119,6 +119,10 @@
   "clickToViewDetails": {
     "message": "Haga clic para ver la traducción detallada",
     "description": "Tooltip for clickable annotations"
+  },
+  "contextMenuDoubleClickAnnotate": {
+    "message": "Doble clic para anotar",
+    "description": "Context menu toggle for double-click annotation"
   }
 }
 

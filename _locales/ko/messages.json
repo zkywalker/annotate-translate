@@ -167,6 +167,10 @@
   "clickToViewDetails": {
     "message": "자세한 번역을 보려면 클릭하세요",
     "description": "Tooltip for clickable annotations"
+  },
+  "contextMenuDoubleClickAnnotate": {
+    "message": "더블클릭으로 주석",
+    "description": "Context menu toggle for double-click annotation"
   }
 }
 

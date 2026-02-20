@@ -1694,6 +1694,10 @@
     "message": "Disable Vocabulary Mode",
     "description": "Context menu option to disable vocabulary mode"
   },
+  "contextMenuDoubleClickAnnotate": {
+    "message": "Double-click to Annotate",
+    "description": "Context menu toggle for double-click annotation"
+  },
   "vocabularyMode": {
     "message": "Vocabulary Mode",
     "description": "Vocabulary mode navigation label"
