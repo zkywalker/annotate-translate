@@ -272,6 +272,12 @@ async function ensureContentScriptInjected(tabId) {
 
 // Handle messages from content scripts or popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // Only accept messages from this extension
+  if (sender.id !== chrome.runtime.id) {
+    sendResponse({ success: false, error: 'Unauthorized sender' });
+    return;
+  }
+
   if (request.action === 'getSettings') {
     chrome.storage.sync.get({
       enableTranslate: false,  // 默认关闭翻译功能
@@ -357,11 +363,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 /**
+ * Allowed hosts for CORS proxy
+ */
+const ALLOWED_HOSTS = {
+  youdao: ['openapi.youdao.com'],
+  deepl: ['api-free.deepl.com', 'api.deepl.com'],
+  openai: null // User-customizable, validate protocol only
+};
+
+/**
+ * Validate a URL against the whitelist for a given provider
+ * @param {string} url - The URL to validate
+ * @param {string} provider - The provider name ('youdao', 'deepl', 'openai')
+ * @returns {boolean} Whether the URL is allowed
+ */
+function validateProxyUrl(url, provider) {
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.protocol !== 'https:' && urlObj.protocol !== 'http:') {
+      return false;
+    }
+    const allowedHosts = ALLOWED_HOSTS[provider];
+    if (allowedHosts === null) {
+      // For user-configurable providers like OpenAI, only enforce https
+      return urlObj.protocol === 'https:';
+    }
+    return allowedHosts.includes(urlObj.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Handle Youdao translation API request in background script (bypasses CORS)
  * @param {Object} params - Request parameters (url, method, headers, body)
  * @returns {Promise<Object>} Response data
  */
 async function handleYoudaoTranslate(params) {
+  if (!validateProxyUrl(params.url, 'youdao')) {
+    throw new Error('Blocked: URL not in whitelist');
+  }
   try {
     const response = await fetch(params.url, {
       method: params.method || 'POST',
@@ -387,6 +428,9 @@ async function handleYoudaoTranslate(params) {
  * @returns {Promise<Object>} Response data
  */
 async function handleDeepLTranslate(params) {
+  if (!validateProxyUrl(params.url, 'deepl')) {
+    throw new Error('Blocked: URL not in whitelist');
+  }
   try {
     const response = await fetch(params.url, {
       method: params.method || 'POST',
@@ -417,6 +461,9 @@ async function handleDeepLTranslate(params) {
  * @returns {Promise<Object>} Response data
  */
 async function handleOpenAITranslate(params) {
+  if (!validateProxyUrl(params.url, 'openai')) {
+    throw new Error('Blocked: URL not in whitelist');
+  }
   try {
     const response = await fetch(params.url, {
       method: params.method || 'POST',

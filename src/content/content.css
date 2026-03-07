@@ -20,14 +20,8 @@
 }
 
 @keyframes menuFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* 默认按钮样式 - Small size */
@@ -80,11 +74,6 @@
 
 .annotate-translate-menu .menu-button:hover {
   background-color: #1557b0;
-  transform: scale(1.05);
-}
-
-.annotate-translate-menu .menu-button:active {
-  transform: scale(0.98);
 }
 
 .annotate-translate-tooltip {
@@ -188,18 +177,15 @@
   transition: all 0.2s;
   padding: 0;
   z-index: 10;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .translation-close-btn:hover {
   background-color: rgba(95, 99, 104, 0.2);
   color: #202124;
-  transform: scale(1.15);
 }
 
 .translation-close-btn:active {
-  transform: scale(0.9);
 }
 
 /* Clear annotations button */
@@ -220,18 +206,15 @@
   transition: all 0.2s;
   padding: 4px;
   z-index: 10;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .translation-clear-btn:hover {
   background-color: rgba(220, 38, 38, 0.15);
   color: #dc2626;
-  transform: scale(1.15);
 }
 
 .translation-clear-btn:active {
-  transform: scale(0.9);
 }
 
 .translation-clear-btn svg {
@@ -311,7 +294,7 @@
   z-index: 100;
 
   /* 注释文本样式 - 更小的字体 */
-  font-size: 0.5em;
+  font-size: 0.65em;
   color: #1a73e8;
   font-weight: 500;
   line-height: 1;
@@ -478,11 +461,9 @@
   opacity: 1;
   background: #e8f0fe; /* 悬停时显示淡蓝色背景 */
   color: #1a73e8;
-  transform: scale(1.2);
 }
 
 .annotate-audio-button:active {
-  transform: scale(0.9);
 }
 
 .annotate-audio-button.playing {
@@ -491,12 +472,8 @@
 }
 
 @keyframes audioPlaying {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* Annotation detail popup specific styles */
@@ -645,5 +622,21 @@
 
   .vocab-annotation-progress .progress-current-word {
     color: #6e7681;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.translation-close-btn:focus-visible,
+.audio-play-button:focus-visible,
+.annotate-audio-button:focus-visible,
+.menu-button:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

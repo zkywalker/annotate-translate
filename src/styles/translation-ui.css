@@ -15,6 +15,8 @@
   color: #333;
   line-height: 1.6;
   overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* 区域标题 */
@@ -77,6 +79,7 @@
   font-weight: 500;
   color: #202124;
   line-height: 1.5;
+  unicode-bidi: plaintext;
 }
 
 /* 读音部分 */
@@ -99,7 +102,7 @@
 
 .phonetic-type {
   display: inline-block;
-  background: #4CAF50;
+  background: #1a73e8;
   color: white;
   font-size: 10px;
   font-weight: 600;
@@ -136,11 +139,6 @@
 .audio-play-button:hover {
   background: #e8f0fe; /* 悬停时显示淡蓝色背景 */
   color: #1a73e8;
-  transform: scale(1.1);
-}
-
-.audio-play-button:active {
-  transform: scale(0.95);
 }
 
 .audio-play-button.playing {
@@ -150,24 +148,11 @@
 
 .audio-play-button.error {
   color: #d93025;
-  animation: shake 0.5s;
 }
 
 @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* 词义部分 */
@@ -388,6 +373,7 @@
   color: #202124;
   margin-bottom: 10px;
   line-height: 1.5;
+  unicode-bidi: plaintext;
 }
 
 .simple-phonetic-row {
@@ -574,5 +560,12 @@
   
   .translation-footer {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

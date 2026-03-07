@@ -106,7 +106,7 @@ class GoogleTranslateProvider extends TranslationProvider {
 
   async translate(text, targetLang, sourceLang = 'auto') {
     try {
-      console.log(`[GoogleTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
+      logger.log(`[GoogleTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
       
       // 这里使用公共API端点（无需API密钥，但有限制）
       // 实际生产环境中应该使用官方API
@@ -126,7 +126,7 @@ class GoogleTranslateProvider extends TranslationProvider {
       const url = 'https://translate.googleapis.com/translate_a/single?' + params.join('&');
       
       // 🐛 DEBUG: 打印请求URL
-      console.log('[GoogleTranslate] Request URL:', url);
+      logger.log('[GoogleTranslate] Request URL:', url);
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -136,22 +136,22 @@ class GoogleTranslateProvider extends TranslationProvider {
       const data = await response.json();
       
       // 🐛 DEBUG: 打印完整的响应数据
-      console.log('[GoogleTranslate] Raw Response Data:', JSON.stringify(data, null, 2));
-      console.log('[GoogleTranslate] Response Structure:');
-      console.log('  - data[0] (翻译文本):', data[0]);
-      console.log('  - data[1] (反向翻译):', data[1]);
-      console.log('  - data[2] (检测语言):', data[2]);
-      console.log('  - data[12] (英文定义):', data[12]);
-      console.log('  - data[13] (例句):', data[13]);
+      logger.log('[GoogleTranslate] Raw Response Data:', JSON.stringify(data, null, 2));
+      logger.log('[GoogleTranslate] Response Structure:');
+      logger.log('  - data[0] (翻译文本):', data[0]);
+      logger.log('  - data[1] (反向翻译):', data[1]);
+      logger.log('  - data[2] (检测语言):', data[2]);
+      logger.log('  - data[12] (英文定义):', data[12]);
+      logger.log('  - data[13] (例句):', data[13]);
       
       // 解析Google Translate API返回的数据
       const result = this.parseGoogleResponse(data, text, sourceLang, targetLang);
       
       // 🐛 DEBUG: 打印解析后的结果
-      console.log('[GoogleTranslate] Parsed Result:', JSON.stringify(result, null, 2));
-      console.log('[GoogleTranslate] Has Phonetics:', result.phonetics.length > 0);
-      console.log('[GoogleTranslate] Has Definitions:', result.definitions.length > 0);
-      console.log('[GoogleTranslate] Has Examples:', result.examples.length > 0);
+      logger.log('[GoogleTranslate] Parsed Result:', JSON.stringify(result, null, 2));
+      logger.log('[GoogleTranslate] Has Phonetics:', result.phonetics.length > 0);
+      logger.log('[GoogleTranslate] Has Definitions:', result.definitions.length > 0);
+      logger.log('[GoogleTranslate] Has Examples:', result.examples.length > 0);
       
       // ✅ 移除提供者级别的音标补充，由 TranslationService 统一处理
       
@@ -163,7 +163,7 @@ class GoogleTranslateProvider extends TranslationProvider {
   }
 
   parseGoogleResponse(data, originalText, sourceLang, targetLang) {
-    console.log('[GoogleTranslate] Parsing response for:', originalText);
+    logger.log('[GoogleTranslate] Parsing response for:', originalText);
     
     const result = {
       originalText: originalText,
@@ -180,24 +180,24 @@ class GoogleTranslateProvider extends TranslationProvider {
     // 主要翻译文本
     if (data[0]) {
       result.translatedText = data[0].map(item => item[0]).filter(Boolean).join('');
-      console.log('[GoogleTranslate] ✓ Extracted translation:', result.translatedText);
+      logger.log('[GoogleTranslate] ✓ Extracted translation:', result.translatedText);
     } else {
-      console.log('[GoogleTranslate] ✗ No translation data in data[0]');
+      logger.log('[GoogleTranslate] ✗ No translation data in data[0]');
     }
 
     // 音标信息（如果有）
-    console.log('[GoogleTranslate] Checking for phonetics in data[0][1][3]...');
+    logger.log('[GoogleTranslate] Checking for phonetics in data[0][1][3]...');
     if (data[0] && data[0][1] && data[0][1][3]) {
       result.phonetics.push({
         text: data[0][1][3],
         type: 'us'
       });
-      console.log('[GoogleTranslate] ✓ Found phonetic:', data[0][1][3]);
+      logger.log('[GoogleTranslate] ✓ Found phonetic:', data[0][1][3]);
     } else {
-      console.log('[GoogleTranslate] ✗ No phonetic data found');
-      console.log('[GoogleTranslate]   data[0]?', !!data[0]);
-      console.log('[GoogleTranslate]   data[0][1]?', data[0] ? !!data[0][1] : 'N/A');
-      console.log('[GoogleTranslate]   data[0][1][3]?', (data[0] && data[0][1]) ? data[0][1][3] : 'N/A');
+      logger.log('[GoogleTranslate] ✗ No phonetic data found');
+      logger.log('[GoogleTranslate]   data[0]?', !!data[0]);
+      logger.log('[GoogleTranslate]   data[0][1]?', data[0] ? !!data[0][1] : 'N/A');
+      logger.log('[GoogleTranslate]   data[0][1][3]?', (data[0] && data[0][1]) ? data[0][1][3] : 'N/A');
     }
 
     // 词义解释 - 优先使用 data[12]（英文定义），否则使用 data[1]（反向翻译）
@@ -215,7 +215,7 @@ class GoogleTranslateProvider extends TranslationProvider {
         }
         return null;
       }).flat().filter(Boolean);
-      console.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions from data[12]`);
+      logger.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions from data[12]`);
     } else if (data[1]) {
       // 回退到 data[1]（反向翻译）
       result.definitions = data[1].map(item => {
@@ -232,9 +232,9 @@ class GoogleTranslateProvider extends TranslationProvider {
         }
         return null;
       }).filter(Boolean);
-      console.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions from data[1]`);
+      logger.log(`[GoogleTranslate] ✓ Found ${result.definitions.length} definitions from data[1]`);
     } else {
-      console.log('[GoogleTranslate] ✗ No definitions in data[12] or data[1]');
+      logger.log('[GoogleTranslate] ✗ No definitions in data[12] or data[1]');
     }
 
     // 例句
@@ -243,9 +243,9 @@ class GoogleTranslateProvider extends TranslationProvider {
         source: item[0],
         translation: ''
       })) || [];
-      console.log(`[GoogleTranslate] ✓ Found ${result.examples.length} examples`);
+      logger.log(`[GoogleTranslate] ✓ Found ${result.examples.length} examples`);
     } else {
-      console.log('[GoogleTranslate] ✗ No examples in data[13]');
+      logger.log('[GoogleTranslate] ✗ No examples in data[13]');
     }
 
     return result;
@@ -297,7 +297,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
   updateConfig(appKey, appSecret) {
     this.appKey = appKey || '';
     this.appSecret = appSecret || '';
-    console.log(`[YoudaoTranslate] Config updated. AppKey: ${this.appKey ? 'Set' : 'Not set'}`);
+    logger.log(`[YoudaoTranslate] Config updated. AppKey: ${this.appKey ? 'Set' : 'Not set'}`);
   }
 
   /**
@@ -412,7 +412,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
     }
 
     try {
-      console.log(`[YoudaoTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
+      logger.log(`[YoudaoTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
       
       // 生成请求参数
       const salt = Date.now().toString();
@@ -435,7 +435,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
         curtime: curtime
       });
 
-      console.log(`[YoudaoTranslate] Request params:`, {
+      logger.log(`[YoudaoTranslate] Request params:`, {
         q: text,
         from: from,
         to: to,
@@ -448,14 +448,14 @@ class YoudaoTranslateProvider extends TranslationProvider {
       // 通过 background script 发送请求（绕过 CORS）
       const data = await this.sendRequestViaBackground(this.apiUrl, params);
       
-      console.log(`[YoudaoTranslate] ========== API Response START ==========`);
-      console.log(`[YoudaoTranslate] Full response:`, JSON.stringify(data, null, 2));
-      console.log(`[YoudaoTranslate] Has basic?`, !!data.basic);
+      logger.log(`[YoudaoTranslate] ========== API Response START ==========`);
+      logger.log(`[YoudaoTranslate] Full response:`, JSON.stringify(data, null, 2));
+      logger.log(`[YoudaoTranslate] Has basic?`, !!data.basic);
       if (data.basic) {
-        console.log(`[YoudaoTranslate] Basic fields:`, Object.keys(data.basic));
-        console.log(`[YoudaoTranslate] Basic content:`, data.basic);
+        logger.log(`[YoudaoTranslate] Basic fields:`, Object.keys(data.basic));
+        logger.log(`[YoudaoTranslate] Basic content:`, data.basic);
       }
-      console.log(`[YoudaoTranslate] ========== API Response END ==========`);
+      logger.log(`[YoudaoTranslate] ========== API Response END ==========`);
 
       // 检查错误码
       if (data.errorCode !== '0') {
@@ -488,7 +488,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
   }
 
   async parseYoudaoResponse(data, originalText, sourceLang, targetLang) {
-    console.log('[YoudaoTranslate] Parsing response data...');
+    logger.log('[YoudaoTranslate] Parsing response data...');
     
     const result = {
       originalText: originalText,
@@ -505,13 +505,13 @@ class YoudaoTranslateProvider extends TranslationProvider {
     // 主要翻译结果
     if (data.translation && data.translation.length > 0) {
       result.translatedText = data.translation.join('\n');
-      console.log('[YoudaoTranslate] ✓ Translation:', result.translatedText);
+      logger.log('[YoudaoTranslate] ✓ Translation:', result.translatedText);
     }
 
     // 音标信息（基本释义中可能包含）
     if (data.basic) {
-      console.log('[YoudaoTranslate] Processing basic dictionary data...');
-      console.log('[YoudaoTranslate] Available fields in basic:', Object.keys(data.basic).join(', '));
+      logger.log('[YoudaoTranslate] Processing basic dictionary data...');
+      logger.log('[YoudaoTranslate] Available fields in basic:', Object.keys(data.basic).join(', '));
       
       let foundPhonetic = false;
       
@@ -526,7 +526,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
           type: 'default',
           audioUrl: data.basic['phonetic-audio'] || null
         });
-        console.log('[YoudaoTranslate] ✓ Default phonetic:', phoneticText);
+        logger.log('[YoudaoTranslate] ✓ Default phonetic:', phoneticText);
         foundPhonetic = true;
       }
       
@@ -538,7 +538,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
           type: 'us',
           audioUrl: data.basic['us-speech'] || null
         });
-        console.log('[YoudaoTranslate] ✓ US phonetic:', usPhonetic);
+        logger.log('[YoudaoTranslate] ✓ US phonetic:', usPhonetic);
         foundPhonetic = true;
       }
       
@@ -550,7 +550,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
           type: 'uk',
           audioUrl: data.basic['uk-speech'] || null
         });
-        console.log('[YoudaoTranslate] ✓ UK phonetic:', ukPhonetic);
+        logger.log('[YoudaoTranslate] ✓ UK phonetic:', ukPhonetic);
         foundPhonetic = true;
       }
       
@@ -562,7 +562,7 @@ class YoudaoTranslateProvider extends TranslationProvider {
 
       // 词义解释
       if (data.basic.explains && data.basic.explains.length > 0) {
-        console.log('[YoudaoTranslate] Processing definitions...');
+        logger.log('[YoudaoTranslate] Processing definitions...');
         data.basic.explains.forEach((explain, index) => {
           // 尝试解析词性和释义（格式：n. 名词释义）
           const match = explain.match(/^([a-z]+\.)\s*(.+)$/i);
@@ -580,13 +580,13 @@ class YoudaoTranslateProvider extends TranslationProvider {
             });
           }
         });
-        console.log(`[YoudaoTranslate] ✓ Definitions: ${result.definitions.length} entries`);
+        logger.log(`[YoudaoTranslate] ✓ Definitions: ${result.definitions.length} entries`);
       }
     }
 
     // 网络释义（作为例句的补充）
     if (data.web && data.web.length > 0) {
-      console.log('[YoudaoTranslate] Processing web translations...');
+      logger.log('[YoudaoTranslate] Processing web translations...');
       data.web.slice(0, 3).forEach(item => {
         if (item.key && item.value && item.value.length > 0) {
           result.examples.push({
@@ -595,27 +595,27 @@ class YoudaoTranslateProvider extends TranslationProvider {
           });
         }
       });
-      console.log(`[YoudaoTranslate] ✓ Examples: ${result.examples.length} entries`);
+      logger.log(`[YoudaoTranslate] ✓ Examples: ${result.examples.length} entries`);
     }
 
     // 如果没有翻译结果，使用原文
     if (!result.translatedText) {
       result.translatedText = originalText;
-      console.log('[YoudaoTranslate] ⚠ No translation, using original text');
+      logger.log('[YoudaoTranslate] ⚠ No translation, using original text');
     }
 
     // ✅ 移除提供者级别的音标补充，由 TranslationService 统一处理
 
     // 生成标注文本（用于 Ruby 标注）
     result.annotationText = this.generateAnnotationText(result);
-    console.log('[YoudaoTranslate] ✓ Annotation text:', result.annotationText);
+    logger.log('[YoudaoTranslate] ✓ Annotation text:', result.annotationText);
 
-    console.log('[YoudaoTranslate] ========== Parsing Summary ==========');
-    console.log('[YoudaoTranslate] Phonetics found:', result.phonetics.length);
-    console.log('[YoudaoTranslate] Definitions found:', result.definitions.length);
-    console.log('[YoudaoTranslate] Examples found:', result.examples.length);
-    console.log('[YoudaoTranslate] Annotation text:', result.annotationText);
-    console.log('[YoudaoTranslate] =====================================');
+    logger.log('[YoudaoTranslate] ========== Parsing Summary ==========');
+    logger.log('[YoudaoTranslate] Phonetics found:', result.phonetics.length);
+    logger.log('[YoudaoTranslate] Definitions found:', result.definitions.length);
+    logger.log('[YoudaoTranslate] Examples found:', result.examples.length);
+    logger.log('[YoudaoTranslate] Annotation text:', result.annotationText);
+    logger.log('[YoudaoTranslate] =====================================');
 
     return result;
   }
@@ -734,12 +734,12 @@ class DeepLTranslateProvider extends TranslationProvider {
     // 🆕 根据 API 密钥自动检测类型（免费密钥通常以 :fx 结尾）
     if (this.apiKey && this.apiKey.includes(':fx')) {
       this.useFreeApi = true;
-      console.log(`[DeepLTranslate] Detected Free API key (ends with :fx)`);
+      logger.log(`[DeepLTranslate] Detected Free API key (ends with :fx)`);
     }
     
-    console.log(`[DeepLTranslate] Config updated.`);
-    console.log(`[DeepLTranslate]   API Key: ${this.apiKey ? (this.apiKey.substring(0, 10) + '...') : 'Not set'}`);
-    console.log(`[DeepLTranslate]   API Type: ${this.useFreeApi ? 'Free (api-free.deepl.com)' : 'Pro (api.deepl.com)'}`);
+    logger.log(`[DeepLTranslate] Config updated.`);
+    logger.log(`[DeepLTranslate]   API Key: ${this.apiKey ? (this.apiKey.substring(0, 10) + '...') : 'Not set'}`);
+    logger.log(`[DeepLTranslate]   API Type: ${this.useFreeApi ? 'Free (api-free.deepl.com)' : 'Pro (api.deepl.com)'}`);
   }
 
   /**
@@ -919,13 +919,13 @@ class DeepLTranslateProvider extends TranslationProvider {
     }
 
     try {
-      console.log(`[DeepLTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
+      logger.log(`[DeepLTranslate] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
       
       // 转换语言代码（源语言和目标语言分别转换）
       const source_lang = this.convertLangCode(sourceLang, false); // 源语言
       const target_lang = this.convertLangCode(targetLang, true);  // 目标语言
 
-      console.log(`[DeepLTranslate] Language code conversion:`, {
+      logger.log(`[DeepLTranslate] Language code conversion:`, {
         sourceLang: sourceLang,
         source_lang: source_lang,
         targetLang: targetLang,
@@ -942,25 +942,25 @@ class DeepLTranslateProvider extends TranslationProvider {
       // 只有在明确指定非 'auto' 的源语言时才添加 source_lang 参数
       if (sourceLang !== 'auto' && source_lang && source_lang !== '') {
         params.source_lang = source_lang;
-        console.log(`[DeepLTranslate] Using explicit source language: ${source_lang}`);
+        logger.log(`[DeepLTranslate] Using explicit source language: ${source_lang}`);
       } else {
-        console.log(`[DeepLTranslate] Using auto-detection (no source_lang parameter)`);
+        logger.log(`[DeepLTranslate] Using auto-detection (no source_lang parameter)`);
       }
 
-      console.log(`[DeepLTranslate] Final request params:`, params);
+      logger.log(`[DeepLTranslate] Final request params:`, params);
 
       // 获取 API URL
       const apiUrl = this.getApiUrl();
       
-      console.log(`[DeepLTranslate] Using API URL: ${apiUrl}`);
-      console.log(`[DeepLTranslate] API Key: ${this.apiKey ? (this.apiKey.substring(0, 10) + '...') : 'Not set'}`);
+      logger.log(`[DeepLTranslate] Using API URL: ${apiUrl}`);
+      logger.log(`[DeepLTranslate] API Key: ${this.apiKey ? (this.apiKey.substring(0, 10) + '...') : 'Not set'}`);
 
       // 通过 background script 发送请求（绕过 CORS）
       const data = await this.sendRequestViaBackground(apiUrl, params);
       
-      console.log(`[DeepLTranslate] ========== API Response START ==========`);
-      console.log(`[DeepLTranslate] Full response:`, JSON.stringify(data, null, 2));
-      console.log(`[DeepLTranslate] ========== API Response END ==========`);
+      logger.log(`[DeepLTranslate] ========== API Response START ==========`);
+      logger.log(`[DeepLTranslate] Full response:`, JSON.stringify(data, null, 2));
+      logger.log(`[DeepLTranslate] ========== API Response END ==========`);
 
       // 解析响应
       return this.parseDeepLResponse(data, text, sourceLang, targetLang);
@@ -999,7 +999,7 @@ class DeepLTranslateProvider extends TranslationProvider {
   }
 
   parseDeepLResponse(data, originalText, sourceLang, targetLang) {
-    console.log('[DeepLTranslate] Parsing response data...');
+    logger.log('[DeepLTranslate] Parsing response data...');
     
     const result = {
       originalText: originalText,
@@ -1028,32 +1028,32 @@ class DeepLTranslateProvider extends TranslationProvider {
       
       // 翻译文本
       result.translatedText = translation.text;
-      console.log('[DeepLTranslate] ✓ Translation:', result.translatedText);
+      logger.log('[DeepLTranslate] ✓ Translation:', result.translatedText);
 
       // 检测到的源语言
       if (translation.detected_source_language) {
         result.sourceLang = translation.detected_source_language.toLowerCase();
-        console.log('[DeepLTranslate] ✓ Detected source language:', result.sourceLang);
+        logger.log('[DeepLTranslate] ✓ Detected source language:', result.sourceLang);
       }
     } else {
-      console.log('[DeepLTranslate] ⚠ No translation in response');
+      logger.log('[DeepLTranslate] ⚠ No translation in response');
       result.translatedText = originalText;
     }
 
     // DeepL 不提供音标和词义解释，这些将由 TranslationService 的统一后处理补充
-    console.log('[DeepLTranslate] ⓘ Note: DeepL does not provide phonetics or definitions');
-    console.log('[DeepLTranslate] ⓘ These will be supplemented by TranslationService if enabled');
+    logger.log('[DeepLTranslate] ⓘ Note: DeepL does not provide phonetics or definitions');
+    logger.log('[DeepLTranslate] ⓘ These will be supplemented by TranslationService if enabled');
 
     // 生成标注文本
     result.annotationText = this.generateAnnotationText(result);
-    console.log('[DeepLTranslate] ✓ Annotation text:', result.annotationText);
+    logger.log('[DeepLTranslate] ✓ Annotation text:', result.annotationText);
 
-    console.log('[DeepLTranslate] ========== Parsing Summary ==========');
-    console.log('[DeepLTranslate] Phonetics found:', result.phonetics.length);
-    console.log('[DeepLTranslate] Definitions found:', result.definitions.length);
-    console.log('[DeepLTranslate] Examples found:', result.examples.length);
-    console.log('[DeepLTranslate] Annotation text:', result.annotationText);
-    console.log('[DeepLTranslate] =====================================');
+    logger.log('[DeepLTranslate] ========== Parsing Summary ==========');
+    logger.log('[DeepLTranslate] Phonetics found:', result.phonetics.length);
+    logger.log('[DeepLTranslate] Definitions found:', result.definitions.length);
+    logger.log('[DeepLTranslate] Examples found:', result.examples.length);
+    logger.log('[DeepLTranslate] Annotation text:', result.annotationText);
+    logger.log('[DeepLTranslate] =====================================');
 
     return result;
   }
@@ -1173,7 +1173,7 @@ class DebugTranslateProvider extends TranslationProvider {
   }
 
   async translate(text, targetLang, sourceLang = 'auto') {
-    console.log(`[DebugProvider] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
+    logger.log(`[DebugProvider] Translating: "${text}" from ${sourceLang} to ${targetLang}`);
     
     // 模拟API延迟
     await new Promise(resolve => setTimeout(resolve, this.delay));
@@ -1344,7 +1344,7 @@ class DebugTranslateProvider extends TranslationProvider {
    * @param {Object} data - 翻译数据
    */
   addTestData(word, targetLang, data) {
-    console.log(`[DebugProvider] Added test data for "${word}" -> ${targetLang}`);
+    logger.log(`[DebugProvider] Added test data for "${word}" -> ${targetLang}`);
   }
 }
 
@@ -1374,25 +1374,25 @@ class FreeDictionaryProvider extends TranslationProvider {
       // 只查询单个单词
       const cleanWord = word.trim().toLowerCase();
       if (cleanWord.split(/\s+/).length > 1) {
-        console.log('[FreeDictionary] Skipping phrase (only supports single words):', word);
+        logger.log('[FreeDictionary] Skipping phrase (only supports single words):', word);
         return null;
       }
 
-      console.log(`[FreeDictionary] Fetching phonetics for: "${cleanWord}"`);
+      logger.log(`[FreeDictionary] Fetching phonetics for: "${cleanWord}"`);
       
       const url = `${this.apiUrl}/${encodeURIComponent(cleanWord)}`;
       const response = await fetch(url);
       
       if (!response.ok) {
         if (response.status === 404) {
-          console.log(`[FreeDictionary] Word not found: ${cleanWord}`);
+          logger.log(`[FreeDictionary] Word not found: ${cleanWord}`);
           return null;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('[FreeDictionary] API response:', data);
+      logger.log('[FreeDictionary] API response:', data);
 
       return this.parseFreeDictionaryResponse(data, cleanWord);
     } catch (error) {
@@ -1440,7 +1440,7 @@ class FreeDictionaryProvider extends TranslationProvider {
       });
     }
 
-    console.log(`[FreeDictionary] Found ${result.phonetics.length} phonetics for "${word}"`);
+    logger.log(`[FreeDictionary] Found ${result.phonetics.length} phonetics for "${word}"`);
     
     return result.phonetics.length > 0 ? result : null;
   }
@@ -1503,7 +1503,7 @@ class OpenAITranslateProvider extends TranslationProvider {
       customTemplates: this.customTemplates
     });
 
-    console.log(`[OpenAI Adapter] Initialized with:`, {
+    logger.log(`[OpenAI Adapter] Initialized with:`, {
       model: this.model,
       baseURL: this.baseURL,
       temperature: this.temperature,
@@ -1571,7 +1571,7 @@ class OpenAITranslateProvider extends TranslationProvider {
     }
 
     if (changed) {
-      console.log('[OpenAI Adapter] Configuration changed, reinitializing provider');
+      logger.log('[OpenAI Adapter] Configuration changed, reinitializing provider');
       this.openaiProvider = null;
     }
   }
@@ -1585,9 +1585,9 @@ class OpenAITranslateProvider extends TranslationProvider {
    * @returns {Promise<TranslationResult>}
    */
   async translate(text, targetLang, sourceLang = 'auto', options = {}) {
-    console.log(`[OpenAI Adapter] Translating: "${text.substring(0, 50)}..." from ${sourceLang} to ${targetLang}`);
-    console.log(`[OpenAI Adapter] Options:`, options);
-    console.log(`[OpenAI Adapter] Context:`, options.context || '(none)');
+    logger.log(`[OpenAI Adapter] Translating: "${text.substring(0, 50)}..." from ${sourceLang} to ${targetLang}`);
+    logger.log(`[OpenAI Adapter] Options:`, options);
+    logger.log(`[OpenAI Adapter] Context:`, options.context || '(none)');
     
     // 确保 provider 已初始化
     if (!this.openaiProvider) {
@@ -1633,7 +1633,7 @@ class OpenAITranslateProvider extends TranslationProvider {
         }
       }
 
-      console.log('[OpenAI Adapter] Translation completed:', result);
+      logger.log('[OpenAI Adapter] Translation completed:', result);
       return result;
 
     } catch (error) {
@@ -1743,7 +1743,7 @@ class TranslationService {
       throw new TypeError('Provider must be an instance of TranslationProvider');
     }
     this.providers.set(name, provider);
-    console.log(`[TranslationService] Registered provider: ${name}`);
+    logger.log(`[TranslationService] Registered provider: ${name}`);
   }
 
   /**
@@ -1755,7 +1755,7 @@ class TranslationService {
       throw new Error(`Provider "${name}" not found`);
     }
     this.activeProvider = name;
-    console.log(`[TranslationService] Active provider set to: ${name}`);
+    logger.log(`[TranslationService] Active provider set to: ${name}`);
   }
 
   /**
@@ -1782,35 +1782,78 @@ class TranslationService {
     
     // 检查缓存（仅在缓存启用且未指定 noCache 时）
     if (!options.noCache && this.maxCacheSize > 0 && this.cache.has(cacheKey)) {
-      console.log('[TranslationService] Using cached result');
+      logger.log('[TranslationService] Using cached result');
       return this.cache.get(cacheKey);
     }
 
+    const provider = this.getActiveProvider();
+
+    // Timeout and retry logic for provider.translate()
+    const maxRetries = 2;
+    let lastError;
+    let result;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      let timeoutId;
+      try {
+        const controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+        logger.log('[TranslationService] Calling provider.translate with options:', options);
+        result = await provider.translate(text, targetLang, sourceLang, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        break; // Success, exit retry loop
+      } catch (error) {
+        clearTimeout(timeoutId);
+        lastError = error;
+
+        // Don't retry on 4xx errors (client errors)
+        if (error.message?.includes('4') && error.message?.includes('error')) {
+          throw error;
+        }
+        // On timeout (AbortError), retry if attempts remain
+        if (error.name === 'AbortError' && attempt < maxRetries) {
+          console.warn(`[TranslationService] Attempt ${attempt + 1} timed out, retrying...`);
+          continue;
+        }
+        // For network errors, retry if attempts remain
+        if (attempt < maxRetries && (error.message?.includes('fetch') || error.message?.includes('network') || error.name === 'TypeError')) {
+          console.warn(`[TranslationService] Attempt ${attempt + 1} failed, retrying...`);
+          continue;
+        }
+        // No more retries or non-retryable error
+        console.error('[TranslationService] Translation failed:', error);
+        throw error;
+      }
+    }
+
+    // If all retries exhausted without breaking out of the loop
+    if (!result) {
+      console.error('[TranslationService] Translation failed after all retries:', lastError);
+      throw lastError;
+    }
+
     try {
-      const provider = this.getActiveProvider();
-      console.log('[TranslationService] Calling provider.translate with options:', options);
-      const result = await provider.translate(text, targetLang, sourceLang, options);
-      
-      // 🆕 通用音标补充：如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
+      // 通用音标补充：如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
       if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
-        console.log('[TranslationService] No phonetics found, trying FreeDictionary supplement...');
+        logger.log('[TranslationService] No phonetics found, trying FreeDictionary supplement...');
         await this.supplementPhoneticsFromFreeDictionary(result, text);
       }
-      
-      // 🆕 生成或更新 annotationText（在补充音标后）
+
+      // 生成或更新 annotationText（在补充音标后）
       if (!result.annotationText || result.phonetics.length > 0) {
         result.annotationText = this.generateAnnotationText(result);
-        console.log('[TranslationService] ✓ Generated annotation text:', result.annotationText);
+        logger.log('[TranslationService] ✓ Generated annotation text:', result.annotationText);
       }
-      
+
       // 缓存结果（仅在缓存启用时）
       if (this.maxCacheSize > 0) {
         this.addToCache(cacheKey, result);
       }
-      
+
       return result;
     } catch (error) {
-      console.error('[TranslationService] Translation failed:', error);
+      console.error('[TranslationService] Post-translation processing failed:', error);
       throw error;
     }
   }
@@ -1826,29 +1869,29 @@ class TranslationService {
       // 只为单个英文单词补充音标
       const words = originalText.trim().split(/\s+/);
       if (words.length !== 1) {
-        console.log('[TranslationService] Skipping FreeDictionary for non-single-word text');
+        logger.log('[TranslationService] Skipping FreeDictionary for non-single-word text');
         return;
       }
 
       // 检查是否是英文（简单判断）
       if (!/^[a-zA-Z]+$/.test(originalText.trim())) {
-        console.log('[TranslationService] Skipping FreeDictionary for non-English text');
+        logger.log('[TranslationService] Skipping FreeDictionary for non-English text');
         return;
       }
 
       // 获取 FreeDictionary 提供者
       const freeDictProvider = this.providers.get('freedict');
       if (!freeDictProvider) {
-        console.log('[TranslationService] ⚠️ FreeDictionary provider not available');
+        logger.log('[TranslationService] ⚠️ FreeDictionary provider not available');
         return;
       }
 
       const phoneticData = await freeDictProvider.fetchPhonetics(originalText);
       if (phoneticData && phoneticData.phonetics.length > 0) {
         result.phonetics = phoneticData.phonetics;
-        console.log(`[TranslationService] ✓ Supplemented ${phoneticData.phonetics.length} phonetics from FreeDictionary`);
+        logger.log(`[TranslationService] ✓ Supplemented ${phoneticData.phonetics.length} phonetics from FreeDictionary`);
       } else {
-        console.log('[TranslationService] ⚠️ FreeDictionary did not return phonetics');
+        logger.log('[TranslationService] ⚠️ FreeDictionary did not return phonetics');
       }
     } catch (error) {
       console.error('[TranslationService] Error supplementing phonetics:', error);
@@ -1925,7 +1968,7 @@ class TranslationService {
    */
   clearCache() {
     this.cache.clear();
-    console.log('[TranslationService] Cache cleared');
+    logger.log('[TranslationService] Cache cleared');
   }
 
   /**
@@ -1934,7 +1977,7 @@ class TranslationService {
    */
   enableCache(size = 100) {
     this.maxCacheSize = Math.max(10, Math.min(size, 1000)); // 限制在 10-1000 之间
-    console.log(`[TranslationService] Cache enabled with size: ${this.maxCacheSize}`);
+    logger.log(`[TranslationService] Cache enabled with size: ${this.maxCacheSize}`);
   }
 
   /**
@@ -1943,7 +1986,7 @@ class TranslationService {
   disableCache() {
     this.maxCacheSize = 0;
     this.clearCache();
-    console.log('[TranslationService] Cache disabled');
+    logger.log('[TranslationService] Cache disabled');
   }
 
   /**
@@ -1998,7 +2041,7 @@ translationService.registerProvider('freedict', new FreeDictionaryProvider());
 try {
   if (typeof OpenAIProvider !== 'undefined') {
     translationService.registerProvider('openai', new OpenAITranslateProvider());
-    console.log('[TranslationService] OpenAI provider registered successfully');
+    logger.log('[TranslationService] OpenAI provider registered successfully');
   } else {
     console.warn('[TranslationService] OpenAIProvider class not found, skipping registration');
   }

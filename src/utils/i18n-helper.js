@@ -156,7 +156,7 @@ function localizeHtmlPage() {
   document.querySelectorAll('[data-i18n-html]').forEach(element => {
     const key = element.getAttribute('data-i18n-html');
     if (key) {
-      element.innerHTML = i18n(key);
+      element.innerHTML = (typeof sanitizeHTML !== 'undefined') ? sanitizeHTML(i18n(key)) : i18n(key);
     }
   });
 

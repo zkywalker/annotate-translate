@@ -46,22 +46,22 @@ class AnnotationScanner {
     this.abortController = new AbortController();
 
     try {
-      console.log('[AnnotationScanner] Starting page scan...');
+      logger.log('[AnnotationScanner] Starting page scan...');
       const startTime = performance.now();
 
       // 1. 遍历所有文本节点
       const textNodes = this.collectTextNodes(rootElement);
-      console.log(`[AnnotationScanner] Found ${textNodes.length} text nodes`);
+      logger.log(`[AnnotationScanner] Found ${textNodes.length} text nodes`);
 
       // 2. 提取所有单词
       const wordsMap = this.extractWordsFromNodes(textNodes);
       const uniqueWords = Array.from(wordsMap.keys());
-      console.log(`[AnnotationScanner] Extracted ${uniqueWords.length} unique words`);
+      logger.log(`[AnnotationScanner] Extracted ${uniqueWords.length} unique words`);
 
       // 3. 批量查询词库
       const wordsToAnnotate = this.vocabularyService.batchCheck(uniqueWords);
       const annotationCount = Array.from(wordsToAnnotate.values()).filter(v => v).length;
-      console.log(`[AnnotationScanner] ${annotationCount} words need annotation`);
+      logger.log(`[AnnotationScanner] ${annotationCount} words need annotation`);
 
       // 4. 准备标注数据
       const annotations = [];
@@ -101,7 +101,7 @@ class AnnotationScanner {
         }
       };
 
-      console.log('[AnnotationScanner] Scan completed:', result);
+      logger.log('[AnnotationScanner] Scan completed:', result);
       return result;
     } catch (error) {
       console.error('[AnnotationScanner] Scan failed:', error);
@@ -202,7 +202,7 @@ class AnnotationScanner {
   async enrichAnnotations(annotations, options) {
     const { fetchTranslation, fetchPhonetic, sourceLang, targetLang, vocabularyConfig } = options;
 
-    console.log(`[AnnotationScanner] Enriching ${annotations.length} annotations`, {
+    logger.log(`[AnnotationScanner] Enriching ${annotations.length} annotations`, {
       fetchTranslation,
       fetchPhonetic,
       sourceLang,
@@ -233,8 +233,12 @@ class AnnotationScanner {
     // 创建进度显示面板
     const progressPanel = this.createProgressPanel(total, vocabularyConfig, providerName, providerDisplayName);
 
-    // 批量获取翻译（带进度更新）
-    const promises = annotations.map(async (annotation, index) => {
+    // 批量获取翻译（带进度更新），分批处理避免 API 速率限制
+    const batchSize = 5;
+    for (let i = 0; i < annotations.length; i += batchSize) {
+      if (this.abortController?.signal.aborted) break;
+      const batch = annotations.slice(i, i + batchSize);
+      await Promise.all(batch.map(async (annotation) => {
       try {
         // 检查是否被中断
         if (this.abortController?.signal.aborted) {
@@ -251,7 +255,7 @@ class AnnotationScanner {
             throw new Error('Translation aborted');
           }
 
-          console.log(`[AnnotationScanner] Fetching translation for "${annotation.word}" (${sourceLang} → ${targetLang})`);
+          logger.log(`[AnnotationScanner] Fetching translation for "${annotation.word}" (${sourceLang} → ${targetLang})`);
 
           const translation = await this.translationService.translate(
             annotation.word,
@@ -259,7 +263,7 @@ class AnnotationScanner {
             sourceLang   // 第3个参数：源语言
           );
 
-          console.log(`[AnnotationScanner] Translation result for "${annotation.word}":`, {
+          logger.log(`[AnnotationScanner] Translation result for "${annotation.word}":`, {
             translatedText: translation.translatedText,
             phonetic: translation.phonetic,
             hasDefinition: !!translation.definition
@@ -290,13 +294,12 @@ class AnnotationScanner {
         completed++;
         this.updateProgress(progressPanel, completed, total, annotation.word, errorCount);
       }
-    });
+    }));
+    }
 
-    await Promise.all(promises);
-
-    console.log(`[AnnotationScanner] Enrichment complete. Success: ${total - errorCount}, Errors: ${errorCount}`);
+    logger.log(`[AnnotationScanner] Enrichment complete. Success: ${total - errorCount}, Errors: ${errorCount}`);
     if (errors.length > 0) {
-      console.log(`[AnnotationScanner] Failed words:`, errors);
+      logger.log(`[AnnotationScanner] Failed words:`, errors);
     }
 
     // 显示完成状态
@@ -566,7 +569,7 @@ class AnnotationScanner {
    */
   abort() {
     if (this.abortController) {
-      console.log('[AnnotationScanner] Aborting current scan...');
+      logger.log('[AnnotationScanner] Aborting current scan...');
       this.abortController.abort();
       this.isScanning = false;
       this.abortController = null;
@@ -586,7 +589,7 @@ class AnnotationScanner {
    * 移除所有标注
    */
   removeAnnotations() {
-    console.log('[AnnotationScanner] Removing all annotations...');
+    logger.log('[AnnotationScanner] Removing all annotations...');
 
     let removedCount = 0;
 
@@ -602,7 +605,7 @@ class AnnotationScanner {
 
     this.annotatedNodes.clear();
 
-    console.log(`[AnnotationScanner] Removed ${removedCount} annotations`);
+    logger.log(`[AnnotationScanner] Removed ${removedCount} annotations`);
     return removedCount;
   }
 
@@ -623,7 +626,7 @@ class AnnotationScanner {
         }
 
         this.observerTimeout = setTimeout(() => {
-          console.log('[AnnotationScanner] DOM changed, re-scanning...');
+          logger.log('[AnnotationScanner] DOM changed, re-scanning...');
           this.scanPage(options);
         }, 1000);
       });
@@ -633,12 +636,12 @@ class AnnotationScanner {
         subtree: true
       });
 
-      console.log('[AnnotationScanner] Started observing DOM changes');
+      logger.log('[AnnotationScanner] Started observing DOM changes');
     } else {
       if (this.observer) {
         this.observer.disconnect();
         this.observer = null;
-        console.log('[AnnotationScanner] Stopped observing DOM changes');
+        logger.log('[AnnotationScanner] Stopped observing DOM changes');
       }
     }
   }

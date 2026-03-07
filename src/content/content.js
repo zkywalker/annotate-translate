@@ -20,6 +20,23 @@ function deepMerge(target, source) {
   return result;
 }
 
+// Sanitize settings object for safe logging (mask sensitive fields)
+function sanitizeSettingsForLog(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const result = Array.isArray(obj) ? [...obj] : { ...obj };
+  const sensitiveKeys = ['key', 'secret', 'apiKey', 'appKey', 'appSecret', 'password', 'token'];
+  for (const k in result) {
+    if (result.hasOwnProperty(k)) {
+      if (typeof result[k] === 'object' && result[k] !== null) {
+        result[k] = sanitizeSettingsForLog(result[k]);
+      } else if (typeof result[k] === 'string' && sensitiveKeys.some(sk => k.toLowerCase().includes(sk.toLowerCase()))) {
+        result[k] = result[k] ? '***' : '';
+      }
+    }
+  }
+  return result;
+}
+
 // 全局设置对象 - 使用新的扁平化结构
 let settings = {
   general: {
@@ -180,7 +197,7 @@ let annotationScanner = null; // AnnotationScanner实例
 init();
 
 async function init() {
-  console.log('[Annotate-Translate] Content script loaded on:', window.location.href);
+  logger.log('[Annotate-Translate] Content script loaded on:', window.location.href);
 
   // 检查扩展上下文
   if (!isExtensionContextValid()) {
@@ -194,12 +211,12 @@ async function init() {
     return;
   }
 
-  console.log('[Annotate-Translate] Translation service available:', translationService);
+  logger.log('[Annotate-Translate] Translation service available:', translationService);
 
   // 初始化语言设置（从 i18n-helper.js）
   if (typeof initializeLanguage !== 'undefined') {
     await initializeLanguage();
-    console.log('[Annotate-Translate] Language initialized');
+    logger.log('[Annotate-Translate] Language initialized');
   }
 
   // Load settings from storage - FIX: Wait for settings to load before proceeding
@@ -218,10 +235,11 @@ async function init() {
     if (items.general) {
       // 深度合并：保留默认settings中的字段，用storage中的值覆盖
       settings = deepMerge(settings, items);
-      console.log('[Annotate-Translate] Settings loaded from storage');
-      console.log('[Annotate-Translate] Merged settings:', settings);
+      if (settings.debug?.enableDebugMode) { logger.enable(); }
+      logger.log('[Annotate-Translate] Settings loaded from storage');
+      logger.log('[Annotate-Translate] Merged settings:', sanitizeSettingsForLog(settings));
     } else {
-      console.log('[Annotate-Translate] No settings found, using defaults');
+      logger.log('[Annotate-Translate] No settings found, using defaults');
     }
 
     // 应用设置到翻译服务 - Now happens BEFORE event listeners are registered
@@ -246,7 +264,7 @@ async function init() {
     // Listen for messages from popup
     chrome.runtime.onMessage.addListener(handleMessage);
 
-    console.log('[Annotate-Translate] Initialization complete');
+    logger.log('[Annotate-Translate] Initialization complete');
   } catch (error) {
     console.error('[Annotate-Translate] Failed to load settings:', error);
     // Continue with defaults even if settings loading fails
@@ -276,14 +294,14 @@ function initializeTranslationUI() {
     enableAudio: $.enableAudio
   });
 
-  console.log('[Annotate-Translate] TranslationUI initialized');
+  logger.log('[Annotate-Translate] TranslationUI initialized');
 }
 
 // 初始化词库服务
 async function initializeVocabularyService() {
-  console.log('[VocabularyService] Starting initialization...');
-  console.log('[VocabularyService] vocabularyService defined?', typeof vocabularyService !== 'undefined');
-  console.log('[VocabularyService] settings.vocabulary:', settings.vocabulary);
+  logger.log('[VocabularyService] Starting initialization...');
+  logger.log('[VocabularyService] vocabularyService defined?', typeof vocabularyService !== 'undefined');
+  logger.log('[VocabularyService] settings.vocabulary:', settings.vocabulary);
 
   if (typeof vocabularyService === 'undefined') {
     console.warn('[Annotate-Translate] VocabularyService not loaded, vocabulary features will be unavailable');
@@ -295,7 +313,7 @@ async function initializeVocabularyService() {
     if (typeof UnifiedVocabularyProvider !== 'undefined') {
       const unifiedProvider = new UnifiedVocabularyProvider('unified');
       vocabularyService.registerProvider('unified', unifiedProvider);
-      console.log('[VocabularyService] Unified provider registered');
+      logger.log('[VocabularyService] Unified provider registered');
     } else {
       console.warn('[VocabularyService] UnifiedVocabularyProvider not defined');
     }
@@ -304,7 +322,7 @@ async function initializeVocabularyService() {
     if (typeof CETVocabularyProvider !== 'undefined') {
       const cetProvider = new CETVocabularyProvider();
       vocabularyService.registerProvider('cet', cetProvider);
-      console.log('[VocabularyService] CET provider registered');
+      logger.log('[VocabularyService] CET provider registered');
     } else {
       console.warn('[VocabularyService] CETVocabularyProvider not defined');
     }
@@ -313,7 +331,7 @@ async function initializeVocabularyService() {
     if (typeof FrequencyVocabularyProvider !== 'undefined') {
       const frequencyProvider = new FrequencyVocabularyProvider();
       vocabularyService.registerProvider('frequency', frequencyProvider);
-      console.log('[VocabularyService] Frequency provider registered');
+      logger.log('[VocabularyService] Frequency provider registered');
     } else {
       console.warn('[VocabularyService] FrequencyVocabularyProvider not defined');
     }
@@ -325,7 +343,7 @@ async function initializeVocabularyService() {
 
     // 自动升级旧配置并转换选项格式
     if (providerName === 'cet' && typeof UnifiedVocabularyProvider !== 'undefined') {
-      console.log('[VocabularyService] Auto-upgrading from "cet" to "unified" provider');
+      logger.log('[VocabularyService] Auto-upgrading from "cet" to "unified" provider');
 
       // 将 CET 配置转换为 Unified 格式
       const cetConfig = settings.vocabulary?.providers?.cet || {};
@@ -337,7 +355,7 @@ async function initializeVocabularyService() {
       };
 
       providerName = 'unified';
-      console.log('[VocabularyService] Converted CET options to unified format:', providerOptions);
+      logger.log('[VocabularyService] Converted CET options to unified format:', providerOptions);
     } else if (providerName === 'unified') {
       // Unified provider 使用默认配置
       providerOptions = settings.vocabulary?.providers?.unified || {
@@ -351,18 +369,18 @@ async function initializeVocabularyService() {
       providerOptions = settings.vocabulary?.providers?.[providerName] || {};
     }
 
-    console.log('[VocabularyService] About to set active provider:', providerName, providerOptions);
+    logger.log('[VocabularyService] About to set active provider:', providerName, providerOptions);
 
     await vocabularyService.setActiveProvider(providerName, providerOptions);
-    console.log(`[VocabularyService] Active provider set to: ${providerName}`, providerOptions);
+    logger.log(`[VocabularyService] Active provider set to: ${providerName}`, providerOptions);
 
     if ($.vocabularyEnabled) {
-      console.log('[VocabularyService] Vocabulary annotation feature is ENABLED');
+      logger.log('[VocabularyService] Vocabulary annotation feature is ENABLED');
     } else {
-      console.log('[VocabularyService] Vocabulary annotation feature is DISABLED (can be enabled in settings)');
+      logger.log('[VocabularyService] Vocabulary annotation feature is DISABLED (can be enabled in settings)');
     }
 
-    console.log('[Annotate-Translate] Vocabulary service initialized successfully');
+    logger.log('[Annotate-Translate] Vocabulary service initialized successfully');
   } catch (error) {
     console.error('[VocabularyService] Initialization failed:', error);
     console.error('[VocabularyService] Error stack:', error.stack);
@@ -382,7 +400,7 @@ function initializeAnnotationScanner() {
   }
 
   annotationScanner = new AnnotationScanner(vocabularyService, translationService);
-  console.log('[Annotate-Translate] AnnotationScanner initialized');
+  logger.log('[Annotate-Translate] AnnotationScanner initialized');
 }
 
 // 设置页面卸载监听器，在页面刷新或关闭时中断翻译任务
@@ -391,7 +409,7 @@ function setupPageUnloadHandler() {
     if (annotationScanner) {
       const aborted = annotationScanner.abort();
       if (aborted) {
-        console.log('[Annotate-Translate] Aborted translation tasks due to page unload');
+        logger.log('[Annotate-Translate] Aborted translation tasks due to page unload');
       }
     }
   });
@@ -403,7 +421,7 @@ function setupPageUnloadHandler() {
     }
   });
 
-  console.log('[Annotate-Translate] Page unload handlers set up');
+  logger.log('[Annotate-Translate] Page unload handlers set up');
 }
 
 // 应用翻译设置
@@ -414,8 +432,8 @@ function applyTranslationSettings() {
   }
   
   // 打印所有已注册的 providers
-  console.log('[Annotate-Translate] Registered providers:', Array.from(translationService.providers.keys()));
-  console.log('[Annotate-Translate] Requested provider:', $.translationProvider);
+  logger.log('[Annotate-Translate] Registered providers:', Array.from(translationService.providers.keys()));
+  logger.log('[Annotate-Translate] Requested provider:', $.translationProvider);
   
   // 设置活跃的翻译提供商
   if ($.translationProvider) {
@@ -442,7 +460,7 @@ function applyTranslationSettings() {
     
     try {
       translationService.setActiveProvider($.translationProvider);
-      console.log('[Annotate-Translate] Provider set to:', $.translationProvider);
+      logger.log('[Annotate-Translate] Provider set to:', $.translationProvider);
     } catch (error) {
       console.error('[Annotate-Translate] Failed to set provider:', error);
       // 出错时回退到 google
@@ -472,7 +490,7 @@ function applyTranslationSettings() {
         googleProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
         googleProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
         googleProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
-        console.log('[Annotate-Translate] Google provider configured - annotation settings:', {
+        logger.log('[Annotate-Translate] Google provider configured - annotation settings:', {
           showPhonetics: googleProvider.showPhoneticInAnnotation,
           showTranslation: googleProvider.showTranslationInAnnotation,
           showDefinitions: googleProvider.showDefinitionsInAnnotation
@@ -487,7 +505,7 @@ function applyTranslationSettings() {
         debugProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
         debugProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
         debugProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
-        console.log('[Annotate-Translate] Debug provider configured - annotation settings:', {
+        logger.log('[Annotate-Translate] Debug provider configured - annotation settings:', {
           showPhonetics: debugProvider.showPhoneticInAnnotation,
           showTranslation: debugProvider.showTranslationInAnnotation,
           showDefinitions: debugProvider.showDefinitionsInAnnotation
@@ -506,9 +524,9 @@ function applyTranslationSettings() {
         youdaoProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
         youdaoProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
         youdaoProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
-        console.log('[Annotate-Translate] Youdao provider configured:');
-        console.log('  - AppKey:', $.youdaoAppKey ? 'Set' : 'Not set');
-        console.log('  - Annotation settings:', {
+        logger.log('[Annotate-Translate] Youdao provider configured:');
+        logger.log('  - AppKey:', $.youdaoAppKey ? 'Set' : 'Not set');
+        logger.log('  - Annotation settings:', {
           showPhonetics: youdaoProvider.showPhoneticInAnnotation,
           showTranslation: youdaoProvider.showTranslationInAnnotation,
           showDefinitions: youdaoProvider.showDefinitionsInAnnotation
@@ -527,10 +545,10 @@ function applyTranslationSettings() {
         deeplProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
         deeplProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
         deeplProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
-        console.log('[Annotate-Translate] DeepL provider configured:');
-        console.log('  - API Key:', $.deeplApiKey ? 'Set' : 'Not set');
-        console.log('  - Use Free API:', $.deeplUseFreeApi);
-        console.log('  - Annotation settings:', {
+        logger.log('[Annotate-Translate] DeepL provider configured:');
+        logger.log('  - API Key:', $.deeplApiKey ? 'Set' : 'Not set');
+        logger.log('  - Use Free API:', $.deeplUseFreeApi);
+        logger.log('  - Annotation settings:', {
           showPhonetics: deeplProvider.showPhoneticInAnnotation,
           showTranslation: deeplProvider.showTranslationInAnnotation,
           showDefinitions: deeplProvider.showDefinitionsInAnnotation
@@ -560,16 +578,16 @@ function applyTranslationSettings() {
           showDefinitionsInAnnotation: $.showDefinitionsInAnnotation === true
         });
 
-        console.log('[Annotate-Translate] AI provider configured:');
-        console.log('  - Provider:', aiProviderConfig.name || 'OpenAI');
-        console.log('  - API Key:', aiProviderConfig.apiKey ? 'Set' : 'Not set');
-        console.log('  - Model:', aiProviderConfig.model);
-        console.log('  - Base URL:', aiProviderConfig.baseUrl);
-        console.log('  - Temperature:', aiProviderConfig.temperature);
-        console.log('  - Max Tokens:', aiProviderConfig.maxTokens);
-        console.log('  - Prompt Format:', aiProviderConfig.promptFormat);
-        console.log('  - Use Context:', aiProviderConfig.useContext);
-        console.log('  - Annotation settings:', {
+        logger.log('[Annotate-Translate] AI provider configured:');
+        logger.log('  - Provider:', aiProviderConfig.name || 'OpenAI');
+        logger.log('  - API Key:', aiProviderConfig.apiKey ? 'Set' : 'Not set');
+        logger.log('  - Model:', aiProviderConfig.model);
+        logger.log('  - Base URL:', aiProviderConfig.baseUrl);
+        logger.log('  - Temperature:', aiProviderConfig.temperature);
+        logger.log('  - Max Tokens:', aiProviderConfig.maxTokens);
+        logger.log('  - Prompt Format:', aiProviderConfig.promptFormat);
+        logger.log('  - Use Context:', aiProviderConfig.useContext);
+        logger.log('  - Annotation settings:', {
           showPhonetics: openaiProvider.showPhoneticInAnnotation,
           showTranslation: openaiProvider.showTranslationInAnnotation,
           showDefinitions: openaiProvider.showDefinitionsInAnnotation
@@ -581,22 +599,22 @@ function applyTranslationSettings() {
   // 🆕 配置翻译服务的通用设置
   if ($.showPhoneticInAnnotation !== undefined) {
     translationService.showPhoneticInAnnotation = $.showPhoneticInAnnotation;
-    console.log('[Annotate-Translate] Show phonetic in annotation:', $.showPhoneticInAnnotation ? 'Enabled' : 'Disabled');
+    logger.log('[Annotate-Translate] Show phonetic in annotation:', $.showPhoneticInAnnotation ? 'Enabled' : 'Disabled');
   }
   
   if ($.showTranslationInAnnotation !== undefined) {
     translationService.showTranslationInAnnotation = $.showTranslationInAnnotation;
-    console.log('[Annotate-Translate] Show translation in annotation:', $.showTranslationInAnnotation ? 'Enabled' : 'Disabled');
+    logger.log('[Annotate-Translate] Show translation in annotation:', $.showTranslationInAnnotation ? 'Enabled' : 'Disabled');
   }
   
   if ($.showDefinitionsInAnnotation !== undefined) {
     translationService.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation;
-    console.log('[Annotate-Translate] Show definitions in annotation:', $.showDefinitionsInAnnotation ? 'Enabled' : 'Disabled');
+    logger.log('[Annotate-Translate] Show definitions in annotation:', $.showDefinitionsInAnnotation ? 'Enabled' : 'Disabled');
   }
   
   if ($.enablePhoneticFallback !== undefined) {
     translationService.enablePhoneticFallback = $.enablePhoneticFallback;
-    console.log('[Annotate-Translate] Phonetic fallback:', $.enablePhoneticFallback ? 'Enabled' : 'Disabled');
+    logger.log('[Annotate-Translate] Phonetic fallback:', $.enablePhoneticFallback ? 'Enabled' : 'Disabled');
   }
   
   // 配置缓存
@@ -634,6 +652,15 @@ function isEditableElement(element) {
 
 // Detect if text is likely already in the target language using Unicode script heuristics
 // Returns true if the text appears to be in the same language as targetLang
+/**
+ * Check if text contains meaningful translatable content (not pure numbers, symbols, etc.)
+ */
+function isTranslatableText(text) {
+  if (!text) return false;
+  // Must contain at least one letter (any script)
+  return /[\p{L}]/u.test(text);
+}
+
 function isTargetLanguageText(text, targetLang) {
   if (!text || !targetLang) return false;
 
@@ -676,6 +703,10 @@ function handleTextSelection(event) {
   const selectedText = window.getSelection().toString().trim();
 
   if (selectedText && ($.enableTranslate || $.enableAnnotate)) {
+    // Skip pure numbers, symbols, etc.
+    if (!isTranslatableText(selectedText)) {
+      return;
+    }
     // Skip if text is already in target language
     if (isTargetLanguageText(selectedText, $.targetLanguage)) {
       hideContextMenu();
@@ -714,6 +745,9 @@ function handleDoubleClick(event) {
   const selectedText = selection.toString().trim();
   if (!selectedText || selection.rangeCount === 0) return;
 
+  // Skip pure numbers, symbols, etc.
+  if (!isTranslatableText(selectedText)) return;
+
   // Skip if text is already in target language
   if (isTargetLanguageText(selectedText, $.targetLanguage)) {
     return;
@@ -737,14 +771,25 @@ function showContextMenu(x, y, text) {
   
   // Apply size class based on settings
   const menuSize = $.menuButtonSize || 'small';
-  console.log('[Annotate-Translate] Menu button size:', menuSize, 'Settings:', settings);
+  logger.log('[Annotate-Translate] Menu button size:', menuSize, 'Settings:', settings);
   if (menuSize !== 'small') {
     menu.classList.add(`size-${menuSize}`);
   }
-  console.log('[Annotate-Translate] Menu classes:', menu.className);
-  
-  menu.style.left = x + 'px';
-  menu.style.top = y + 'px';
+  logger.log('[Annotate-Translate] Menu classes:', menu.className);
+
+  // Viewport boundary detection for menu positioning
+  let menuLeft = x;
+  let menuTop = y;
+  const menuWidth = 80; // estimated
+  const menuHeight = 30; // estimated
+  if (menuLeft + menuWidth > window.innerWidth + window.scrollX) {
+    menuLeft = window.innerWidth + window.scrollX - menuWidth - 5;
+  }
+  if (menuTop + menuHeight > window.innerHeight + window.scrollY) {
+    menuTop = y - menuHeight - 5;
+  }
+  menu.style.left = menuLeft + 'px';
+  menu.style.top = menuTop + 'px';
 
   if ($.enableTranslate) {
     const translateBtn = document.createElement('button');
@@ -754,7 +799,7 @@ function showContextMenu(x, y, text) {
     translateBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // 阻止事件冒泡
       e.preventDefault();  // 阻止默认行为
-      console.log('[Annotate-Translate] Translate button clicked');
+      logger.log('[Annotate-Translate] Translate button clicked');
       hideContextMenu();
       translateText(text);
     });
@@ -770,7 +815,7 @@ function showContextMenu(x, y, text) {
     annotateBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      console.log('[Annotate-Translate] Annotate button clicked');
+      logger.log('[Annotate-Translate] Annotate button clicked');
       hideContextMenu();
       // 直接标注用户选择的文本，使用保存的 Range
       annotateSelectedText(text);
@@ -808,7 +853,7 @@ function hideContextMenu() {
  * @returns {string} 包含选中文本的完整上下文
  */
 function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text = '') {
-  console.log('[Annotate-Translate] extractContext called with:', {
+  logger.log('[Annotate-Translate] extractContext called with:', {
     type: selectionOrRange?.constructor?.name,
     maxLength,
     text,
@@ -827,18 +872,18 @@ function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text =
       }
       range = selectionOrRange.getRangeAt(0);
       selectedText = selectedText || selectionOrRange.toString();
-      console.log('[Annotate-Translate] Using Selection, selectedText:', selectedText);
+      logger.log('[Annotate-Translate] Using Selection, selectedText:', selectedText);
     } else if (selectionOrRange instanceof Range) {
       range = selectionOrRange;
       selectedText = selectedText || range.toString();
-      console.log('[Annotate-Translate] Using Range, selectedText:', selectedText);
+      logger.log('[Annotate-Translate] Using Range, selectedText:', selectedText);
     } else {
       console.warn('[Annotate-Translate] extractContext: invalid parameter type:', typeof selectionOrRange);
       return '';
     }
     
     const container = range.commonAncestorContainer;
-    console.log('[Annotate-Translate] Range container:', container, 'nodeType:', container.nodeType);
+    logger.log('[Annotate-Translate] Range container:', container, 'nodeType:', container.nodeType);
     
     // 获取包含选中文本的父元素
     const parentElement = container.nodeType === Node.TEXT_NODE 
@@ -850,7 +895,7 @@ function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text =
       return '';
     }
     
-    console.log('[Annotate-Translate] Parent element:', parentElement.tagName, 'textLength:', parentElement.textContent?.length);
+    logger.log('[Annotate-Translate] Parent element:', parentElement.tagName, 'textLength:', parentElement.textContent?.length);
     
     if (!parentElement) {
       console.warn('[Annotate-Translate] extractContext: no parent element');
@@ -861,7 +906,7 @@ function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text =
     let fullText = parentElement.textContent || '';
     let currentElement = parentElement;
     
-    console.log('[Annotate-Translate] Initial fullText length:', fullText.length);
+    logger.log('[Annotate-Translate] Initial fullText length:', fullText.length);
     
     // 向上查找直到获得足够的文本或到达根元素
     while (fullText.length < maxLength * 2 && currentElement.parentElement) {
@@ -869,13 +914,13 @@ function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text =
       const parentText = currentElement.textContent || '';
       if (parentText.length > fullText.length) {
         fullText = parentText;
-        console.log('[Annotate-Translate] Expanded to parent, new length:', fullText.length);
+        logger.log('[Annotate-Translate] Expanded to parent, new length:', fullText.length);
       } else {
         break; // 不再增长，停止向上查找
       }
     }
 
-    console.log('[Annotate-Translate] Final fullText length:', fullText.length, 'Preview:', fullText.substring(0, 100));
+    logger.log('[Annotate-Translate] Final fullText length:', fullText.length, 'Preview:', fullText.substring(0, 100));
 
     if (!selectedText || !fullText) {
       console.warn('[Annotate-Translate] extractContext: no text to extract, selectedText:', selectedText, 'fullText length:', fullText.length);
@@ -885,21 +930,21 @@ function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text =
     // 查找选中文本在完整文本中的位置
     const selectedIndex = fullText.indexOf(selectedText);
     
-    console.log('[Annotate-Translate] Looking for selectedText:', selectedText, 'found at index:', selectedIndex);
+    logger.log('[Annotate-Translate] Looking for selectedText:', selectedText, 'found at index:', selectedIndex);
     
     if (selectedIndex === -1) {
       console.warn('[Annotate-Translate] extractContext: selected text not found in context');
       // 降级：返回开头部分
       const fallback = fullText.substring(0, maxLength).trim();
-      console.log('[Annotate-Translate] Using fallback context, length:', fallback.length);
+      logger.log('[Annotate-Translate] Using fallback context, length:', fallback.length);
       return fallback;
     }
 
     // 策略：提取包含选中文本的完整句子及其前后句
-    console.log('[Annotate-Translate] Calling extractSentenceContext with selectedIndex:', selectedIndex, 'length:', selectedText.length);
+    logger.log('[Annotate-Translate] Calling extractSentenceContext with selectedIndex:', selectedIndex, 'length:', selectedText.length);
     const context = extractSentenceContext(fullText, selectedIndex, selectedText.length, maxLength);
     
-    console.log('[Annotate-Translate] Extracted context length:', context.length, 
+    logger.log('[Annotate-Translate] Extracted context length:', context.length, 
                 'Preview:', context.substring(0, 60) + (context.length > 60 ? '...' : ''));
     return context;
     
@@ -1034,6 +1079,33 @@ function extractByCharacterLimit(fullText, targetIndex, targetLength, maxLength)
   return fullText.substring(contextStart, contextEnd).trim();
 }
 
+function getUserFriendlyError(error) {
+  const msg = error.message || '';
+  if (msg.includes('401') || msg.includes('403'))
+    return safeGetMessage('errorInvalidApiKey', null, 'Invalid API key. Please check your settings.');
+  if (msg.includes('timeout') || error.name === 'AbortError')
+    return safeGetMessage('errorTimeout', null, 'Translation timed out. Please try again.');
+  if (msg.includes('network') || msg.includes('fetch') || error.name === 'TypeError')
+    return safeGetMessage('errorNetwork', null, 'Network error. Please check your connection.');
+  if (msg.includes('429'))
+    return safeGetMessage('errorRateLimit', null, 'Too many requests. Please wait a moment.');
+  return safeGetMessage('errorGeneric', null, 'Translation failed. Please try again.');
+}
+
+// Get user-friendly error message for translation failures
+function getUserFriendlyError(error) {
+  const msg = error.message || '';
+  if (msg.includes('401') || msg.includes('403'))
+    return safeGetMessage('errorInvalidApiKey', null, 'Invalid API key. Please check your settings.');
+  if (msg.includes('timeout') || error.name === 'AbortError')
+    return safeGetMessage('errorTimeout', null, 'Translation timed out. Please try again.');
+  if (msg.includes('network') || msg.includes('fetch') || error.name === 'TypeError')
+    return safeGetMessage('errorNetwork', null, 'Network error. Please check your connection.');
+  if (msg.includes('429'))
+    return safeGetMessage('errorRateLimit', null, 'Too many requests. Please wait a moment.');
+  return safeGetMessage('errorGeneric', null, 'Translation failed. Please try again.');
+}
+
 async function translateText(text) {
   hideContextMenu();
   
@@ -1071,13 +1143,13 @@ async function translateText(text) {
     }
     
     if ($.debugMode && $.showConsoleLogs) {
-      console.log('[Annotate-Translate] Translating:', text, 'to', $.targetLanguage);
+      logger.log('[Annotate-Translate] Translating:', text, 'to', $.targetLanguage);
     }
     
     // 提取上下文信息（使用默认 300 字符限制）
     const context = extractContext(selection, 300, text);
     
-    console.log('[Annotate-Translate] Context:', context || '(empty)');
+    logger.log('[Annotate-Translate] Context:', context || '(empty)');
     
     // 调用翻译服务，传递上下文
     const result = await translationService.translate(
@@ -1088,7 +1160,7 @@ async function translateText(text) {
     );
     
     if ($.debugMode && $.showConsoleLogs) {
-      console.log('[Annotate-Translate] Translation result:', result);
+      logger.log('[Annotate-Translate] Translation result:', result);
     }
     
     // 移除加载提示
@@ -1109,8 +1181,26 @@ async function translateText(text) {
     if (selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      element.style.left = (rect.left + window.scrollX) + 'px';
-      element.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+      let left = rect.left + window.scrollX;
+      let top = rect.bottom + window.scrollY + 5;
+
+      // Viewport boundary detection
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const cardWidth = 450; // max-width from CSS
+      const cardHeight = 300; // estimated
+
+      // Check right edge overflow
+      if (left + cardWidth > viewportWidth + window.scrollX) {
+        left = Math.max(window.scrollX, viewportWidth + window.scrollX - cardWidth - 10);
+      }
+      // Check bottom overflow → show above selection
+      if (rect.bottom + cardHeight > viewportHeight) {
+        top = rect.top + window.scrollY - cardHeight - 5;
+      }
+
+      element.style.left = left + 'px';
+      element.style.top = top + 'px';
     }
     
     document.body.appendChild(element);
@@ -1121,11 +1211,22 @@ async function translateText(text) {
     closeBtn.className = 'translation-close-btn';
     closeBtn.innerHTML = '×';
     closeBtn.title = safeGetMessage('close', null, 'Close');
+    closeBtn.setAttribute('aria-label', safeGetMessage('close', null, 'Close'));
     closeBtn.addEventListener('click', () => {
       element.remove();
       currentTooltip = null;
     });
     element.appendChild(closeBtn);
+
+    // Keyboard navigation: Escape key to close
+    element.setAttribute('tabindex', '-1');
+    element.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        element.remove();
+        currentTooltip = null;
+      }
+    });
+    element.focus();
 
     // 自动关闭（如果配置了）
     if ($.autoCloseDelay && $.autoCloseDelay > 0) {
@@ -1145,15 +1246,15 @@ async function translateText(text) {
         if (!element.contains(e.target)) {
           element.remove();
           currentTooltip = null;
-          document.removeEventListener('click', closeHandler);
+          eventManager.remove(document, 'click', closeHandler);
         }
       };
-      document.addEventListener('click', closeHandler);
+      eventManager.add(document, 'click', closeHandler);
     }, 100);
     
   } catch (error) {
     console.error('[Annotate-Translate] Translation failed:', error);
-    
+
     // 显示错误消息
     loadingTooltip.className = 'annotate-translate-tooltip error';
     loadingTooltip.innerHTML = `
@@ -1161,11 +1262,11 @@ async function translateText(text) {
         <span class="error-icon">⚠️</span>
         <div class="error-message">
           <strong>${safeGetMessage('translationFailed', null, 'Translation failed')}</strong>
-          <p>${error.message}</p>
+          <p>${getUserFriendlyError(error)}</p>
         </div>
       </div>
     `;
-    
+
     // 3秒后自动关闭错误提示
     setTimeout(() => {
       if (loadingTooltip.parentElement) {
@@ -1181,24 +1282,24 @@ async function translateText(text) {
 // Annotate selected text
 // 优化版本：直接使用保存的 Range，不再弹窗询问
 function annotateSelectedText(text) {
-  console.log('[Annotate-Translate] Annotating selected text:', text);
-  console.log('[Annotate-Translate] lastSelection:', lastSelection);
+  logger.log('[Annotate-Translate] Annotating selected text:', text);
+  logger.log('[Annotate-Translate] lastSelection:', lastSelection);
 
   // 优先使用保存的 Range（用户真正选择的位置）
   if (lastSelection) {
     try {
       // 验证 Range 是否仍然有效
       const selectedText = lastSelection.toString();
-      console.log('[Annotate-Translate] lastSelection.toString():', selectedText);
-      console.log('[Annotate-Translate] lastSelection container:', lastSelection.commonAncestorContainer);
+      logger.log('[Annotate-Translate] lastSelection.toString():', selectedText);
+      logger.log('[Annotate-Translate] lastSelection container:', lastSelection.commonAncestorContainer);
 
       // 比较时去除首尾空格，因为用户可能选择时多选了空格
       if (selectedText.trim() === text.trim()) {
-        console.log('[Annotate-Translate] Using saved range - annotating exact user selection');
+        logger.log('[Annotate-Translate] Using saved range - annotating exact user selection');
         promptAndAnnotate(lastSelection, text);
         return;
       } else {
-        console.log('[Annotate-Translate] Saved range text mismatch:', selectedText.trim(), 'vs', text.trim());
+        logger.log('[Annotate-Translate] Saved range text mismatch:', selectedText.trim(), 'vs', text.trim());
       }
     } catch (e) {
       console.error('[Annotate-Translate] Saved range is invalid:', e);
@@ -1243,7 +1344,7 @@ function findFirstOccurrence(text) {
 
 // 标注页面所有相同文本（新功能：替代弹窗）
 async function annotateAllOccurrences(text) {
-  console.log('[Annotate-Translate] Annotating all occurrences of:', text);
+  logger.log('[Annotate-Translate] Annotating all occurrences of:', text);
 
   // 查找所有匹配项
   const matches = findAllOccurrences(text);
@@ -1256,7 +1357,7 @@ async function annotateAllOccurrences(text) {
     return;
   }
 
-  console.log(`[Annotate-Translate] Found ${matches.length} occurrences`);
+  logger.log(`[Annotate-Translate] Found ${matches.length} occurrences`);
 
   // 显示进度提示
   const progressMsg = showTemporaryMessage(
@@ -1317,7 +1418,7 @@ async function annotateAllOccurrences(text) {
       'success'
     );
 
-    console.log(`[Annotate-Translate] Successfully annotated ${successCount}/${matches.length} occurrences`);
+    logger.log(`[Annotate-Translate] Successfully annotated ${successCount}/${matches.length} occurrences`);
 
   } catch (error) {
     console.error('[Annotate-Translate] Batch annotation failed:', error);
@@ -1455,11 +1556,11 @@ function findAndAnnotateText(text) {
   }
   
   if (matches.length === 0) {
-    alert('Could not find the selected text on the page.');
+    showTemporaryMessage(safeGetMessage('textNotFound', null, 'Could not find the selected text on the page.'), 'error');
     return;
   }
   
-  console.log(`[Annotate-Translate] Found ${matches.length} match(es)`);
+  logger.log(`[Annotate-Translate] Found ${matches.length} match(es)`);
   
   // 如果只有一个匹配，直接标注
   if (matches.length === 1) {
@@ -1565,10 +1666,10 @@ function annotateAllMatches(matches, text, annotation) {
     }
   }
   
-  console.log(`[Annotate-Translate] Successfully annotated ${successCount}/${matches.length} occurrences`);
+  logger.log(`[Annotate-Translate] Successfully annotated ${successCount}/${matches.length} occurrences`);
   
   if (successCount < matches.length) {
-    alert(`Annotated ${successCount} out of ${matches.length} occurrences.\nSome annotations may have failed.`);
+    showTemporaryMessage(`Annotated ${successCount} out of ${matches.length} occurrences. Some annotations may have failed.`, 'info');
   }
 }
 
@@ -1603,7 +1704,7 @@ async function promptForBatchAnnotation(matches, text) {
       throw new Error('Translation service not available');
     }
     
-    console.log('[Annotate-Translate] Batch auto-annotating:', text, `(${matches.length} occurrences)`);
+    logger.log('[Annotate-Translate] Batch auto-annotating:', text, `(${matches.length} occurrences)`);
     
     // 提取第一个匹配项的上下文，直接使用 range
     let context = '';
@@ -1616,7 +1717,7 @@ async function promptForBatchAnnotation(matches, text) {
       // 直接使用 range 提取上下文（使用默认 300 字符）
       context = extractContext(range, 300, text);
       
-      console.log('[Annotate-Translate] Context (batch):', context || '(empty)');
+      logger.log('[Annotate-Translate] Context (batch):', context || '(empty)');
     }
     
     // 调用翻译服务，传递上下文
@@ -1636,7 +1737,7 @@ async function promptForBatchAnnotation(matches, text) {
     // 使用翻译结果标注所有匹配项
     annotateAllMatches(matches, text, annotationText);
     
-    console.log('[Annotate-Translate] Batch auto-annotated with:', annotationText);
+    logger.log('[Annotate-Translate] Batch auto-annotated with:', annotationText);
     
   } catch (error) {
     console.error('[Annotate-Translate] Auto-translate failed:', error);
@@ -1687,12 +1788,12 @@ async function promptAndAnnotate(range, text) {
       throw new Error('Translation service not available');
     }
     
-    console.log('[Annotate-Translate] Auto-annotating:', text);
+    logger.log('[Annotate-Translate] Auto-annotating:', text);
     
     // 直接使用 range 对象提取上下文（使用默认 300 字符）
     const context = extractContext(range, 300, text);
     
-    console.log('[Annotate-Translate] Context (annotate):', context || '(empty)');
+    logger.log('[Annotate-Translate] Context (annotate):', context || '(empty)');
     
     // 调用翻译服务，传递上下文
     const result = await translationService.translate(
@@ -1714,7 +1815,7 @@ async function promptAndAnnotate(range, text) {
     if (shouldHidePhonetic) {
       // 多个单词且启用隐藏读音，只显示翻译
       annotationText = result.translatedText;
-      console.log('[Annotate-Translate] Multiple words detected, hiding phonetics');
+      logger.log('[Annotate-Translate] Multiple words detected, hiding phonetics');
     } else {
       // 单个单词或未启用隐藏读音，可以显示读音
       annotationText = result.annotationText || result.translatedText;
@@ -1722,7 +1823,7 @@ async function promptAndAnnotate(range, text) {
     
     createRubyAnnotation(range, text, annotationText, result);
     
-    console.log('[Annotate-Translate] Auto-annotated with:', annotationText);
+    logger.log('[Annotate-Translate] Auto-annotated with:', annotationText);
     
   } catch (error) {
     console.error('[Annotate-Translate] Auto-translate failed:', error);
@@ -1846,7 +1947,7 @@ function createRubyElement(baseText, annotationText, result = null) {
 // Create ruby tag annotation
 function createRubyAnnotation(range, baseText, annotationText, result = null) {
   try {
-    console.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
+    logger.log('[Annotate-Translate] Creating ruby annotation for:', baseText, 'with:', annotationText);
 
     // Get the actual text from the range (including trailing spaces)
     const rangeText = range.toString();
@@ -1864,10 +1965,10 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
     // Clear selection
     window.getSelection().removeAllRanges();
 
-    console.log('[Annotate-Translate] Annotation created successfully');
+    logger.log('[Annotate-Translate] Annotation created successfully');
   } catch (e) {
     console.error('[Annotate-Translate] Failed to create annotation:', e);
-    alert('Failed to annotate text. Please try selecting the text again.');
+    showTemporaryMessage(safeGetMessage('annotationFailed', null, 'Failed to annotate text. Please try selecting the text again.'), 'error');
   }
 }
 
@@ -1877,7 +1978,7 @@ function createRubyAnnotation(range, baseText, annotationText, result = null) {
  * @param {string} text - The base text to search for
  */
 function clearAnnotationsByText(text) {
-  console.log('[Annotate-Translate] Clearing annotations for text:', text);
+  logger.log('[Annotate-Translate] Clearing annotations for text:', text);
 
   // Normalize text for comparison (trim and lowercase)
   const normalizedText = text.trim().toLowerCase();
@@ -1902,7 +2003,7 @@ function clearAnnotationsByText(text) {
           annotations.delete(element);
 
           removedCount++;
-          console.log('[Annotate-Translate] Removed annotation for:', baseText);
+          logger.log('[Annotate-Translate] Removed annotation for:', baseText);
         }
       } catch (error) {
         console.error('[Annotate-Translate] Failed to remove annotation:', error);
@@ -1911,9 +2012,9 @@ function clearAnnotationsByText(text) {
   });
 
   if (removedCount > 0) {
-    console.log(`[Annotate-Translate] Removed ${removedCount} annotation(s)`);
+    logger.log(`[Annotate-Translate] Removed ${removedCount} annotation(s)`);
   } else {
-    console.log('[Annotate-Translate] No annotations found for text:', text);
+    logger.log('[Annotate-Translate] No annotations found for text:', text);
   }
 }
 
@@ -1972,7 +2073,7 @@ function createAudioButton(phonetics, text) {
 
 // Play phonetic audio
 async function playPhoneticAudio(phonetics, text) {
-  console.log('[Annotate-Translate] Playing audio for:', text, phonetics);
+  logger.log('[Annotate-Translate] Playing audio for:', text, phonetics);
   
   // Priority:
   // 1. audioUrl from phonetics
@@ -1982,12 +2083,12 @@ async function playPhoneticAudio(phonetics, text) {
   const phoneticWithAudio = phonetics.find(p => p.audioUrl);
   
   if (phoneticWithAudio && phoneticWithAudio.audioUrl) {
-    console.log('[Annotate-Translate] Playing from URL:', phoneticWithAudio.audioUrl);
+    logger.log('[Annotate-Translate] Playing from URL:', phoneticWithAudio.audioUrl);
     return playAudioFromUrl(phoneticWithAudio.audioUrl);
   }
   
   // Fallback to Web Speech API
-  console.log('[Annotate-Translate] Using Web Speech API for:', text);
+  logger.log('[Annotate-Translate] Using Web Speech API for:', text);
   return playTextToSpeech(text);
 }
 
@@ -1998,12 +2099,12 @@ function playAudioFromUrl(url) {
     
     // Check if audio is cached
     if (audioCache.has(url)) {
-      console.log('[Annotate-Translate] Using cached audio for:', url);
+      logger.log('[Annotate-Translate] Using cached audio for:', url);
       audio = audioCache.get(url);
       // Reset audio to beginning
       audio.currentTime = 0;
     } else {
-      console.log('[Annotate-Translate] Loading new audio for:', url);
+      logger.log('[Annotate-Translate] Loading new audio for:', url);
       audio = new Audio(url);
       
       // Cache the audio object
@@ -2012,14 +2113,14 @@ function playAudioFromUrl(url) {
       // Implement LRU cache - remove oldest if cache is full
       if (audioCache.size > audioCacheMaxSize) {
         const firstKey = audioCache.keys().next().value;
-        console.log('[Annotate-Translate] Cache full, removing:', firstKey);
+        logger.log('[Annotate-Translate] Cache full, removing:', firstKey);
         audioCache.delete(firstKey);
       }
     }
     
     // Set up event listeners
     const onEnded = () => {
-      console.log('[Annotate-Translate] Audio playback completed');
+      logger.log('[Annotate-Translate] Audio playback completed');
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
       resolve();
@@ -2054,7 +2155,7 @@ function playTextToSpeech(text) {
     utterance.rate = 0.9; // Slightly slower for clarity
     
     utterance.onend = () => {
-      console.log('[Annotate-Translate] TTS playback completed');
+      logger.log('[Annotate-Translate] TTS playback completed');
       resolve();
     };
     
@@ -2069,7 +2170,7 @@ function playTextToSpeech(text) {
 
 // Clear audio cache (useful for memory management)
 function clearAudioCache() {
-  console.log(`[Annotate-Translate] Clearing audio cache (${audioCache.size} items)`);
+  logger.log(`[Annotate-Translate] Clearing audio cache (${audioCache.size} items)`);
   audioCache.clear();
 }
 
@@ -2121,7 +2222,7 @@ function saveAnnotation(baseText, annotationText) {
 
 // Handle messages from popup or background
 function handleMessage(request, sender, sendResponse) {
-  console.log('[Annotate-Translate] Received message:', request);
+  logger.log('[Annotate-Translate] Received message:', request);
   
   if (request.action === 'ping') {
     // Respond to ping to confirm content script is loaded
@@ -2142,7 +2243,7 @@ function handleMessage(request, sender, sendResponse) {
         }
         
         settings = Object.assign({}, settings, items);
-        console.log('[Annotate-Translate] Settings reloaded from storage:', settings);
+        logger.log('[Annotate-Translate] Settings reloaded from storage:', settings);
         
         // 重新应用翻译设置
         applyTranslationSettings();
@@ -2159,7 +2260,7 @@ function handleMessage(request, sender, sendResponse) {
     // 清除翻译缓存
     if (typeof translationService !== 'undefined') {
       translationService.clearCache();
-      console.log('[Annotate-Translate] Translation cache cleared');
+      logger.log('[Annotate-Translate] Translation cache cleared');
       sendResponse({success: true});
     } else {
       sendResponse({success: false, error: 'Translation service not available'});
@@ -2169,17 +2270,17 @@ function handleMessage(request, sender, sendResponse) {
     sendResponse({success: true});
   } else if (request.action === 'annotate' && request.text) {
     // Handle annotate action from context menu
-    console.log('[Annotate-Translate] Annotating text:', request.text);
+    logger.log('[Annotate-Translate] Annotating text:', request.text);
     annotateSelectedText(request.text);
     sendResponse({success: true});
   } else if (request.action === 'translate' && request.text) {
     // Handle translate action from context menu
-    console.log('[Annotate-Translate] Translating text:', request.text);
+    logger.log('[Annotate-Translate] Translating text:', request.text);
     translateText(request.text);
     sendResponse({success: true});
   } else if (request.action === 'annotate_page') {
     // Handle vocabulary annotation action
-    console.log('[Annotate-Translate] Annotating page vocabulary');
+    logger.log('[Annotate-Translate] Annotating page vocabulary');
 
     // 获取词汇配置信息
     const vocabularyConfig = {
@@ -2195,12 +2296,12 @@ function handleMessage(request, sender, sendResponse) {
       targetLang: $.targetLanguage,
       vocabularyConfig: vocabularyConfig  // 传递词汇配置信息
     };
-    console.log('[Annotate-Translate] Scan options:', scanOptions);
-    console.log('[Annotate-Translate] TranslationService available:', !!translationService);
+    logger.log('[Annotate-Translate] Scan options:', scanOptions);
+    logger.log('[Annotate-Translate] TranslationService available:', !!translationService);
 
     if (annotationScanner) {
       annotationScanner.scanPage(scanOptions).then(result => {
-        console.log('[Annotate-Translate] Annotation result:', result);
+        logger.log('[Annotate-Translate] Annotation result:', result);
         sendResponse(result);
       }).catch(error => {
         console.error('[Annotate-Translate] Annotation failed:', error);
@@ -2213,10 +2314,10 @@ function handleMessage(request, sender, sendResponse) {
     return true; // 异步响应
   } else if (request.action === 'remove_annotations') {
     // Handle remove annotations action
-    console.log('[Annotate-Translate] Removing vocabulary annotations');
+    logger.log('[Annotate-Translate] Removing vocabulary annotations');
     if (annotationScanner) {
       const count = annotationScanner.removeAnnotations();
-      console.log(`[Annotate-Translate] Removed ${count} annotations`);
+      logger.log(`[Annotate-Translate] Removed ${count} annotations`);
       sendResponse({ status: 'success', count });
     } else {
       console.error('[Annotate-Translate] AnnotationScanner not initialized');
@@ -2228,7 +2329,7 @@ function handleMessage(request, sender, sendResponse) {
 
 // Show detailed translation popup for annotation
 function showDetailedTranslation(rubyElement, result) {
-  console.log('[Annotate-Translate] Showing detailed translation for:', result.originalText);
+  logger.log('[Annotate-Translate] Showing detailed translation for:', result.originalText);
   
   // 移除之前的翻译卡片
   if (currentTooltip) {
@@ -2260,12 +2361,23 @@ function showDetailedTranslation(rubyElement, result) {
   closeBtn.className = 'translation-close-btn';
   closeBtn.innerHTML = '×';
   closeBtn.title = safeGetMessage('close', null, 'Close');
+  closeBtn.setAttribute('aria-label', safeGetMessage('close', null, 'Close'));
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     element.remove();
     currentTooltip = null;
   });
   element.appendChild(closeBtn);
+
+  // Keyboard navigation: Escape key to close
+  element.setAttribute('tabindex', '-1');
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      element.remove();
+      currentTooltip = null;
+    }
+  });
+  element.focus();
 
   // 添加清除标注按钮
   const clearBtn = document.createElement('button');
@@ -2301,7 +2413,7 @@ function showDetailedTranslation(rubyElement, result) {
     document.addEventListener('click', closeHandler);
   }, 100);
   
-  console.log('[Annotate-Translate] Detailed translation popup shown');
+  logger.log('[Annotate-Translate] Detailed translation popup shown');
 }
 
 // Clear all annotations from the page

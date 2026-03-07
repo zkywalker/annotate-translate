@@ -207,7 +207,12 @@ function clearAnnotations() {
         }, 3000);
         return;
       }
-      
+
+      // Ask for confirmation before clearing
+      if (!confirm(i18n('confirmClearAnnotations') || 'Are you sure you want to clear all annotations on this page?')) {
+        return;
+      }
+
       chrome.tabs.sendMessage(tabs[0].id, {
         action: 'clearAnnotations'
       }, function(response) {

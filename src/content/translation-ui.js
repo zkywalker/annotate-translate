@@ -64,6 +64,8 @@ class TranslationUI {
   render(result) {
     const container = document.createElement('div');
     container.className = 'translation-result-container';
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-label', safeGetMessage('translationResult', null, 'Translation result'));
 
     // 原文
     const originalSection = this.createSection('original-text', 'original');
@@ -130,6 +132,7 @@ class TranslationUI {
   createTextElement(text, className) {
     const el = document.createElement('div');
     el.className = `text-content ${className}`;
+    el.setAttribute('dir', 'auto');
     el.textContent = text;
     return el;
   }
@@ -200,6 +203,13 @@ class TranslationUI {
     const playPronunciationText = safeGetMessage('playPronunciation', null, 'Play pronunciation');
     button.title = playPronunciationText;
     button.setAttribute('aria-label', playPronunciationText);
+    button.setAttribute('tabindex', '0');
+    button.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        button.click();
+      }
+    });
 
     // 点击播放
     button.addEventListener('click', async (e) => {
@@ -253,7 +263,10 @@ class TranslationUI {
    * @returns {Promise<void>}
    */
   async playAudioFromData(audioData) {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!TranslationUI._audioContext) {
+      TranslationUI._audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const audioContext = TranslationUI._audioContext;
     const audioBuffer = await audioContext.decodeAudioData(audioData);
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
@@ -282,6 +295,14 @@ class TranslationUI {
     // 创建新的音频元素
     const audio = new Audio(url);
     this.audioCache.set(url, audio);
+
+    // Evict oldest entries if cache exceeds limit
+    if (this.audioCache.size > 20) {
+      const firstKey = this.audioCache.keys().next().value;
+      const evicted = this.audioCache.get(firstKey);
+      if (evicted) { evicted.pause(); evicted.src = ''; }
+      this.audioCache.delete(firstKey);
+    }
 
     return new Promise((resolve, reject) => {
       audio.onended = resolve;
@@ -382,13 +403,11 @@ class TranslationUI {
    * @param {HTMLElement} button - 按钮元素
    */
   showAudioError(button) {
-    const originalHTML = button.innerHTML;
-    button.innerHTML = '❌';
     button.classList.add('error');
-    
+    button.title = safeGetMessage('audioError', null, 'Audio playback failed');
     setTimeout(() => {
-      button.innerHTML = originalHTML;
       button.classList.remove('error');
+      button.title = safeGetMessage('playPronunciation', null, 'Play pronunciation');
     }, 2000);
   }
 
@@ -558,6 +577,7 @@ class TranslationUI {
     // 译文
     const translation = document.createElement('div');
     translation.className = 'simple-translation';
+    translation.setAttribute('dir', 'auto');
     translation.textContent = result.translatedText;
     container.appendChild(translation);
 
