@@ -157,14 +157,13 @@
   font-size: 13px;
 }
 
-/* 卡片操作按钮行（流式布局） */
+/* 卡片操作按钮行（顶部流式布局） */
 .card-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
-  padding: 4px 8px 6px;
-  border-top: 1px solid #f0f0f0;
+  gap: 2px;
+  padding: 4px 6px;
 }
 
 .card-action-btn {

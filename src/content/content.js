@@ -1206,32 +1206,8 @@ async function translateText(text) {
     document.body.appendChild(element);
     currentTooltip = element;
 
-    // 操作按钮行（流式布局）
-    const actionsRow = document.createElement('div');
-    actionsRow.className = 'card-actions';
-
-    // 收藏按钮（星标）
-    const starBtn = document.createElement('button');
-    starBtn.className = 'card-action-btn wordbook-star-btn';
-    starBtn.title = safeGetMessage('collectWord', null, 'Add to wordbook');
-    starBtn.setAttribute('aria-label', safeGetMessage('collectWord', null, 'Add to wordbook'));
-    starBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-    actionsRow.appendChild(starBtn);
-    setupWordbookStarButton(starBtn, result, context);
-
-    // 关闭按钮（放最右边）
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'card-action-btn card-close-btn';
-    closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-    closeBtn.title = safeGetMessage('close', null, 'Close');
-    closeBtn.setAttribute('aria-label', safeGetMessage('close', null, 'Close'));
-    closeBtn.addEventListener('click', () => {
-      element.remove();
-      currentTooltip = null;
-    });
-    actionsRow.appendChild(closeBtn);
-
-    element.appendChild(actionsRow);
+    // 操作按钮行（顶部流式布局）
+    createCardActions(element, result, context);
 
     // Keyboard navigation: Escape key to close
     element.setAttribute('tabindex', '-1');
@@ -1535,6 +1511,60 @@ function showTemporaryMessage(message, type = 'info', autoCloseMs = ERROR_MESSAG
   }
 
   return toast;
+}
+
+/**
+ * Create card action bar and prepend it to the card element.
+ * Unified for both translation cards and annotation detail popups.
+ * @param {HTMLElement} element - The card element
+ * @param {object} result - Translation result
+ * @param {string} context - Context text
+ * @param {object} [opts] - Options
+ * @param {boolean} [opts.showClear] - Show clear-annotation button
+ * @param {Function} [opts.onClear] - Callback for clear button
+ */
+function createCardActions(element, result, context, opts = {}) {
+  const actionsRow = document.createElement('div');
+  actionsRow.className = 'card-actions';
+
+  // 收藏按钮（星标）
+  const starBtn = document.createElement('button');
+  starBtn.className = 'card-action-btn wordbook-star-btn';
+  starBtn.title = safeGetMessage('collectWord', null, 'Add to wordbook');
+  starBtn.setAttribute('aria-label', safeGetMessage('collectWord', null, 'Add to wordbook'));
+  starBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  actionsRow.appendChild(starBtn);
+  setupWordbookStarButton(starBtn, result, context);
+
+  // 清除标注按钮（仅注释模式）
+  if (opts.showClear && typeof opts.onClear === 'function') {
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'card-action-btn card-clear-btn';
+    clearBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
+    clearBtn.title = safeGetMessage('clearAnnotations', null, 'Clear annotations');
+    clearBtn.setAttribute('aria-label', safeGetMessage('clearAnnotations', null, 'Clear annotations'));
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      opts.onClear();
+    });
+    actionsRow.appendChild(clearBtn);
+  }
+
+  // 关闭按钮（最右边）
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'card-action-btn card-close-btn';
+  closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  closeBtn.title = safeGetMessage('close', null, 'Close');
+  closeBtn.setAttribute('aria-label', safeGetMessage('close', null, 'Close'));
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    element.remove();
+    currentTooltip = null;
+  });
+  actionsRow.appendChild(closeBtn);
+
+  // 插入到卡片顶部
+  element.prepend(actionsRow);
 }
 
 /**
@@ -2428,38 +2458,15 @@ function showDetailedTranslation(rubyElement, result) {
   document.body.appendChild(element);
   currentTooltip = element;
 
-  // 操作按钮行（流式布局）
-  const actionsRow = document.createElement('div');
-  actionsRow.className = 'card-actions';
-
-  // 清除标注按钮
-  const clearBtn = document.createElement('button');
-  clearBtn.className = 'card-action-btn card-clear-btn';
-  clearBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
-  clearBtn.title = safeGetMessage('clearAnnotations', null, 'Clear annotations');
-  clearBtn.setAttribute('aria-label', safeGetMessage('clearAnnotations', null, 'Clear annotations'));
-  clearBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    clearAnnotationsByText(result.originalText);
-    element.remove();
-    currentTooltip = null;
+  // 操作按钮行（顶部流式布局）— 注释模式额外显示清除按钮和收藏按钮
+  createCardActions(element, result, '', {
+    showClear: true,
+    onClear: () => {
+      clearAnnotationsByText(result.originalText);
+      element.remove();
+      currentTooltip = null;
+    }
   });
-  actionsRow.appendChild(clearBtn);
-
-  // 关闭按钮
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'card-action-btn card-close-btn';
-  closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-  closeBtn.title = safeGetMessage('close', null, 'Close');
-  closeBtn.setAttribute('aria-label', safeGetMessage('close', null, 'Close'));
-  closeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    element.remove();
-    currentTooltip = null;
-  });
-  actionsRow.appendChild(closeBtn);
-
-  element.appendChild(actionsRow);
 
   // Keyboard navigation: Escape key to close
   element.setAttribute('tabindex', '-1');
