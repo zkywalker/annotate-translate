@@ -1,0 +1,1038 @@
+/* ============================================
+ * Wordbook & Review System Styles
+ * ============================================ */
+
+/* Star Button in Translation Card (absolute, next to close btn) */
+.wordbook-star-btn {
+  position: absolute;
+  top: 10px;
+  right: 45px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: rgba(95, 99, 104, 0.1);
+  color: #9ca3af;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 10;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.wordbook-star-btn:hover {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.wordbook-star-btn.collected {
+  color: #f59e0b;
+}
+
+.wordbook-star-btn.collected .star-icon {
+  fill: #f59e0b;
+}
+
+/* ============================================
+ * Options Page: Wordbook Tab
+ * ============================================ */
+
+.wordbook-layout {
+  display: flex;
+  gap: 20px;
+}
+
+/* Group Sidebar */
+.wordbook-groups {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.group-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.group-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+  transition: background 0.15s;
+  gap: 8px;
+}
+
+.group-item:hover {
+  background: #f3f4f6;
+}
+
+.group-item.active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.group-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.group-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-count {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.group-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 2px;
+  display: none;
+}
+
+.group-item:hover .group-delete-btn {
+  display: block;
+}
+
+.btn-add-group {
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: none;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 13px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-add-group:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Word List */
+.wordbook-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.wordbook-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.wordbook-search {
+  flex: 1;
+  min-width: 150px;
+  padding: 7px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.wordbook-search:focus {
+  border-color: #3b82f6;
+}
+
+.wordbook-sort {
+  padding: 7px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Word Table */
+.word-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.word-table th,
+.word-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.word-table th {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.word-table tr:hover {
+  background: #f9fafb;
+}
+
+.word-col-word {
+  font-weight: 500;
+  color: #111827;
+}
+
+.word-col-translation {
+  color: #4b5563;
+}
+
+.word-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.word-status-badge.status-new {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.word-status-badge.status-learning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.word-status-badge.status-review {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.word-status-badge.status-mastered {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.word-group-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  background: #f3f4f6;
+  color: #6b7280;
+  margin-right: 4px;
+}
+
+/* Pagination */
+.wordbook-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 4px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Batch Actions */
+.wordbook-batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 8px;
+}
+
+.wordbook-batch-actions button {
+  padding: 5px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  color: #374151;
+}
+
+.wordbook-batch-actions button:hover {
+  background: #f3f4f6;
+}
+
+.wordbook-batch-actions .btn-danger {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.wordbook-batch-actions .btn-danger:hover {
+  background: #fef2f2;
+}
+
+/* ============================================
+ * Options Page: Review Tab
+ * ============================================ */
+
+/* Stats Dashboard */
+.review-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.stat-value.rate-low { color: #dc2626; }
+.stat-value.rate-mid { color: #d97706; }
+.stat-value.rate-high { color: #16a34a; }
+
+.stat-streak-fire::after {
+  content: '';
+  margin-left: 4px;
+}
+
+/* 7-Day Bar Chart */
+.review-chart {
+  margin-bottom: 24px;
+}
+
+.review-chart h4 {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 70px;
+}
+
+.chart-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-bar {
+  width: 100%;
+  min-height: 4px;
+  background: #3b82f6;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s;
+  position: relative;
+}
+
+.chart-bar.empty {
+  background: #e5e7eb;
+}
+
+.chart-bar-label {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.chart-bar[title]:hover {
+  opacity: 0.8;
+}
+
+/* Status Distribution Bar */
+.status-distribution {
+  margin-bottom: 24px;
+}
+
+.status-distribution h4 {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.status-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.status-bar-segment {
+  transition: width 0.3s;
+}
+
+.status-bar-segment.seg-new { background: #9ca3af; }
+.status-bar-segment.seg-learning { background: #f59e0b; }
+.status-bar-segment.seg-review { background: #3b82f6; }
+.status-bar-segment.seg-mastered { background: #22c55e; }
+
+.status-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.status-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-legend-dot.dot-new { background: #9ca3af; }
+.status-legend-dot.dot-learning { background: #f59e0b; }
+.status-legend-dot.dot-review { background: #3b82f6; }
+.status-legend-dot.dot-mastered { background: #22c55e; }
+
+/* Review Config */
+.review-config {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.review-config label {
+  font-size: 13px;
+  color: #374151;
+}
+
+.review-config select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.btn-start-review {
+  padding: 10px 24px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.btn-start-review:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btn-start-review:disabled {
+  background: #d1d5db;
+  cursor: default;
+}
+
+/* Review Area */
+.review-area {
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-card {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.review-word {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.review-phonetic {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.review-phonetic .audio-play-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 2px;
+  vertical-align: middle;
+}
+
+.review-context {
+  font-size: 13px;
+  color: #9ca3af;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.review-answer {
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.review-translation {
+  font-size: 20px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.review-definition {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.review-progress {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 20px;
+}
+
+/* Review Action Buttons */
+.review-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.review-btn {
+  padding: 10px 24px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.review-btn:hover {
+  background: #f3f4f6;
+}
+
+.review-btn.btn-show-answer {
+  padding: 12px 32px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+}
+
+.review-btn.btn-show-answer:hover {
+  background: #2563eb;
+}
+
+.review-btn.btn-dont-know {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.review-btn.btn-hard {
+  color: #d97706;
+  border-color: #fcd34d;
+}
+
+.review-btn.btn-remembered {
+  color: #16a34a;
+  border-color: #86efac;
+}
+
+.review-btn.btn-too-easy {
+  color: #2563eb;
+  border-color: #93c5fd;
+}
+
+/* Quiz Mode */
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.quiz-option {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.quiz-option:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.quiz-option.correct {
+  background: #dcfce7;
+  border-color: #22c55e;
+}
+
+.quiz-option.wrong {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.quiz-option .option-key {
+  font-weight: 600;
+  margin-right: 8px;
+  color: #6b7280;
+}
+
+/* Spelling Mode */
+.spelling-input-wrapper {
+  display: flex;
+  gap: 8px;
+  margin: 16px auto;
+  max-width: 400px;
+}
+
+.spelling-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.spelling-input:focus {
+  border-color: #3b82f6;
+}
+
+.spelling-hint {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+.spelling-result {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.spelling-result.correct {
+  color: #16a34a;
+}
+
+.spelling-result.wrong {
+  color: #dc2626;
+}
+
+/* Session Summary */
+.review-summary {
+  text-align: center;
+  padding: 24px;
+}
+
+.review-summary h3 {
+  font-size: 20px;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto 24px;
+}
+
+.summary-stat {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.summary-stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.summary-stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.summary-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.summary-actions button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.summary-actions .btn-primary {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+}
+
+.summary-actions .btn-primary:hover {
+  background: #2563eb;
+}
+
+.summary-actions .btn-secondary {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.summary-actions .btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 14px;
+}
+
+/* ============================================
+ * Star Button Tooltip & Animation
+ * ============================================ */
+
+.wordbook-star-btn[data-tooltip] {
+  position: relative;
+}
+
+.wordbook-star-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: #374151;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.wordbook-star-btn[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+@keyframes star-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.wordbook-star-btn.star-pulse {
+  animation: star-pulse 0.3s ease;
+}
+
+/* ============================================
+ * Review Mode Selector (Radio Buttons)
+ * ============================================ */
+
+.review-mode-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mode-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  color: #6b7280;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.mode-button input[type="radio"] {
+  display: none;
+}
+
+.mode-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.mode-button:has(input:checked),
+.mode-button.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+/* ============================================
+ * Review Progress Bar
+ * ============================================ */
+
+.review-progress-bar {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* ============================================
+ * Previous Feedback Strip
+ * ============================================ */
+
+.previous-feedback {
+  width: 100%;
+  max-width: 500px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.previous-feedback.feedback-correct {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.previous-feedback.feedback-wrong {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.previous-feedback.feedback-partial {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* ============================================
+ * Keyboard Shortcut Tags
+ * ============================================ */
+
+.review-btn kbd,
+.quiz-option kbd,
+.btn-show-answer kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin-left: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: inherit;
+  line-height: 1.4;
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* ============================================
+ * Keyboard Help Overlay
+ * ============================================ */
+
+.keyboard-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.keyboard-help-panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px 28px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.keyboard-help-panel h3 {
+  font-size: 16px;
+  color: #111827;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+.keyboard-help-panel dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  align-items: center;
+}
+
+.keyboard-help-panel dt {
+  text-align: right;
+}
+
+.keyboard-help-panel dt kbd {
+  display: inline-block;
+  padding: 2px 7px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #374151;
+  min-width: 24px;
+  text-align: center;
+}
+
+.keyboard-help-panel dd {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.keyboard-help-panel .help-close-hint {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ============================================
+ * Spelling Partial Match
+ * ============================================ */
+
+.spelling-result.partial {
+  color: #d97706;
+}
+
+/* ============================================
+ * Navigation Section Title
+ * ============================================ */
+
+.nav-section-title {
+  padding: 12px 16px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

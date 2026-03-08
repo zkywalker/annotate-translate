@@ -1938,6 +1938,243 @@
   "noAnnotationsFound": {
     "message": "No Annotations Found",
     "description": "No annotations found message"
+  },
+
+  "wordbook": {
+    "message": "Wordbook",
+    "description": "Wordbook tab title"
+  },
+  "review": {
+    "message": "Review",
+    "description": "Review tab title"
+  },
+  "collectWord": {
+    "message": "Collect word",
+    "description": "Tooltip for star button"
+  },
+  "collected": {
+    "message": "Added to wordbook",
+    "description": "Toast when word is collected"
+  },
+  "uncollected": {
+    "message": "Removed from wordbook",
+    "description": "Toast when word is uncollected"
+  },
+  "startReview": {
+    "message": "Start Review",
+    "description": "Start review button"
+  },
+  "reviewComplete": {
+    "message": "Review complete!",
+    "description": "Review completion message"
+  },
+  "todayComplete": {
+    "message": "All done for today",
+    "description": "No words to review today"
+  },
+  "pendingReview": {
+    "message": "To review: $COUNT$ words",
+    "description": "Pending review count in popup",
+    "placeholders": {
+      "COUNT": { "content": "$1" }
+    }
+  },
+  "flashcard": {
+    "message": "Flashcard",
+    "description": "Flashcard review mode"
+  },
+  "quiz": {
+    "message": "Quiz",
+    "description": "Quiz review mode"
+  },
+  "spelling": {
+    "message": "Spelling",
+    "description": "Spelling review mode"
+  },
+  "dontKnow": {
+    "message": "Don't know",
+    "description": "Don't know button in review"
+  },
+  "hard": {
+    "message": "Hard",
+    "description": "Hard button in review"
+  },
+  "remembered": {
+    "message": "Remembered",
+    "description": "Remembered button in review"
+  },
+  "tooEasy": {
+    "message": "Too easy",
+    "description": "Too easy button in review"
+  },
+  "showAnswer": {
+    "message": "Show Answer",
+    "description": "Show answer button in flashcard"
+  },
+  "submit": {
+    "message": "Submit",
+    "description": "Submit button"
+  },
+  "hint": {
+    "message": "Hint",
+    "description": "Hint button in spelling mode"
+  },
+  "totalWords": {
+    "message": "Total Words",
+    "description": "Total words metric label"
+  },
+  "masteryRate": {
+    "message": "Mastery Rate",
+    "description": "Mastery rate metric label"
+  },
+  "studyStreak": {
+    "message": "Study Streak",
+    "description": "Study streak metric label"
+  },
+  "noWordsToReview": {
+    "message": "No words to review",
+    "description": "Empty review state"
+  },
+  "reviewSummary": {
+    "message": "Review Summary",
+    "description": "Review summary title"
+  },
+  "wordsReviewed": {
+    "message": "Words Reviewed",
+    "description": "Summary stat"
+  },
+  "accuracy": {
+    "message": "Accuracy",
+    "description": "Summary accuracy"
+  },
+  "newlyLearned": {
+    "message": "Newly Learned",
+    "description": "Summary new words"
+  },
+  "newlyMastered": {
+    "message": "Newly Mastered",
+    "description": "Summary mastered words"
+  },
+  "anotherRound": {
+    "message": "Another Round",
+    "description": "Start another review round"
+  },
+  "backToWordbook": {
+    "message": "Back to Wordbook",
+    "description": "Return to wordbook"
+  },
+  "newGroup": {
+    "message": "New Group",
+    "description": "Create new group button"
+  },
+  "allGroups": {
+    "message": "All",
+    "description": "All groups filter"
+  },
+  "deleteGroup": {
+    "message": "Delete Group",
+    "description": "Delete group button"
+  },
+  "confirmDeleteWords": {
+    "message": "Delete $COUNT$ selected words? Review records will also be removed.",
+    "description": "Confirm batch delete",
+    "placeholders": {
+      "COUNT": { "content": "$1" }
+    }
+  },
+  "moveToGroup": {
+    "message": "Move to Group",
+    "description": "Move to group button"
+  },
+  "deleteSelected": {
+    "message": "Delete Selected",
+    "description": "Delete selected button"
+  },
+  "selectAll": {
+    "message": "Select All",
+    "description": "Select all checkbox"
+  },
+  "sortNewest": {
+    "message": "Newest",
+    "description": "Sort by newest"
+  },
+  "sortOldest": {
+    "message": "Oldest",
+    "description": "Sort by oldest"
+  },
+  "sortAlpha": {
+    "message": "Alphabetical",
+    "description": "Sort alphabetically"
+  },
+  "sortStatus": {
+    "message": "Status",
+    "description": "Sort by review status"
+  },
+  "searchWords": {
+    "message": "Search words...",
+    "description": "Search placeholder"
+  },
+  "last7Days": {
+    "message": "Last 7 Days",
+    "description": "Chart title"
+  },
+  "statusDistribution": {
+    "message": "Word Status Distribution",
+    "description": "Status bar title"
+  },
+  "reviewMode": {
+    "message": "Mode",
+    "description": "Review mode selector label"
+  },
+  "reviewCount": {
+    "message": "Count",
+    "description": "Review count selector label"
+  },
+  "reviewGroup": {
+    "message": "Group",
+    "description": "Review group selector label"
+  },
+  "days": {
+    "message": "days",
+    "description": "Days unit"
+  },
+  "whatDoesThisMean": {
+    "message": "What does \"$WORD$\" mean?",
+    "description": "Quiz question format",
+    "placeholders": {
+      "WORD": { "content": "$1" }
+    }
+  },
+  "howToSpell": {
+    "message": "How do you spell \"$WORD$\"?",
+    "description": "Spelling question format",
+    "placeholders": {
+      "WORD": { "content": "$1" }
+    }
+  },
+  "groupName": {
+    "message": "Group name",
+    "description": "Group name input placeholder"
+  },
+  "enterGroupName": {
+    "message": "Enter group name:",
+    "description": "Group name prompt"
+  },
+  "statusNew": {
+    "message": "new",
+    "description": "New word status"
+  },
+  "statusLearning": {
+    "message": "learning",
+    "description": "Learning word status"
+  },
+  "statusReview": {
+    "message": "review",
+    "description": "Review word status"
+  },
+  "statusMastered": {
+    "message": "mastered",
+    "description": "Mastered word status"
   }
 }
 

@@ -152,6 +152,35 @@ const STORAGE_KEY_ANNOTATIONS = 'annotations';
  */
 const STORAGE_KEY_SETTINGS = 'settings';
 
+/**
+ * Storage key for wordbook
+ */
+const STORAGE_KEY_WORDBOOK = 'wordbook';
+
+// ============================================
+// Wordbook Configuration
+// ============================================
+
+/**
+ * Maximum number of wordbook entries
+ */
+const WORDBOOK_MAX_ENTRIES = 5000;
+
+/**
+ * Maximum days to keep daily history
+ */
+const WORDBOOK_HISTORY_MAX_DAYS = 90;
+
+/**
+ * Default review session size
+ */
+const WORDBOOK_DEFAULT_SESSION_SIZE = 20;
+
+/**
+ * Default page size for wordbook list
+ */
+const WORDBOOK_PAGE_SIZE = 20;
+
 // ============================================
 // Language Codes
 // ============================================
@@ -322,6 +351,13 @@ if (typeof module !== 'undefined' && module.exports) {
     // Storage Keys
     STORAGE_KEY_ANNOTATIONS,
     STORAGE_KEY_SETTINGS,
+    STORAGE_KEY_WORDBOOK,
+
+    // Wordbook Configuration
+    WORDBOOK_MAX_ENTRIES,
+    WORDBOOK_HISTORY_MAX_DAYS,
+    WORDBOOK_DEFAULT_SESSION_SIZE,
+    WORDBOOK_PAGE_SIZE,
 
     // Language Codes
     DEFAULT_SOURCE_LANG,

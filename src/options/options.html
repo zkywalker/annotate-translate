@@ -7,6 +7,7 @@
   <!-- Lucide Icons -->
   <script src="../lib/lucide.min.js"></script>
   <link rel="stylesheet" href="options.css">
+  <link rel="stylesheet" href="../styles/wordbook.css">
 </head>
 <body>
   <!-- 顶部标题栏 -->
@@ -62,10 +63,21 @@
       </a>
 
       <div class="nav-divider"></div>
+      <div class="nav-section-title">学习中心</div>
 
       <a href="#vocabulary" class="nav-item" data-page="vocabulary">
         <i data-lucide="book-open" class="nav-icon" width="20" height="20"></i>
         <span data-i18n="vocabularyMode">词汇模式</span>
+      </a>
+
+      <a href="#wordbook" class="nav-item" data-page="wordbook">
+        <i data-lucide="bookmark" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="wordbook">单词本</span>
+      </a>
+
+      <a href="#review" class="nav-item" data-page="review">
+        <i data-lucide="graduation-cap" class="nav-icon" width="20" height="20"></i>
+        <span data-i18n="review">复习</span>
       </a>
 
       <div class="nav-divider"></div>
@@ -901,6 +913,136 @@
             </div>
           </div>
         </section>
+      </div>
+
+      <!-- 单词本页面 -->
+      <div id="page-wordbook" class="page">
+        <h2 class="page-title" data-i18n="wordbook">单词本</h2>
+
+        <div class="wordbook-layout">
+          <!-- Group Sidebar -->
+          <div class="wordbook-groups">
+            <ul class="group-list" id="wordbook-group-list"></ul>
+            <button class="btn-add-group" id="btn-add-group">
+              <i data-lucide="plus" width="14" height="14"></i>
+              <span data-i18n="newGroup">新建分组</span>
+            </button>
+          </div>
+
+          <!-- Word List -->
+          <div class="wordbook-main">
+            <div class="wordbook-toolbar">
+              <input type="text" class="wordbook-search" id="wordbook-search" data-i18n-placeholder="searchWords" placeholder="搜索单词...">
+              <select class="wordbook-sort" id="wordbook-sort">
+                <option value="newest" data-i18n="sortNewest">最新</option>
+                <option value="oldest" data-i18n="sortOldest">最早</option>
+                <option value="alpha" data-i18n="sortAlpha">字母序</option>
+                <option value="status" data-i18n="sortStatus">复习状态</option>
+              </select>
+            </div>
+
+            <table class="word-table">
+              <thead>
+                <tr>
+                  <th width="30"><input type="checkbox" id="wordbook-select-all"></th>
+                  <th data-i18n="wordbook">单词</th>
+                  <th>翻译</th>
+                  <th data-i18n="sortStatus">状态</th>
+                  <th>分组</th>
+                </tr>
+              </thead>
+              <tbody id="wordbook-table-body"></tbody>
+            </table>
+
+            <div class="wordbook-pagination" id="wordbook-pagination"></div>
+
+            <div class="wordbook-batch-actions" id="wordbook-batch-actions" style="display:none;">
+              <label><input type="checkbox" id="wordbook-batch-select-all"> <span data-i18n="selectAll">全选</span></label>
+              <button id="wordbook-batch-move" data-i18n="moveToGroup">移动到分组</button>
+              <button id="wordbook-batch-delete" class="btn-danger" data-i18n="deleteSelected">删除选中</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 复习页面 -->
+      <div id="page-review" class="page">
+        <h2 class="page-title" data-i18n="review">复习</h2>
+
+        <!-- Stats Dashboard -->
+        <div class="review-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total-words">0</div>
+            <div class="stat-label" data-i18n="totalWords">总词量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-mastery-rate">0%</div>
+            <div class="stat-label" data-i18n="masteryRate">掌握率</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-streak">0</div>
+            <div class="stat-label" data-i18n="studyStreak">连续学习</div>
+          </div>
+        </div>
+
+        <!-- 7-Day Bar Chart -->
+        <div class="review-chart">
+          <h4 data-i18n="last7Days">最近 7 天</h4>
+          <div class="chart-bars" id="review-chart-bars"></div>
+        </div>
+
+        <!-- Status Distribution -->
+        <div class="status-distribution">
+          <h4 data-i18n="statusDistribution">单词状态分布</h4>
+          <div class="status-bar" id="status-bar"></div>
+          <div class="status-legend">
+            <span class="status-legend-item"><span class="status-legend-dot dot-new"></span> <span data-i18n="statusNew">新词</span></span>
+            <span class="status-legend-item"><span class="status-legend-dot dot-learning"></span> <span data-i18n="statusLearning">学习中</span></span>
+            <span class="status-legend-item"><span class="status-legend-dot dot-review"></span> <span data-i18n="statusReview">复习中</span></span>
+            <span class="status-legend-item"><span class="status-legend-dot dot-mastered"></span> <span data-i18n="statusMastered">已掌握</span></span>
+          </div>
+        </div>
+
+        <!-- Review Config -->
+        <div class="review-config">
+          <div class="review-mode-selector">
+            <label class="mode-button active">
+              <input type="radio" name="review-mode" value="flashcard" checked>
+              <span class="mode-label" data-i18n="flashcard">闪卡</span>
+            </label>
+            <label class="mode-button">
+              <input type="radio" name="review-mode" value="quiz">
+              <span class="mode-label" data-i18n="quiz">选择题</span>
+            </label>
+            <label class="mode-button">
+              <input type="radio" name="review-mode" value="spelling">
+              <span class="mode-label" data-i18n="spelling">拼写</span>
+            </label>
+            <label class="mode-button">
+              <input type="radio" name="review-mode" value="auto">
+              <span class="mode-label">Auto</span>
+            </label>
+          </div>
+
+          <select id="review-session-size">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+          </select>
+
+          <select id="review-group-filter">
+            <option value="" data-i18n="allGroups">全部</option>
+          </select>
+
+          <button class="btn-start-review" id="btn-start-review" data-i18n="startReview">开始复习</button>
+        </div>
+
+        <!-- Review Area -->
+        <div class="review-area" id="review-area">
+          <div class="empty-state">
+            <div class="empty-state-text" data-i18n="noWordsToReview">暂无待复习单词</div>
+          </div>
+        </div>
       </div>
 
       <!-- 数据与隐私页面 -->

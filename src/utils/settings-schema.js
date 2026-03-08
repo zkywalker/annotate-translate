@@ -159,6 +159,16 @@ const DEFAULT_SETTINGS = {
   // 调试设置
   debug: {
     enableDebugMode: false
+  },
+
+  // 单词本设置
+  wordbook: {
+    review: {
+      sessionSize: 20,
+      defaultMode: 'flashcard',
+      autoPlayAudio: false,
+      showContext: true
+    }
   }
 };
 

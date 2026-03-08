@@ -1938,6 +1938,243 @@
   "noAnnotationsFound": {
     "message": "未找到标注",
     "description": "No annotations found message"
+  },
+
+  "wordbook": {
+    "message": "单词本",
+    "description": "Wordbook tab title"
+  },
+  "review": {
+    "message": "复习",
+    "description": "Review tab title"
+  },
+  "collectWord": {
+    "message": "收藏单词",
+    "description": "Tooltip for star button"
+  },
+  "collected": {
+    "message": "已收藏",
+    "description": "Toast when word is collected"
+  },
+  "uncollected": {
+    "message": "已取消收藏",
+    "description": "Toast when word is uncollected"
+  },
+  "startReview": {
+    "message": "开始复习",
+    "description": "Start review button"
+  },
+  "reviewComplete": {
+    "message": "本次复习完成！",
+    "description": "Review completion message"
+  },
+  "todayComplete": {
+    "message": "今日已完成",
+    "description": "No words to review today"
+  },
+  "pendingReview": {
+    "message": "待复习: $COUNT$ 个",
+    "description": "Pending review count in popup",
+    "placeholders": {
+      "COUNT": { "content": "$1" }
+    }
+  },
+  "flashcard": {
+    "message": "闪卡",
+    "description": "Flashcard review mode"
+  },
+  "quiz": {
+    "message": "选择题",
+    "description": "Quiz review mode"
+  },
+  "spelling": {
+    "message": "拼写",
+    "description": "Spelling review mode"
+  },
+  "dontKnow": {
+    "message": "不认识",
+    "description": "Don't know button in review"
+  },
+  "hard": {
+    "message": "困难",
+    "description": "Hard button in review"
+  },
+  "remembered": {
+    "message": "记住了",
+    "description": "Remembered button in review"
+  },
+  "tooEasy": {
+    "message": "太简单了",
+    "description": "Too easy button in review"
+  },
+  "showAnswer": {
+    "message": "显示答案",
+    "description": "Show answer button in flashcard"
+  },
+  "submit": {
+    "message": "提交",
+    "description": "Submit button"
+  },
+  "hint": {
+    "message": "提示",
+    "description": "Hint button in spelling mode"
+  },
+  "totalWords": {
+    "message": "总词量",
+    "description": "Total words metric label"
+  },
+  "masteryRate": {
+    "message": "掌握率",
+    "description": "Mastery rate metric label"
+  },
+  "studyStreak": {
+    "message": "连续学习",
+    "description": "Study streak metric label"
+  },
+  "noWordsToReview": {
+    "message": "暂无待复习单词",
+    "description": "Empty review state"
+  },
+  "reviewSummary": {
+    "message": "复习总结",
+    "description": "Review summary title"
+  },
+  "wordsReviewed": {
+    "message": "复习单词",
+    "description": "Summary stat"
+  },
+  "accuracy": {
+    "message": "正确率",
+    "description": "Summary accuracy"
+  },
+  "newlyLearned": {
+    "message": "新学习",
+    "description": "Summary new words"
+  },
+  "newlyMastered": {
+    "message": "已掌握",
+    "description": "Summary mastered words"
+  },
+  "anotherRound": {
+    "message": "再来一轮",
+    "description": "Start another review round"
+  },
+  "backToWordbook": {
+    "message": "返回单词本",
+    "description": "Return to wordbook"
+  },
+  "newGroup": {
+    "message": "新建分组",
+    "description": "Create new group button"
+  },
+  "allGroups": {
+    "message": "全部",
+    "description": "All groups filter"
+  },
+  "deleteGroup": {
+    "message": "删除分组",
+    "description": "Delete group button"
+  },
+  "confirmDeleteWords": {
+    "message": "确定删除 $COUNT$ 个单词？复习记录将一并删除。",
+    "description": "Confirm batch delete",
+    "placeholders": {
+      "COUNT": { "content": "$1" }
+    }
+  },
+  "moveToGroup": {
+    "message": "移动到分组",
+    "description": "Move to group button"
+  },
+  "deleteSelected": {
+    "message": "删除选中",
+    "description": "Delete selected button"
+  },
+  "selectAll": {
+    "message": "全选",
+    "description": "Select all checkbox"
+  },
+  "sortNewest": {
+    "message": "最新",
+    "description": "Sort by newest"
+  },
+  "sortOldest": {
+    "message": "最早",
+    "description": "Sort by oldest"
+  },
+  "sortAlpha": {
+    "message": "字母序",
+    "description": "Sort alphabetically"
+  },
+  "sortStatus": {
+    "message": "复习状态",
+    "description": "Sort by review status"
+  },
+  "searchWords": {
+    "message": "搜索单词...",
+    "description": "Search placeholder"
+  },
+  "last7Days": {
+    "message": "最近 7 天",
+    "description": "Chart title"
+  },
+  "statusDistribution": {
+    "message": "单词状态分布",
+    "description": "Status bar title"
+  },
+  "reviewMode": {
+    "message": "模式",
+    "description": "Review mode selector label"
+  },
+  "reviewCount": {
+    "message": "数量",
+    "description": "Review count selector label"
+  },
+  "reviewGroup": {
+    "message": "分组",
+    "description": "Review group selector label"
+  },
+  "days": {
+    "message": "天",
+    "description": "Days unit"
+  },
+  "whatDoesThisMean": {
+    "message": "$WORD$ 的意思是？",
+    "description": "Quiz question format",
+    "placeholders": {
+      "WORD": { "content": "$1" }
+    }
+  },
+  "howToSpell": {
+    "message": "$WORD$ 用英语怎么说？",
+    "description": "Spelling question format",
+    "placeholders": {
+      "WORD": { "content": "$1" }
+    }
+  },
+  "groupName": {
+    "message": "分组名称",
+    "description": "Group name input placeholder"
+  },
+  "enterGroupName": {
+    "message": "请输入分组名称：",
+    "description": "Group name prompt"
+  },
+  "statusNew": {
+    "message": "新词",
+    "description": "New word status"
+  },
+  "statusLearning": {
+    "message": "学习中",
+    "description": "Learning word status"
+  },
+  "statusReview": {
+    "message": "复习中",
+    "description": "Review word status"
+  },
+  "statusMastered": {
+    "message": "已掌握",
+    "description": "Mastered word status"
   }
 }
 

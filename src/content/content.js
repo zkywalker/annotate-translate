@@ -1205,7 +1205,15 @@ async function translateText(text) {
     
     document.body.appendChild(element);
     currentTooltip = element;
-    
+
+    // 添加收藏按钮（星标）— larger, with tooltip
+    const starBtn = document.createElement('button');
+    starBtn.className = 'wordbook-star-btn';
+    starBtn.setAttribute('data-tooltip', safeGetMessage('collectWord', null, 'Add to wordbook'));
+    starBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+    element.appendChild(starBtn);
+    setupWordbookStarButton(starBtn, result, context);
+
     // 添加关闭按钮
     const closeBtn = document.createElement('button');
     closeBtn.className = 'translation-close-btn';
@@ -1520,6 +1528,63 @@ function showTemporaryMessage(message, type = 'info', autoCloseMs = ERROR_MESSAG
   }
 
   return toast;
+}
+
+/**
+ * Setup wordbook star button on translation card
+ * BR-007: async check collection status and attach handlers
+ * Enhanced: pulse animation, undo support
+ */
+async function setupWordbookStarButton(starBtn, result, context) {
+  if (typeof wordbookService === 'undefined') return;
+  if (!starBtn) return;
+
+  try {
+    await wordbookService.init();
+    const collected = wordbookService.isCollected(result.originalText, result.targetLang);
+    if (collected) {
+      starBtn.classList.add('collected');
+      starBtn.setAttribute('data-tooltip', safeGetMessage('uncollected', null, 'Remove from wordbook'));
+    }
+
+    starBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      try {
+        await wordbookService.init();
+        const isNowCollected = wordbookService.isCollected(result.originalText, result.targetLang);
+
+        if (isNowCollected) {
+          const entry = wordbookService.findByWord(result.originalText, result.targetLang);
+          if (entry) {
+            await wordbookService.removeWord(entry.id);
+          }
+          starBtn.classList.remove('collected');
+          starBtn.setAttribute('data-tooltip', safeGetMessage('collectWord', null, 'Add to wordbook'));
+          showTemporaryMessage(
+            safeGetMessage('uncollected', null, 'Removed from wordbook'),
+            'success'
+          );
+        } else {
+          const newEntry = await wordbookService.addWord(result, context);
+          starBtn.classList.add('collected');
+          starBtn.classList.add('star-pulse');
+          setTimeout(() => starBtn.classList.remove('star-pulse'), 600);
+          starBtn.setAttribute('data-tooltip', safeGetMessage('uncollected', null, 'Remove from wordbook'));
+          showTemporaryMessage(
+            safeGetMessage('collected', null, 'Added to wordbook'),
+            'success'
+          );
+        }
+      } catch (err) {
+        console.error('[Annotate-Translate] Wordbook operation failed:', err);
+        showTemporaryMessage(err.message, 'error');
+      }
+    });
+  } catch (err) {
+    console.error('[Annotate-Translate] Wordbook init failed:', err);
+  }
 }
 
 // 查找并标注文本（保留用于右键菜单或其他场景）

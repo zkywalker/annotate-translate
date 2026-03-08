@@ -1668,8 +1668,719 @@ async function clearAllData() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// ============================================
+// Wordbook & Review Module
+// ============================================
+
+const WordbookModule = (() => {
+  let data = null;
+  let currentGroup = '';
+  let currentSearch = '';
+  let currentSort = 'newest';
+  let currentPage = 1;
+  let selectedIds = new Set();
+  let reviewSession = null;
+  let _listenersAttached = false;
+
+  async function loadData() {
+    const result = await chrome.storage.local.get('wordbook');
+    data = result.wordbook || {
+      version: 1, entries: {},
+      groups: [{ id: 'default', name: 'Default', color: '#6b7280', createdAt: Date.now() }],
+      stats: { totalCollected: 0, totalReviews: 0, streakDays: 0, lastStudyDate: '', dailyHistory: {} }
+    };
+  }
+
+  async function saveData() {
+    await chrome.storage.local.set({ wordbook: data });
+  }
+
+  function esc(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+  }
+
+  function getEntries() {
+    let entries = Object.values(data.entries);
+    if (currentGroup) entries = entries.filter(e => e.groups.includes(currentGroup));
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      entries = entries.filter(e => e.word.toLowerCase().includes(q) || e.translation.toLowerCase().includes(q));
+    }
+    const ord = { new: 0, learning: 1, review: 2, mastered: 3 };
+    switch (currentSort) {
+      case 'oldest': entries.sort((a, b) => a.createdAt - b.createdAt); break;
+      case 'alpha': entries.sort((a, b) => a.word.localeCompare(b.word)); break;
+      case 'status': entries.sort((a, b) => ord[a.review.status] - ord[b.review.status]); break;
+      default: entries.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    return entries;
+  }
+
+  // ============ Wordbook List ============
+
+  function renderGroups() {
+    const list = document.getElementById('wordbook-group-list');
+    if (!list) return;
+    list.innerHTML = '';
+    const allItem = document.createElement('li');
+    allItem.className = 'group-item' + (currentGroup === '' ? ' active' : '');
+    allItem.innerHTML = `<span class="group-color-dot" style="background:#6b7280"></span>
+      <span class="group-name">${i18n('allGroups') || 'All'}</span>
+      <span class="group-count">${Object.keys(data.entries).length}</span>`;
+    allItem.addEventListener('click', () => { currentGroup = ''; currentPage = 1; renderGroups(); renderWordList(); });
+    list.appendChild(allItem);
+
+    data.groups.forEach(g => {
+      const count = Object.values(data.entries).filter(e => e.groups.includes(g.id)).length;
+      const li = document.createElement('li');
+      li.className = 'group-item' + (currentGroup === g.id ? ' active' : '');
+      li.innerHTML = `<span class="group-color-dot" style="background:${g.color}"></span>
+        <span class="group-name">${esc(g.name)}</span>
+        <span class="group-count">${count}</span>
+        ${g.id !== 'default' ? '<button class="group-delete-btn" title="Delete">&times;</button>' : ''}`;
+      li.querySelector('.group-name').addEventListener('click', () => {
+        currentGroup = g.id; currentPage = 1; renderGroups(); renderWordList();
+      });
+      const delBtn = li.querySelector('.group-delete-btn');
+      if (delBtn) {
+        delBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (!confirm(`Delete group "${g.name}"?`)) return;
+          const idx = data.groups.findIndex(x => x.id === g.id);
+          if (idx !== -1) data.groups.splice(idx, 1);
+          Object.values(data.entries).forEach(entry => {
+            const gi = entry.groups.indexOf(g.id);
+            if (gi !== -1) { entry.groups.splice(gi, 1); if (!entry.groups.length) entry.groups.push('default'); }
+          });
+          if (currentGroup === g.id) currentGroup = '';
+          await saveData(); renderGroups(); renderWordList();
+        });
+      }
+      list.appendChild(li);
+    });
+    // Update review group filter
+    const rgf = document.getElementById('review-group-filter');
+    if (rgf) {
+      const v = rgf.value;
+      rgf.innerHTML = `<option value="">${i18n('allGroups') || 'All'}</option>`;
+      data.groups.forEach(g => { rgf.innerHTML += `<option value="${g.id}">${esc(g.name)}</option>`; });
+      rgf.value = v;
+    }
+  }
+
+  function renderWordList() {
+    const tbody = document.getElementById('wordbook-table-body');
+    if (!tbody) return;
+    const allEntries = getEntries();
+    const pageSize = 20;
+    const totalPages = Math.ceil(allEntries.length / pageSize) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * pageSize;
+    const entries = allEntries.slice(start, start + pageSize);
+    tbody.innerHTML = '';
+    if (!entries.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:40px">No words yet</td></tr>';
+      return;
+    }
+    entries.forEach(entry => {
+      const tr = document.createElement('tr');
+      const statusKey = 'status' + entry.review.status.charAt(0).toUpperCase() + entry.review.status.slice(1);
+      const statusText = i18n(statusKey) || entry.review.status;
+      const groupTags = entry.groups.map(gid => {
+        const g = data.groups.find(x => x.id === gid);
+        return g ? `<span class="word-group-tag" style="border-left:3px solid ${g.color}">${esc(g.name)}</span>` : '';
+      }).join('');
+      tr.innerHTML = `
+        <td><input type="checkbox" class="word-checkbox" data-id="${entry.id}" ${selectedIds.has(entry.id) ? 'checked' : ''}></td>
+        <td class="word-col-word">${esc(entry.word)}</td>
+        <td class="word-col-translation">${esc(entry.translation)}</td>
+        <td><span class="word-status-badge status-${entry.review.status}">${statusText}</span></td>
+        <td>${groupTags}</td>`;
+      tr.querySelector('.word-checkbox').addEventListener('change', (e) => {
+        if (e.target.checked) selectedIds.add(entry.id); else selectedIds.delete(entry.id);
+        updateBatchActions();
+      });
+      tbody.appendChild(tr);
+    });
+    const pag = document.getElementById('wordbook-pagination');
+    if (pag) {
+      pag.innerHTML = `<span>${allEntries.length} words</span>
+        <div class="pagination-controls">
+          <button class="pagination-btn" id="page-prev" ${currentPage <= 1 ? 'disabled' : ''}>&lt;</button>
+          <span>${currentPage} / ${totalPages}</span>
+          <button class="pagination-btn" id="page-next" ${currentPage >= totalPages ? 'disabled' : ''}>&gt;</button>
+        </div>`;
+      document.getElementById('page-prev')?.addEventListener('click', () => { currentPage--; renderWordList(); });
+      document.getElementById('page-next')?.addEventListener('click', () => { currentPage++; renderWordList(); });
+    }
+    updateBatchActions();
+  }
+
+  function updateBatchActions() {
+    const bar = document.getElementById('wordbook-batch-actions');
+    if (bar) bar.style.display = selectedIds.size > 0 ? 'flex' : 'none';
+  }
+
+  // ============ SM-2 (local copy for options page) ============
+  function sm2(reviewState, quality, responseTimeMs) {
+    let { repetitions, easeFactor, interval } = reviewState;
+    if (responseTimeMs != null && quality >= 3) {
+      if (responseTimeMs < 2000 && quality === 4) quality = 5;
+      else if (responseTimeMs > 8000 && quality === 4) quality = 3;
+    }
+    if (quality < 3) { repetitions = 0; interval = 0; }
+    else {
+      if (repetitions === 0) interval = 1;
+      else if (repetitions === 1) interval = 3;
+      else interval = Math.round(interval * easeFactor);
+      repetitions += 1;
+    }
+    easeFactor = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    if (easeFactor < 1.3) easeFactor = 1.3;
+    let status;
+    if (repetitions === 0) status = 'learning';
+    else if (interval >= 21 && repetitions >= 5) status = 'mastered';
+    else status = 'review';
+    return {
+      repetitions, easeFactor: Math.round(easeFactor * 100) / 100, interval,
+      nextReviewAt: Date.now() + interval * 24 * 60 * 60 * 1000,
+      lastReviewAt: Date.now(),
+      totalReviews: (reviewState.totalReviews || 0) + 1,
+      correctCount: quality >= 3 ? (reviewState.correctCount || 0) + 1 : (reviewState.correctCount || 0),
+      status, log: reviewState.log || []
+    };
+  }
+
+  // Levenshtein distance
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++)
+      for (let j = 1; j <= n; j++)
+        dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    return dp[m][n];
+  }
+
+  // Adaptive mode recommendation
+  function recommendMode(entry) {
+    const r = entry.review.repetitions;
+    if (r <= 2) return 'flashcard';
+    if (r <= 5) return 'quiz';
+    return 'spelling';
+  }
+
+  // Smart distractors for quiz
+  function generateDistracters(targetEntry, count) {
+    const all = Object.values(data.entries).filter(e => e.id !== targetEntry.id && e.translation);
+    if (all.length < count) return all.map(e => e.translation);
+    const targetPOS = targetEntry.definitions?.[0]?.partOfSpeech || '';
+    const targetLen = targetEntry.translation.length;
+    const scored = all.map(e => {
+      let s = Math.random() * 2;
+      if (targetPOS && e.definitions?.[0]?.partOfSpeech === targetPOS) s += 3;
+      if (Math.abs(e.translation.length - targetLen) <= 2) s += 2;
+      return { e, s };
+    });
+    scored.sort((a, b) => b.s - a.s);
+    return scored.slice(0, count).map(x => x.e.translation);
+  }
+
+  // ============ Dashboard ============
+  function renderReviewDashboard() {
+    if (!data) return;
+    const entries = Object.values(data.entries);
+    const total = entries.length;
+    const el = (id) => document.getElementById(id);
+
+    el('stat-total-words').textContent = total;
+
+    const dist = { new: 0, learning: 0, review: 0, mastered: 0 };
+    entries.forEach(e => dist[e.review.status] = (dist[e.review.status] || 0) + 1);
+
+    const rate = total > 0 ? Math.round((dist.mastered / total) * 100) : 0;
+    const rateEl = el('stat-mastery-rate');
+    rateEl.textContent = rate + '%';
+    rateEl.className = 'stat-value' + (rate >= 70 ? ' rate-high' : rate >= 40 ? ' rate-mid' : ' rate-low');
+    el('stat-streak').textContent = (data.stats.streakDays || 0) + ' ' + (i18n('days') || 'days');
+
+    // 7-day chart
+    const chartBars = el('review-chart-bars');
+    if (chartBars) {
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const key = d.toISOString().split('T')[0];
+        days.push({ date: key, ...(data.stats.dailyHistory[key] || { reviewed: 0, correct: 0, newWords: 0 }) });
+      }
+      const mx = Math.max(...days.map(d => d.reviewed), 1);
+      chartBars.innerHTML = days.map(d => {
+        const h = Math.max(4, (d.reviewed / mx) * 60);
+        return `<div class="chart-bar-wrapper">
+          <div class="chart-bar ${d.reviewed === 0 ? 'empty' : ''}" style="height:${h}px" title="${d.reviewed} reviewed"></div>
+          <span class="chart-bar-label">${d.date.slice(5)}</span></div>`;
+      }).join('');
+    }
+
+    // Status bar
+    const statusBar = el('status-bar');
+    if (statusBar && total > 0) {
+      statusBar.innerHTML = ['new','learning','review','mastered'].map(s =>
+        `<div class="status-bar-segment seg-${s}" style="width:${(dist[s]/total*100).toFixed(1)}%" title="${s}: ${dist[s]}"></div>`
+      ).join('');
+    }
+  }
+
+  // ============ Review Session (improved) ============
+
+  function getSelectedMode() {
+    const checked = document.querySelector('input[name="review-mode"]:checked');
+    return checked ? checked.value : 'flashcard';
+  }
+
+  function startReview() {
+    const mode = getSelectedMode();
+    const sessionSize = parseInt(document.getElementById('review-session-size').value);
+    const groupFilter = document.getElementById('review-group-filter').value;
+    const now = Date.now();
+
+    let candidates = Object.values(data.entries);
+    if (groupFilter) candidates = candidates.filter(e => e.groups.includes(groupFilter));
+
+    // Priority: learning(overdue) > review(overdue) > new (max 7)
+    const overdueLearning = candidates.filter(e => e.review.nextReviewAt <= now && e.review.status === 'learning')
+      .sort((a, b) => a.review.nextReviewAt - b.review.nextReviewAt);
+    const overdueReview = candidates.filter(e => e.review.nextReviewAt <= now && e.review.status === 'review')
+      .sort((a, b) => a.review.nextReviewAt - b.review.nextReviewAt);
+    const newWords = candidates.filter(e => e.review.status === 'new')
+      .sort((a, b) => a.createdAt - b.createdAt);
+
+    const maxNew = Math.min(7, Math.floor(sessionSize * 0.35));
+    const selected = [];
+    selected.push(...overdueLearning.slice(0, sessionSize));
+    if (selected.length < sessionSize) selected.push(...overdueReview.slice(0, sessionSize - selected.length));
+    if (selected.length < sessionSize) selected.push(...newWords.slice(0, Math.min(maxNew, sessionSize - selected.length)));
+
+    if (!selected.length) {
+      document.getElementById('review-area').innerHTML =
+        `<div class="empty-state"><div class="empty-state-text">${i18n('noWordsToReview') || 'No words to review'}</div></div>`;
+      return;
+    }
+
+    reviewSession = {
+      mode, words: selected, current: 0, results: [], correctCount: 0,
+      retestQueue: [], // wrong answers re-inserted later
+      cardStartTime: null, lastFeedback: null
+    };
+    renderReviewCard();
+  }
+
+  function renderProgressBar() {
+    if (!reviewSession) return '';
+    const cur = reviewSession.current;
+    const total = reviewSession.words.length;
+    const pct = Math.round((cur / total) * 100);
+    return `<div class="review-progress-bar">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span class="progress-text">${cur} / ${total}</span>
+    </div>`;
+  }
+
+  function renderLastFeedback() {
+    if (!reviewSession?.lastFeedback) return '';
+    const fb = reviewSession.lastFeedback;
+    const cls = fb.quality >= 3 ? 'feedback-correct' : 'feedback-wrong';
+    const icon = fb.quality >= 3 ? '✓' : '✗';
+    return `<div class="previous-feedback ${cls}">
+      <span>${icon} ${esc(fb.word)}</span>
+    </div>`;
+  }
+
+  function renderReviewCard() {
+    const area = document.getElementById('review-area');
+    if (!reviewSession) return;
+
+    // Check if we should insert a retest word
+    if (reviewSession.current >= reviewSession.words.length && reviewSession.retestQueue.length > 0) {
+      reviewSession.words.push(reviewSession.retestQueue.shift());
+    }
+
+    if (reviewSession.current >= reviewSession.words.length) {
+      renderSummary(); return;
+    }
+
+    const entry = reviewSession.words[reviewSession.current];
+    // Determine mode: auto or fixed
+    let mode = reviewSession.mode;
+    if (mode === 'auto') mode = recommendMode(entry);
+
+    reviewSession.cardStartTime = Date.now();
+
+    if (mode === 'flashcard') renderFlashcard(area, entry);
+    else if (mode === 'quiz') renderQuiz(area, entry);
+    else renderSpelling(area, entry);
+  }
+
+  function renderFlashcard(area, entry) {
+    area.innerHTML = `${renderProgressBar()}${renderLastFeedback()}
+      <div class="review-card">
+        <div class="review-word">${esc(entry.word)}</div>
+        ${entry.phonetics?.length ? `<div class="review-phonetic">${esc(entry.phonetics[0].text || '')}</div>` : ''}
+        ${entry.context ? `<div class="review-context">"${esc(entry.context.slice(0, 100))}"</div>` : ''}
+        <div class="review-answer" id="review-answer" style="display:none">
+          <div class="review-translation">${esc(entry.translation)}</div>
+          ${entry.definitions?.length ? `<div class="review-definition">${entry.definitions.map(d => esc((d.partOfSpeech ? d.partOfSpeech + '. ' : '') + (d.meaning || d))).join('<br>')}</div>` : ''}
+        </div>
+        <div class="review-actions" id="review-actions-front">
+          <button class="review-btn btn-show-answer" id="btn-show-answer">${i18n('showAnswer') || 'Show Answer'} <kbd>Space</kbd></button>
+        </div>
+        <div class="review-actions" id="review-actions-back" style="display:none">
+          <button class="review-btn btn-dont-know" data-quality="1">${i18n('dontKnow') || "Don't know"} <kbd>1</kbd></button>
+          <button class="review-btn btn-hard" data-quality="3">${i18n('hard') || 'Hard'} <kbd>2</kbd></button>
+          <button class="review-btn btn-remembered" data-quality="4">${i18n('remembered') || 'Remembered'} <kbd>3</kbd></button>
+          <button class="review-btn btn-too-easy" data-quality="5">${i18n('tooEasy') || 'Too easy'} <kbd>4</kbd></button>
+        </div>
+      </div>`;
+
+    document.getElementById('btn-show-answer').addEventListener('click', () => {
+      document.getElementById('review-answer').style.display = '';
+      document.getElementById('review-actions-front').style.display = 'none';
+      document.getElementById('review-actions-back').style.display = '';
+    });
+    area.querySelectorAll('[data-quality]').forEach(btn => {
+      btn.addEventListener('click', () => handleReviewAnswer(parseInt(btn.dataset.quality)));
+    });
+  }
+
+  function renderQuiz(area, entry) {
+    const wrongOptions = generateDistracters(entry, 3);
+    const options = [entry.translation, ...wrongOptions].sort(() => Math.random() - 0.5);
+
+    area.innerHTML = `${renderProgressBar()}${renderLastFeedback()}
+      <div class="review-card">
+        <div class="review-word">${esc(entry.word)}</div>
+        ${entry.context ? `<div class="review-context">"${esc(entry.context.slice(0, 100))}"</div>` : ''}
+        <div class="quiz-options">
+          ${options.map((opt, i) => `<button class="quiz-option" data-answer="${esc(opt)}" data-correct="${opt === entry.translation}">
+            <kbd>${i + 1}</kbd>${esc(opt)}</button>`).join('')}
+        </div>
+      </div>`;
+
+    let answered = false;
+    area.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const correct = btn.dataset.correct === 'true';
+        btn.classList.add(correct ? 'correct' : 'wrong');
+        if (!correct) area.querySelector('[data-correct="true"]').classList.add('correct');
+        setTimeout(() => handleReviewAnswer(correct ? 4 : 1), 800);
+      });
+    });
+  }
+
+  function renderSpelling(area, entry) {
+    let hintLevel = 0;
+    area.innerHTML = `${renderProgressBar()}${renderLastFeedback()}
+      <div class="review-card">
+        <div class="review-translation" style="font-size:22px">${esc(entry.translation)}</div>
+        ${entry.definitions?.length ? `<div class="review-definition" style="margin-bottom:16px">${entry.definitions.map(d => esc((d.partOfSpeech ? d.partOfSpeech + '. ' : '') + (d.meaning || d))).join('<br>')}</div>` : ''}
+        <div class="spelling-input-wrapper">
+          <input type="text" class="spelling-input" id="spelling-input" placeholder="Type the word..." autocomplete="off">
+          <button class="review-btn" id="spelling-submit">${i18n('submit') || 'Submit'} <kbd>Enter</kbd></button>
+          <button class="review-btn" id="spelling-hint">${i18n('hint') || 'Hint'} <kbd>H</kbd></button>
+        </div>
+        <div class="spelling-hint" id="spelling-hint-text" style="display:none"></div>
+        <div class="spelling-result" id="spelling-result"></div>
+      </div>`;
+
+    const input = document.getElementById('spelling-input');
+    let answered = false;
+
+    const submit = () => {
+      if (answered) return;
+      answered = true;
+      const ua = input.value.trim().toLowerCase();
+      const cw = entry.word.toLowerCase();
+      const dist = levenshtein(ua, cw);
+      const accuracy = 1 - (dist / Math.max(cw.length, 1));
+      let quality, verdict;
+
+      if (ua === cw) { quality = 5; verdict = 'Correct!'; }
+      else if (accuracy >= 0.85) { quality = 3; verdict = `Close! (${entry.word})`; }
+      else if (accuracy >= 0.6) { quality = 2; verdict = `Partial. Answer: ${entry.word}`; }
+      else { quality = 1; verdict = `Wrong. Answer: ${entry.word}`; }
+
+      const resultEl = document.getElementById('spelling-result');
+      resultEl.textContent = verdict;
+      resultEl.className = 'spelling-result ' + (quality >= 3 ? 'correct' : quality === 2 ? 'partial' : 'wrong');
+      input.disabled = true;
+      setTimeout(() => handleReviewAnswer(quality), 1000);
+    };
+
+    document.getElementById('spelling-submit').addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    document.getElementById('spelling-hint').addEventListener('click', () => {
+      hintLevel = Math.min(hintLevel + 1, 3);
+      const word = entry.word;
+      let hint;
+      if (hintLevel >= 3) hint = word.split('').map((c, i) => i % 2 === 0 ? c : '_').join(' ');
+      else if (hintLevel >= 2) hint = word[0] + ' ' + '_ '.repeat(word.length - 2).trim() + ' ' + word[word.length - 1];
+      else hint = '_ '.repeat(word.length).trim() + ` (${word.length})`;
+      const hintEl = document.getElementById('spelling-hint-text');
+      hintEl.textContent = hint;
+      hintEl.style.display = '';
+    });
+    input.focus();
+  }
+
+  async function handleReviewAnswer(quality) {
+    const entry = reviewSession.words[reviewSession.current];
+    const responseTime = reviewSession.cardStartTime ? Date.now() - reviewSession.cardStartTime : null;
+
+    // Append to log
+    if (!entry.review.log) entry.review.log = [];
+    entry.review.log.push({ ts: Date.now(), q: quality, rt: responseTime });
+    if (entry.review.log.length > 30) entry.review.log = entry.review.log.slice(-30);
+
+    entry.review = sm2(entry.review, quality, responseTime);
+    data.entries[entry.id] = entry;
+
+    // Stats
+    data.stats.totalReviews = (data.stats.totalReviews || 0) + 1;
+    const today = new Date().toISOString().split('T')[0];
+    if (!data.stats.dailyHistory[today]) data.stats.dailyHistory[today] = { reviewed: 0, correct: 0, newWords: 0 };
+    data.stats.dailyHistory[today].reviewed += 1;
+    if (quality >= 3) { data.stats.dailyHistory[today].correct += 1; reviewSession.correctCount++; }
+
+    // Streak
+    if (data.stats.lastStudyDate !== today) {
+      const y = new Date(); y.setDate(y.getDate() - 1);
+      data.stats.streakDays = data.stats.lastStudyDate === y.toISOString().split('T')[0]
+        ? (data.stats.streakDays || 0) + 1 : 1;
+      data.stats.lastStudyDate = today;
+    }
+
+    // Wrong answer reinforcement: re-test 5-7 items later
+    if (quality < 3) {
+      const insertAt = Math.min(reviewSession.current + 5 + Math.floor(Math.random() * 3), reviewSession.words.length);
+      reviewSession.retestQueue.push(entry);
+    }
+
+    reviewSession.lastFeedback = { word: entry.word, quality };
+    reviewSession.results.push({ id: entry.id, quality });
+    reviewSession.current++;
+    await saveData();
+    renderReviewCard();
+  }
+
+  function renderSummary() {
+    const area = document.getElementById('review-area');
+    const total = reviewSession.results.length;
+    const correct = reviewSession.correctCount;
+    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+    area.innerHTML = `
+      <div class="review-summary">
+        <h3>${i18n('reviewSummary') || 'Review Summary'}</h3>
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <div class="summary-stat-value">${total}</div>
+            <div class="summary-stat-label">${i18n('wordsReviewed') || 'Words Reviewed'}</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-value ${accuracy >= 80 ? 'rate-high' : accuracy >= 50 ? 'rate-mid' : 'rate-low'}">${accuracy}%</div>
+            <div class="summary-stat-label">${i18n('accuracy') || 'Accuracy'}</div>
+          </div>
+        </div>
+        <div class="summary-actions">
+          <button class="btn-primary" id="btn-another-round">${i18n('anotherRound') || 'Another Round'}</button>
+          <button class="btn-secondary" id="btn-back-wordbook">${i18n('backToWordbook') || 'Back to Wordbook'}</button>
+        </div>
+      </div>`;
+
+    document.getElementById('btn-another-round').addEventListener('click', startReview);
+    document.getElementById('btn-back-wordbook').addEventListener('click', () => {
+      document.querySelector('.nav-item[data-page="wordbook"]')?.click();
+    });
+    renderReviewDashboard();
+  }
+
+  // ============ Keyboard ============
+  function handleKeyboard(e) {
+    if (!reviewSession || reviewSession.current >= reviewSession.words.length) return;
+    // Don't intercept when typing in input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if (e.key === 'Enter') return; // let submit handler handle it
+      return;
+    }
+    const area = document.getElementById('review-area');
+    if (!area) return;
+
+    // ? key: show keyboard help
+    if (e.key === '?') { e.preventDefault(); showKeyboardHelp(); return; }
+
+    const mode = reviewSession.mode === 'auto' ? recommendMode(reviewSession.words[reviewSession.current]) : reviewSession.mode;
+
+    if (mode === 'flashcard') {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        const showBtn = document.getElementById('btn-show-answer');
+        if (showBtn?.offsetParent) { showBtn.click(); return; }
+      }
+      const qm = { Digit1: 1, Digit2: 3, Digit3: 4, Digit4: 5 };
+      if (qm[e.code] !== undefined) {
+        const btn = area.querySelector(`[data-quality="${qm[e.code]}"]`);
+        if (btn?.offsetParent) btn.click();
+      }
+    } else if (mode === 'quiz') {
+      const km = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3 };
+      if (km[e.code] !== undefined) {
+        const opts = area.querySelectorAll('.quiz-option');
+        if (opts[km[e.code]]) opts[km[e.code]].click();
+      }
+    } else if (mode === 'spelling') {
+      if (e.key === 'h' || e.key === 'H') {
+        document.getElementById('spelling-hint')?.click();
+      }
+    }
+  }
+
+  function showKeyboardHelp() {
+    let overlay = document.getElementById('keyboard-help-overlay');
+    if (overlay) { overlay.remove(); return; }
+    overlay = document.createElement('div');
+    overlay.id = 'keyboard-help-overlay';
+    overlay.className = 'keyboard-help-overlay';
+    overlay.innerHTML = `<div class="keyboard-help-panel">
+      <h4>Keyboard Shortcuts</h4>
+      <table>
+        <tr><td><kbd>Space</kbd></td><td>Show answer (flashcard)</td></tr>
+        <tr><td><kbd>1</kbd></td><td>Don't know / Option A</td></tr>
+        <tr><td><kbd>2</kbd></td><td>Hard / Option B</td></tr>
+        <tr><td><kbd>3</kbd></td><td>Remembered / Option C</td></tr>
+        <tr><td><kbd>4</kbd></td><td>Too easy / Option D</td></tr>
+        <tr><td><kbd>Enter</kbd></td><td>Submit (spelling)</td></tr>
+        <tr><td><kbd>H</kbd></td><td>Hint (spelling)</td></tr>
+        <tr><td><kbd>?</kbd></td><td>Toggle this help</td></tr>
+      </table>
+      <button class="review-btn" onclick="this.closest('.keyboard-help-overlay').remove()">Close</button>
+    </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+  }
+
+  // ============ Mode selector UI ============
+  function initModeSelector() {
+    document.querySelectorAll('input[name="review-mode"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.querySelectorAll('.mode-button').forEach(b => b.classList.remove('active'));
+        radio.closest('.mode-button').classList.add('active');
+      });
+    });
+  }
+
+  // ============ Init ============
+  async function init() {
+    await loadData();
+    renderGroups();
+    renderWordList();
+    renderReviewDashboard();
+    initModeSelector();
+
+    if (_listenersAttached) return;
+    _listenersAttached = true;
+
+    const searchEl = document.getElementById('wordbook-search');
+    if (searchEl) {
+      let t;
+      searchEl.addEventListener('input', () => {
+        clearTimeout(t);
+        t = setTimeout(() => { currentSearch = searchEl.value; currentPage = 1; renderWordList(); }, 300);
+      });
+    }
+    document.getElementById('wordbook-sort')?.addEventListener('change', (e) => {
+      currentSort = e.target.value; currentPage = 1; renderWordList();
+    });
+    document.getElementById('wordbook-select-all')?.addEventListener('change', (e) => {
+      document.querySelectorAll('.word-checkbox').forEach(cb => {
+        cb.checked = e.target.checked;
+        if (e.target.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
+      });
+      updateBatchActions();
+    });
+    document.getElementById('btn-add-group')?.addEventListener('click', () => {
+      const name = prompt(i18n('enterGroupName') || 'Enter group name:');
+      if (!name || name.length > 30) return;
+      if (data.groups.some(g => g.name === name)) { alert('Group already exists'); return; }
+      const colors = ['#6b7280','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899'];
+      data.groups.push({ id: 'group_' + Date.now(), name, color: colors[data.groups.length % colors.length], createdAt: Date.now() });
+      saveData().then(() => renderGroups());
+    });
+    document.getElementById('wordbook-batch-delete')?.addEventListener('click', async () => {
+      if (!selectedIds.size) return;
+      if (!confirm((i18n('confirmDeleteWords') || 'Delete $1 words?').replace('$1', selectedIds.size))) return;
+      selectedIds.forEach(id => delete data.entries[id]);
+      selectedIds.clear();
+      await saveData(); renderWordList(); renderGroups();
+    });
+    document.getElementById('wordbook-batch-move')?.addEventListener('click', async () => {
+      if (!selectedIds.size) return;
+      const names = data.groups.map(g => g.name);
+      const c = prompt('Move to group:\n' + names.map((n, i) => `${i+1}. ${n}`).join('\n'));
+      const idx = parseInt(c) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= data.groups.length) return;
+      const tid = data.groups[idx].id;
+      selectedIds.forEach(id => { const e = data.entries[id]; if (e && !e.groups.includes(tid)) e.groups.push(tid); });
+      selectedIds.clear();
+      await saveData(); renderWordList(); renderGroups();
+    });
+    document.getElementById('btn-start-review')?.addEventListener('click', startReview);
+    document.addEventListener('keydown', handleKeyboard);
+  }
+
+  return { init };
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+
+  // Initialize wordbook module when navigating to its pages
+  let wordbookInitialized = false;
+  const initWordbook = () => {
+    if (!wordbookInitialized) {
+      wordbookInitialized = true;
+      WordbookModule.init();
+    } else {
+      WordbookModule.init();
+    }
+  };
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const page = item.dataset.page;
+      if (page === 'wordbook' || page === 'review') {
+        initWordbook();
+      }
+    });
+  });
+
+  // Check initial hash
+  const hash = window.location.hash.slice(1);
+  if (hash === 'wordbook' || hash === 'review') {
+    initWordbook();
+  }
+});
 
 // 监听 hash 变化
-window.addEventListener('hashchange', handleHashNavigation);
+window.addEventListener('hashchange', () => {
+  handleHashNavigation();
+  const hash = window.location.hash.slice(1);
+  if (hash === 'wordbook' || hash === 'review') {
+    WordbookModule.init();
+  }
+});
 
