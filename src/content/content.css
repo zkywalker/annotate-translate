@@ -157,69 +157,60 @@
   font-size: 13px;
 }
 
-/* 翻译卡片关闭按钮 */
-.translation-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+/* 卡片操作按钮行（流式布局） */
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px 8px 6px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.card-action-btn {
   width: 28px;
   height: 28px;
   border: none;
-  background-color: rgba(95, 99, 104, 0.1);
-  color: #5f6368;
-  border-radius: 50%;
-  font-size: 20px;
-  line-height: 1;
+  background: transparent;
+  color: #9ca3af;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
   padding: 0;
-  z-index: 10;
-  background-color: rgba(255, 255, 255, 0.9);
+  transition: color 0.15s, background-color 0.15s;
 }
 
-.translation-close-btn:hover {
-  background-color: rgba(95, 99, 104, 0.2);
-  color: #202124;
-}
-
-.translation-close-btn:active {
-}
-
-/* Clear annotations button */
-.translation-clear-btn {
-  position: absolute;
-  top: 10px;
-  right: 45px; /* Position left of close button */
-  width: 28px;
-  height: 28px;
-  border: none;
-  background-color: rgba(95, 99, 104, 0.1);
+.card-action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
   color: #5f6368;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  padding: 4px;
-  z-index: 10;
-  background-color: rgba(255, 255, 255, 0.9);
 }
 
-.translation-clear-btn:hover {
-  background-color: rgba(220, 38, 38, 0.15);
+/* 收藏按钮 */
+.card-action-btn.wordbook-star-btn:hover {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.card-action-btn.wordbook-star-btn.collected {
+  color: #f59e0b;
+}
+
+.card-action-btn.wordbook-star-btn.collected .star-icon {
+  fill: #f59e0b;
+}
+
+/* 清除标注按钮 */
+.card-action-btn.card-clear-btn:hover {
   color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.08);
 }
 
-.translation-clear-btn:active {
-}
-
-.translation-clear-btn svg {
-  width: 14px;
-  height: 14px;
+/* 关闭按钮 */
+.card-action-btn.card-close-btn:hover {
+  color: #202124;
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 /* 确保翻译UI组件在tooltip内正常显示 */
@@ -229,14 +220,9 @@
   max-width: none;
 }
 
-/* 为翻译结果容器留出关闭按钮的空间 */
+/* 翻译结果容器 */
 .annotate-translate-tooltip .translation-result-container {
   position: relative;
-}
-
-/* 调整第一个section的右侧padding，避免被关闭按钮遮挡 */
-.annotate-translate-tooltip .translation-section:first-child {
-  padding-right: 44px;
 }
 
 .annotate-translate-highlight {
@@ -626,7 +612,7 @@
 }
 
 /* Focus styles for keyboard navigation */
-.translation-close-btn:focus-visible,
+.card-action-btn:focus-visible,
 .audio-play-button:focus-visible,
 .annotate-audio-button:focus-visible,
 .menu-button:focus-visible {

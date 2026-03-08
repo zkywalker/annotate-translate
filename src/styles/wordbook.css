@@ -2,38 +2,7 @@
  * Wordbook & Review System Styles
  * ============================================ */
 
-/* Star Button in Translation Card (absolute, next to close btn) */
-.wordbook-star-btn {
-  position: absolute;
-  top: 10px;
-  right: 45px;
-  width: 28px;
-  height: 28px;
-  border: none;
-  background-color: rgba(95, 99, 104, 0.1);
-  color: #9ca3af;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  z-index: 10;
-  transition: color 0.2s, background-color 0.2s;
-}
-
-.wordbook-star-btn:hover {
-  color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.1);
-}
-
-.wordbook-star-btn.collected {
-  color: #f59e0b;
-}
-
-.wordbook-star-btn.collected .star-icon {
-  fill: #f59e0b;
-}
+/* Star button styles are in content.css (.card-action-btn.wordbook-star-btn) */
 
 /* ============================================
  * Options Page: Wordbook Tab
@@ -794,30 +763,7 @@
  * Star Button Tooltip & Animation
  * ============================================ */
 
-.wordbook-star-btn[data-tooltip] {
-  position: relative;
-}
-
-.wordbook-star-btn[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 8px;
-  background: #374151;
-  color: #fff;
-  font-size: 11px;
-  border-radius: 4px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.wordbook-star-btn[data-tooltip]:hover::after {
-  opacity: 1;
-}
+/* Star button tooltip — now uses native title attribute */
 
 @keyframes star-pulse {
   0% { transform: scale(1); }
