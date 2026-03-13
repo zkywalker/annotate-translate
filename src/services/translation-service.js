@@ -102,6 +102,7 @@ class GoogleTranslateProvider extends TranslationProvider {
     this.apiKey = config.apiKey || null;
     this.usePublicApi = config.usePublicApi !== false; // 默认使用公共API
     this.showPhoneticInAnnotation = config.showPhoneticInAnnotation !== false; // 默认在标注中显示音标
+    this.debugMode = config.debugMode || false; // Fixed: P1-2 — gate verbose logs behind debug flag
   }
 
   async translate(text, targetLang, sourceLang = 'auto') {
@@ -134,24 +135,28 @@ class GoogleTranslateProvider extends TranslationProvider {
       }
 
       const data = await response.json();
-      
-      // 🐛 DEBUG: 打印完整的响应数据
-      logger.log('[GoogleTranslate] Raw Response Data:', JSON.stringify(data, null, 2));
-      logger.log('[GoogleTranslate] Response Structure:');
-      logger.log('  - data[0] (翻译文本):', data[0]);
-      logger.log('  - data[1] (反向翻译):', data[1]);
-      logger.log('  - data[2] (检测语言):', data[2]);
-      logger.log('  - data[12] (英文定义):', data[12]);
-      logger.log('  - data[13] (例句):', data[13]);
-      
+
+      // Fixed: P1-2 — only log full response in debug mode
+      if (this.debugMode) {
+        logger.log('[GoogleTranslate] Raw Response Data:', JSON.stringify(data, null, 2));
+        logger.log('[GoogleTranslate] Response Structure:');
+        logger.log('  - data[0] (翻译文本):', data[0]);
+        logger.log('  - data[1] (反向翻译):', data[1]);
+        logger.log('  - data[2] (检测语言):', data[2]);
+        logger.log('  - data[12] (英文定义):', data[12]);
+        logger.log('  - data[13] (例句):', data[13]);
+      }
+
       // 解析Google Translate API返回的数据
       const result = this.parseGoogleResponse(data, text, sourceLang, targetLang);
-      
-      // 🐛 DEBUG: 打印解析后的结果
-      logger.log('[GoogleTranslate] Parsed Result:', JSON.stringify(result, null, 2));
-      logger.log('[GoogleTranslate] Has Phonetics:', result.phonetics.length > 0);
-      logger.log('[GoogleTranslate] Has Definitions:', result.definitions.length > 0);
-      logger.log('[GoogleTranslate] Has Examples:', result.examples.length > 0);
+
+      // Fixed: P1-2 — only log parsed result in debug mode
+      if (this.debugMode) {
+        logger.log('[GoogleTranslate] Parsed Result:', JSON.stringify(result, null, 2));
+        logger.log('[GoogleTranslate] Has Phonetics:', result.phonetics.length > 0);
+        logger.log('[GoogleTranslate] Has Definitions:', result.definitions.length > 0);
+        logger.log('[GoogleTranslate] Has Examples:', result.examples.length > 0);
+      }
       
       // ✅ 移除提供者级别的音标补充，由 TranslationService 统一处理
       

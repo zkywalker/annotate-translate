@@ -412,6 +412,10 @@ function setupPageUnloadHandler() {
         logger.log('[Annotate-Translate] Aborted translation tasks due to page unload');
       }
     }
+    // Fixed: P2-7 — destroy any service with a CacheManager to stop its setInterval
+    if (typeof translationService !== 'undefined' && typeof translationService.destroy === 'function') {
+      translationService.destroy();
+    }
   });
 
   // 也监听 pagehide 事件（用于更好的支持移动端和 bfcache）
@@ -419,9 +423,20 @@ function setupPageUnloadHandler() {
     if (annotationScanner) {
       annotationScanner.abort();
     }
+    // Fixed: P2-7 — same cleanup for bfcache navigation
+    if (typeof translationService !== 'undefined' && typeof translationService.destroy === 'function') {
+      translationService.destroy();
+    }
   });
 
   logger.log('[Annotate-Translate] Page unload handlers set up');
+}
+
+// Fixed: P2-3 — extracted common annotation settings assignment to avoid repetition
+function applyAnnotationSettingsToProvider(provider) {
+  provider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
+  provider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
+  provider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
 }
 
 // 应用翻译设置
@@ -487,9 +502,8 @@ function applyTranslationSettings() {
     if ($.translationProvider === 'google') {
       const googleProvider = translationService.providers.get('google');
       if (googleProvider) {
-        googleProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        googleProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
-        googleProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        applyAnnotationSettingsToProvider(googleProvider); // Fixed: P2-3
+        googleProvider.debugMode = $.debugMode; // Fixed: P1-2 — propagate debug flag to provider
         logger.log('[Annotate-Translate] Google provider configured - annotation settings:', {
           showPhonetics: googleProvider.showPhoneticInAnnotation,
           showTranslation: googleProvider.showTranslationInAnnotation,
@@ -502,9 +516,7 @@ function applyTranslationSettings() {
     if ($.translationProvider === 'debug') {
       const debugProvider = translationService.providers.get('debug');
       if (debugProvider) {
-        debugProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        debugProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
-        debugProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        applyAnnotationSettingsToProvider(debugProvider); // Fixed: P2-3
         logger.log('[Annotate-Translate] Debug provider configured - annotation settings:', {
           showPhonetics: debugProvider.showPhoneticInAnnotation,
           showTranslation: debugProvider.showTranslationInAnnotation,
@@ -518,12 +530,10 @@ function applyTranslationSettings() {
       const youdaoProvider = translationService.providers.get('youdao');
       if (youdaoProvider) {
         youdaoProvider.updateConfig(
-          $.youdaoAppKey, 
+          $.youdaoAppKey,
           $.youdaoAppSecret
         );
-        youdaoProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        youdaoProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
-        youdaoProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        applyAnnotationSettingsToProvider(youdaoProvider); // Fixed: P2-3
         logger.log('[Annotate-Translate] Youdao provider configured:');
         logger.log('  - AppKey:', $.youdaoAppKey ? 'Set' : 'Not set');
         logger.log('  - Annotation settings:', {
@@ -542,9 +552,7 @@ function applyTranslationSettings() {
           $.deeplApiKey,
           $.deeplUseFreeApi
         );
-        deeplProvider.showPhoneticInAnnotation = $.showPhoneticInAnnotation !== false;
-        deeplProvider.showTranslationInAnnotation = $.showTranslationInAnnotation !== false;
-        deeplProvider.showDefinitionsInAnnotation = $.showDefinitionsInAnnotation === true;
+        applyAnnotationSettingsToProvider(deeplProvider); // Fixed: P2-3
         logger.log('[Annotate-Translate] DeepL provider configured:');
         logger.log('  - API Key:', $.deeplApiKey ? 'Set' : 'Not set');
         logger.log('  - Use Free API:', $.deeplUseFreeApi);
@@ -572,11 +580,9 @@ function applyTranslationSettings() {
           promptFormat: aiProviderConfig.promptFormat,
           useContext: aiProviderConfig.useContext,
           customTemplates: aiProviderConfig.customTemplates,
-          providerName: aiProviderConfig.name || 'OpenAI', // 传递用户自定义的提供商名称
-          showPhoneticInAnnotation: $.showPhoneticInAnnotation !== false,
-          showTranslationInAnnotation: $.showTranslationInAnnotation !== false,
-          showDefinitionsInAnnotation: $.showDefinitionsInAnnotation === true
+          providerName: aiProviderConfig.name || 'OpenAI' // 传递用户自定义的提供商名称
         });
+        applyAnnotationSettingsToProvider(openaiProvider); // Fixed: P2-3
 
         logger.log('[Annotate-Translate] AI provider configured:');
         logger.log('  - Provider:', aiProviderConfig.name || 'OpenAI');
@@ -894,13 +900,10 @@ function extractContext(selectionOrRange, maxLength = CONTEXT_MAX_LENGTH, text =
       console.warn('[Annotate-Translate] extractContext: no parent element');
       return '';
     }
-    
+
     logger.log('[Annotate-Translate] Parent element:', parentElement.tagName, 'textLength:', parentElement.textContent?.length);
-    
-    if (!parentElement) {
-      console.warn('[Annotate-Translate] extractContext: no parent element');
-      return '';
-    }
+
+    // Fixed: P2-4 — removed duplicate null check that appeared here
 
     // 获取足够大的文本范围（向上查找父元素）
     let fullText = parentElement.textContent || '';

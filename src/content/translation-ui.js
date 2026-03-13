@@ -24,6 +24,8 @@ class TranslationUI {
       ...options
     };
     this.audioCache = new Map(); // 缓存音频数据
+    // Fixed: P2-1 — reuse a single AudioContext instead of creating one per click
+    this._audioContext = null;
 
     // 允许的 HTML 标签（用于例句高亮）
     this.allowedHTMLTags = ['b', 'i', 'em', 'strong', 'u', 'mark', 'span'];
@@ -240,8 +242,8 @@ class TranslationUI {
     // 优先级：
     // 1. phonetic.audioData (预加载的音频数据)
     // 2. phonetic.audioUrl (在线音频URL)
-    // 3. 语音合成API (浏览器自带TTS)
-    // 4. 第三方音频服务
+    // 3. 第三方音频服务URL (Fixed: P2-5 — now actually used)
+    // 4. 语音合成API (浏览器自带TTS)
 
     if (phonetic.audioData) {
       // 播放预加载的音频数据
@@ -251,6 +253,16 @@ class TranslationUI {
     if (phonetic.audioUrl) {
       // 播放在线音频
       return this.playAudioFromUrl(phonetic.audioUrl);
+    }
+
+    // Fixed: P2-5 — try third-party service URL before falling back to TTS
+    const serviceUrl = this.getAudioUrlFromService(text, phonetic.type);
+    if (serviceUrl) {
+      try {
+        return await this.playAudioFromUrl(serviceUrl);
+      } catch (e) {
+        // fall through to TTS
+      }
     }
 
     // 使用语音合成API
@@ -263,15 +275,16 @@ class TranslationUI {
    * @returns {Promise<void>}
    */
   async playAudioFromData(audioData) {
-    if (!TranslationUI._audioContext) {
+    // Fixed: P2-1 — reuse shared static AudioContext to avoid resource leak
+    if (!TranslationUI._audioContext || TranslationUI._audioContext.state === 'closed') {
       TranslationUI._audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
     const audioContext = TranslationUI._audioContext;
-    const audioBuffer = await audioContext.decodeAudioData(audioData);
+    const audioBuffer = await audioContext.decodeAudioData(audioData.slice(0));
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(audioContext.destination);
-    
+
     return new Promise((resolve, reject) => {
       source.onended = resolve;
       source.onerror = reject;

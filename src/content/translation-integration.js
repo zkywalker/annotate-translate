@@ -1,6 +1,11 @@
 /**
  * Translation Service Integration Example
- * 
+ *
+ * Fixed: P2-6 — this file is EXAMPLE/REFERENCE CODE only. It is intentionally
+ * NOT listed in manifest.json content_scripts and must NOT be loaded as a
+ * content script. Loading it would register a duplicate chrome.runtime.onMessage
+ * listener at the top level and cause unexpected behaviour.
+ *
  * 这个文件展示了如何将翻译服务集成到Chrome扩展中
  */
 

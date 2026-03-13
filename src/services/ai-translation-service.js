@@ -9,11 +9,15 @@ class AITranslationService {
   constructor() {
     this.provider = null;
     this.currentProviderName = null;
-    this.cache = new Map();
+    // Fixed: P2-2 — use CacheManager (with LRU+TTL) instead of a plain Map
+    this.cache = typeof CacheManager !== 'undefined'
+      ? new CacheManager({ maxSize: 100, ttl: 60 * 60 * 1000 }) // 1 hour TTL
+      : null;
+    this._legacyCache = this.cache ? null : new Map(); // fallback if CacheManager not loaded
     this.cacheMaxSize = 100;
     this.requestQueue = [];
     this.isProcessing = false;
-    
+
     console.log('[AI Translation Service] Initialized');
   }
 
@@ -82,11 +86,12 @@ class AITranslationService {
       throw new Error('Text too long. Maximum 5000 characters.');
     }
 
-    // 检查缓存
+    // 检查缓存 (Fixed: P2-2)
     const cacheKey = this.getCacheKey(text, sourceLang, targetLang);
-    if (this.cache.has(cacheKey) && !options.skipCache) {
+    const cachedValue = this.cache ? this.cache.get(cacheKey) : (this._legacyCache && this._legacyCache.get(cacheKey));
+    if (cachedValue && !options.skipCache) {
       console.log('[AI Translation Service] Returning cached result');
-      return this.cache.get(cacheKey);
+      return cachedValue;
     }
 
     try {
@@ -194,26 +199,33 @@ class AITranslationService {
 
   /**
    * 缓存结果
+   * Fixed: P2-2 — delegate to CacheManager
    * @param {string} key - 缓存键
    * @param {AITranslationResult} result - 翻译结果
    * @private
    */
   cacheResult(key, result) {
-    // 如果缓存已满，删除最早的条目
-    if (this.cache.size >= this.cacheMaxSize) {
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+    if (this.cache) {
+      this.cache.set(key, result);
+    } else if (this._legacyCache) {
+      if (this._legacyCache.size >= this.cacheMaxSize) {
+        const firstKey = this._legacyCache.keys().next().value;
+        this._legacyCache.delete(firstKey);
+      }
+      this._legacyCache.set(key, result);
     }
-    
-    this.cache.set(key, result);
-    console.log(`[AI Translation Service] Cached result. Cache size: ${this.cache.size}`);
+    console.log('[AI Translation Service] Cached result.');
   }
 
   /**
    * 清除缓存
    */
   clearCache() {
-    this.cache.clear();
+    if (this.cache) {
+      this.cache.clear();
+    } else if (this._legacyCache) {
+      this._legacyCache.clear();
+    }
     console.log('[AI Translation Service] Cache cleared');
   }
 
@@ -222,11 +234,27 @@ class AITranslationService {
    * @returns {Object}
    */
   getCacheStats() {
+    if (this.cache) {
+      return this.cache.getStats ? this.cache.getStats() : { size: this.cache.size };
+    }
     return {
-      size: this.cache.size,
+      size: this._legacyCache ? this._legacyCache.size : 0,
       maxSize: this.cacheMaxSize,
-      keys: Array.from(this.cache.keys())
+      keys: this._legacyCache ? Array.from(this._legacyCache.keys()) : []
     };
+  }
+
+  /**
+   * Fixed: P2-7 — destroy CacheManager interval when content script unloads
+   */
+  destroy() {
+    if (this.cache && typeof this.cache.destroy === 'function') {
+      this.cache.destroy();
+    } else if (this._legacyCache) {
+      this._legacyCache.clear();
+    }
+    this.cache = null;
+    this._legacyCache = null;
   }
 
   /**

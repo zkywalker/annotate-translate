@@ -47,19 +47,20 @@ chrome.runtime.onInstalled.addListener((details) => {
         deepl: { enabled: false, apiKey: '', useFreeApi: true, connectionStatus: null },
         openai: { enabled: false, apiKey: '', model: 'gpt-3.5-turbo', baseUrl: 'https://api.openai.com/v1', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null }
       },
+      // Fixed: P0-1 — align with content.js which reads from settings.translationCard.*
+      translationCard: {
+        enableAudio: true,
+        showPhonetics: true,
+        showDefinitions: true,
+        showExamples: true,
+        maxExamples: 3,
+        autoCloseDelay: 10,
+        enablePhoneticFallback: true
+      },
       display: {
-        translation: {
-          enableAudio: true,
-          showPhonetics: true,
-          showDefinitions: true,
-          showExamples: true,
-          maxExamples: 3,
-          autoCloseDelay: 10,
-          enablePhoneticFallback: true
-        },
         menu: { buttonSize: 'small' },
-        annotation: { 
-          showPhonetics: true, 
+        annotation: {
+          showPhonetics: true,
           enableAudio: true,
           hidePhoneticForMultipleWords: false
         }

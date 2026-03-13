@@ -15,6 +15,7 @@ class AnnotationScanner {
     this.annotatedNodes = new Set(); // 跟踪已标注的节点
     this.isScanning = false;
     this.abortController = null; // 用于中断翻译请求
+    this._mutating = false; // Fixed: P1-3 — flag to prevent observer re-entry during DOM mutations
   }
 
   /**
@@ -233,7 +234,7 @@ class AnnotationScanner {
     // 创建进度显示面板
     const progressPanel = this.createProgressPanel(total, vocabularyConfig, providerName, providerDisplayName);
 
-    // 批量获取翻译（带进度更新），分批处理避免 API 速率限制
+    // Fixed: P1-1 — batch concurrent requests (max 5 per batch) to avoid rate limiting
     const batchSize = 5;
     for (let i = 0; i < annotations.length; i += batchSize) {
       if (this.abortController?.signal.aborted) break;
@@ -620,14 +621,29 @@ class AnnotationScanner {
       }
 
       this.observer = new MutationObserver((mutations) => {
+        // Fixed: P1-3 — skip mutations caused by our own annotation insertions
+        if (this._mutating) return;
+
         // 防抖处理
         if (this.observerTimeout) {
           clearTimeout(this.observerTimeout);
         }
 
-        this.observerTimeout = setTimeout(() => {
+        this.observerTimeout = setTimeout(async () => {
           logger.log('[AnnotationScanner] DOM changed, re-scanning...');
-          this.scanPage(options);
+          // Disconnect before scanning to prevent self-triggering mutations
+          this.observer.disconnect();
+          this._mutating = true;
+          try {
+            await this.scanPage(options);
+          } finally {
+            this._mutating = false;
+            // Reconnect after DOM mutations are done
+            this.observer.observe(document.body, {
+              childList: true,
+              subtree: true
+            });
+          }
         }, 1000);
       });
 
