@@ -114,6 +114,24 @@
   color: #5f6368;
 }
 
+.annotate-translate-tooltip .loading-cancel-btn {
+  margin-left: auto;
+  padding: 2px 6px;
+  background: none;
+  border: 1px solid #d8dadf;
+  border-radius: 4px;
+  color: #80868b;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.annotate-translate-tooltip .loading-cancel-btn:hover {
+  background: #f1f3f4;
+  color: #3c4043;
+}
+
 .annotate-translate-tooltip .loading-spinner {
   width: 20px;
   height: 20px;

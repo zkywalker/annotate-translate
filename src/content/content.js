@@ -191,6 +191,7 @@ let annotations = new Map();
 let lastSelection = null; // 保存最后一次选择的Range
 let translationUI = null; // TranslationUI实例
 let currentTooltip = null; // 当前显示的翻译卡片
+let currentTranslationController = null; // 当前翻译请求的 AbortController
 let annotationScanner = null; // AnnotationScanner实例
 
 // Initialize the extension
@@ -1111,13 +1112,23 @@ function getUserFriendlyError(error) {
 
 async function translateText(text) {
   hideContextMenu();
-  
+
+  // 取消之前正在进行的翻译请求
+  if (currentTranslationController) {
+    currentTranslationController.abort();
+    currentTranslationController = null;
+  }
+
   // 移除之前的翻译卡片
   if (currentTooltip) {
     currentTooltip.remove();
     currentTooltip = null;
   }
-  
+
+  // 创建用于取消本次翻译的 AbortController
+  const cancelController = new AbortController();
+  currentTranslationController = cancelController;
+
   // 创建加载提示
   const loadingTooltip = document.createElement('div');
   loadingTooltip.className = 'annotate-translate-tooltip loading';
@@ -1125,8 +1136,14 @@ async function translateText(text) {
     <div class="loading-content">
       <div class="loading-spinner"></div>
       <span>${safeGetMessage('translating', null, 'Translating...')}</span>
+      <button class="loading-cancel-btn" title="${safeGetMessage('cancelTranslation', null, 'Cancel')}">✕</button>
     </div>
   `;
+
+  // 绑定取消按钮
+  loadingTooltip.querySelector('.loading-cancel-btn').addEventListener('click', () => {
+    cancelController.abort();
+  });
   
   const selection = window.getSelection();
   if (selection.rangeCount > 0) {
@@ -1154,13 +1171,21 @@ async function translateText(text) {
     
     logger.log('[Annotate-Translate] Context:', context || '(empty)');
     
-    // 调用翻译服务，传递上下文
-    const result = await translationService.translate(
-      text,
-      $.targetLanguage || 'zh-CN',
-      'auto',
-      { context }  // 传递上下文作为 options
-    );
+    // 调用翻译服务，传递上下文；同时 race 取消信号
+    const cancelPromise = new Promise((_, reject) => {
+      cancelController.signal.addEventListener('abort', () => {
+        reject(new DOMException('Translation cancelled by user', 'AbortError'));
+      });
+    });
+    const result = await Promise.race([
+      translationService.translate(
+        text,
+        $.targetLanguage || 'zh-CN',
+        'auto',
+        { context }  // 传递上下文作为 options
+      ),
+      cancelPromise
+    ]);
     
     if ($.debugMode && $.showConsoleLogs) {
       logger.log('[Annotate-Translate] Translation result:', result);
@@ -1168,7 +1193,8 @@ async function translateText(text) {
     
     // 移除加载提示
     loadingTooltip.remove();
-    
+    currentTranslationController = null;
+
     // 使用TranslationUI渲染结果
     if (!translationUI) {
       initializeTranslationUI();
@@ -1247,6 +1273,14 @@ async function translateText(text) {
     }, 100);
     
   } catch (error) {
+    // 用户主动取消：静默关闭 loading tooltip
+    if (error.name === 'AbortError' && cancelController.signal.aborted) {
+      if (loadingTooltip.parentElement) loadingTooltip.remove();
+      if (currentTooltip === loadingTooltip) currentTooltip = null;
+      currentTranslationController = null;
+      return;
+    }
+
     console.error('[Annotate-Translate] Translation failed:', error);
 
     // 显示错误消息
