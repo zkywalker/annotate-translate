@@ -1,6 +1,6 @@
 ---
 module: vocabulary
-last-updated: 2026-02-19
+last-updated: 2026-07-28
 related-modules:
   - docs/modules/translation-service.md
   - docs/modules/content.md
@@ -46,7 +46,7 @@ content.js (初始化入口)
     1. collectTextNodes()     → TreeWalker 遍历 DOM
     2. extractWordsFromNodes() → 正则提取英文单词
     3. vocabularyService.batchCheck() → 词库匹配 + LRU 缓存
-    4. enrichAnnotations()    → translationService.translate() 逐词翻译
+    4. enrichAnnotations()    → translationService.translateBatch() 分块翻译
     5. applyAnnotations()     → createRubyElement() 替换 DOM 节点
 ```
 
@@ -126,7 +126,7 @@ observeChanges(enable, options)  // MutationObserver 监听动态内容（1s 防
 1. **文本节点收集** — `TreeWalker` 过滤 `script/style/noscript/iframe/ruby/rt/rp` 标签，跳过空白节点和已标注内容。
 2. **单词提取** — 正则 `/\b[a-zA-Z]+(?:[-'][a-zA-Z]+)*\b/g` 匹配英文单词（含连字符、撇号），结果按 `word.toLowerCase()` 去重，记录每个出现的 `{node, offset, length, originalWord}`。
 3. **词库查询** — `vocabularyService.batchCheck()` 先查 LRU 缓存，未命中的批量委托 provider。
-4. **翻译 enrichment** — 对需要标注的词并发调用 `translationService.translate()`，每个词翻译前检查 `abortController.signal.aborted`。翻译过程中显示进度面板（provider 名称、标签配置、完成数/总数、错误计数）。
+4. **翻译 enrichment** — 将需要标注的唯一词列表交给 `translationService.translateBatch()`。OpenAI 使用结构化 JSON 分块翻译，其他 provider 使用有界单条并发；每个 outcome 独立更新进度和错误计数。
 5. **DOM 替换** — 同一文本节点上的多个标注按 offset 倒序处理（避免偏移），调用 `createRubyElement()` 生成 ruby 元素，用 fragment 一次性替换原节点。
 
 ### 标签过滤逻辑
@@ -148,23 +148,23 @@ observeChanges(enable, options)  // MutationObserver 监听动态内容（1s 防
 | 全局单例 `vocabularyService` | 与 `translationService` 保持一致的模式，方便跨模块共享 |
 | 分层加载（core / advanced / frequency） | 减少初始化开销，按需加载大型词库 |
 | LRU 缓存放在 Service 层而非 Provider 层 | 缓存键包含 provider 名和 options，切换 provider 时自动清空 |
-| AbortController 仅检查信号而非传递给 fetch | 翻译调用委托给 `translationService`，中断粒度为逐词检查 |
+| AbortController 传入批量调度层 | 已发出的请求不强制取消，但中断后不再调度后续批次或单词，也不应用晚到结果 |
 | 标注按 offset 倒序替换 | 从后往前替换文本节点避免前面的替换影响后面的 offset |
 | 依赖全局 `createRubyElement` 函数 | 复用 `content.js` 已有的 ruby 创建逻辑（含点击事件、音频按钮） |
-| 并发翻译 `Promise.all` | 所有词的翻译请求同时发出以提速，通过进度面板反馈进度 |
+| Provider 感知的批量调度 | LLM 合并结构化请求；其他 provider 保留原契约并限制并发，兼顾吞吐与兼容性 |
 
 ## 已知限制
 
 1. **仅支持英文** — 单词提取正则 `/\b[a-zA-Z]+/` 无法处理非拉丁文字。
-2. **AbortController 不穿透翻译层** — `abort()` 只阻止后续词的翻译发起，已发出的 HTTP 请求不会被取消。
+2. **AbortController 不取消在途网络请求** — `abort()` 会阻止后续调度和结果应用，但 background message 已发出的 HTTP 请求仍会完成。
 3. **无词形还原** — 词库查询使用原形匹配，`running` 不会归约为 `run`（依赖词库本身包含变形）。
-4. **并发翻译无限流** — `Promise.all` 同时发出所有翻译请求，大量词汇时可能造成请求洪峰。
-5. **MutationObserver 全量重扫** — DOM 变化触发的重扫调用 `scanPage()` 而非增量处理新节点。
-6. **`createRubyElement` 全局依赖** — `applyAnnotations` 运行时要求 `content.js` 已定义该函数，否则返回 0。
+4. **MutationObserver 全量重扫** — DOM 变化触发的重扫调用 `scanPage()` 而非增量处理新节点。
+5. **`createRubyElement` 全局依赖** — `applyAnnotations` 运行时要求 `content.js` 已定义该函数，否则返回 0。
 
 ## 变更历史
 
 | 日期 | 提交 | 描述 |
 |------|------|------|
+| 2026-07-28 | working tree | 词汇翻译改为结构化分批请求，并为非批量 provider 增加有界并发 |
 | 2025 | 初始实现 | 建立 VocabularyProvider 基类、VocabularyService、UnifiedProvider、AnnotationScanner |
 | 2025 | 59d607b | 修复标注音频按钮不可点击问题，3 词以上隐藏音标 |

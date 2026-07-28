@@ -9,3 +9,5 @@
 ## 已归档
 
 归档的规格位于 [archive/](./archive/) 目录。
+
+- [词汇模式批量翻译](./archive/batch-vocabulary-translation.md)

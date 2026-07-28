@@ -76,6 +76,34 @@ class TranslationProvider {
   }
 
   /**
+   * Provider 是否能在一次请求中返回多个可独立映射的结果。
+   */
+  supportsBatchTranslation() {
+    return false;
+  }
+
+  /**
+   * Provider 建议的单批大小。不支持批量时保持为 1。
+   */
+  getBatchSize() {
+    return 1;
+  }
+
+  /**
+   * 参与缓存键的 provider 配置标识，不得包含密钥。
+   */
+  getCacheIdentity() {
+    return this.name;
+  }
+
+  /**
+   * 返回真正影响翻译结果的上下文。普通 provider 默认忽略上下文。
+   */
+  getCacheContext() {
+    return '';
+  }
+
+  /**
    * 检测语言
    * @param {string} text - 待检测文本
    * @returns {Promise<string>} 语言代码
@@ -1581,6 +1609,43 @@ class OpenAITranslateProvider extends TranslationProvider {
     }
   }
 
+  supportsBatchTranslation() {
+    // 自定义单条模板可能包含用户特定语义，不能由内置批量模板替代。
+    return !this.customTemplates;
+  }
+
+  getBatchSize(options = {}) {
+    if (!this.supportsBatchTranslation()) {
+      return 1;
+    }
+
+    const detailedOutput = this.promptFormat === 'jsonFormat' || options.includeDefinitions;
+    const tokensPerItem = detailedOutput ? 50 : 25;
+    const maximum = detailedOutput ? 8 : 20;
+    const tokenLimitedSize = Math.floor(Math.max(0, this.maxTokens - 80) / tokensPerItem);
+    return Math.max(1, Math.min(maximum, tokenLimitedSize));
+  }
+
+  getCacheIdentity() {
+    return JSON.stringify({
+      type: 'openai',
+      providerName: this.providerName,
+      baseURL: this.baseURL,
+      model: this.model,
+      temperature: this.temperature,
+      maxTokens: this.maxTokens,
+      promptFormat: this.promptFormat,
+      useContext: this.useContext,
+      customTemplates: this.customTemplates
+    });
+  }
+
+  getCacheContext(options = {}) {
+    return this.useContext && typeof options.context === 'string'
+      ? options.context.trim()
+      : '';
+  }
+
   /**
    * 翻译文本（适配 TranslationProvider 接口）
    * @param {string} text - 待翻译文本
@@ -1605,38 +1670,8 @@ class OpenAITranslateProvider extends TranslationProvider {
         context: options.context || '' // 从 options 中传递上下文
       });
 
-      // 转换为 TranslationResult 格式
-      const result = {
-        originalText: text,
-        translatedText: aiResult.translatedText || aiResult.translation || '',
-        sourceLang: sourceLang === 'auto' ? (aiResult.sourceLang || 'auto') : sourceLang,
-        targetLang: targetLang,
-        phonetics: aiResult.phonetics || [],
-        definitions: aiResult.definitions || [],
-        examples: aiResult.examples || [],
-        provider: 'openai',
-        providerDisplayName: this.providerName, // 用户自定义的提供商显示名称
-        metadata: aiResult.metadata || {},
-        timestamp: Date.now()
-      };
-
-      // 构建标注文本
-      result.annotationText = this.buildAnnotationText(result);
-
-      // 记录 token 使用量
-      if (typeof tokenStatsService !== 'undefined' && result.metadata) {
-        const { promptTokens, completionTokens, tokensUsed, cost } = result.metadata;
-        if (promptTokens || completionTokens || tokensUsed) {
-          tokenStatsService.recordUsage(this.providerName, {
-            promptTokens: promptTokens || 0,
-            completionTokens: completionTokens || 0,
-            totalTokens: tokensUsed || (promptTokens + completionTokens),
-            cost: cost || 0
-          }).catch(err => {
-            console.warn('[OpenAI Adapter] Failed to record token usage:', err);
-          });
-        }
-      }
+      const result = this.adaptAIResult(aiResult, text, sourceLang, targetLang);
+      this.recordTokenUsage(result.metadata);
 
       logger.log('[OpenAI Adapter] Translation completed:', result);
       return result;
@@ -1645,6 +1680,88 @@ class OpenAITranslateProvider extends TranslationProvider {
       console.error('[OpenAI Adapter] Translation failed:', error);
       throw new Error(`OpenAI translation failed: ${error.message}`);
     }
+  }
+
+  async translateBatch(texts, targetLang, sourceLang = 'auto', options = {}) {
+    if (!Array.isArray(texts) || texts.length === 0) {
+      throw new Error('Batch translation requires at least one text');
+    }
+    if (!this.supportsBatchTranslation()) {
+      throw new Error('Batch translation is disabled when custom prompt templates are active');
+    }
+    if (!this.openaiProvider) {
+      this.initializeProvider();
+    }
+
+    try {
+      const context = this.useContext ? (options.context || '') : '';
+      const batchItems = texts.map((text, index) => ({ id: index, text, context }));
+      const batchResult = await this.openaiProvider.translateBatch(
+        batchItems,
+        sourceLang,
+        targetLang,
+        {
+          includePhonetic: options.includePhonetic !== false,
+          includeDefinitions: options.includeDefinitions !== undefined
+            ? options.includeDefinitions
+            : this.promptFormat === 'jsonFormat'
+        }
+      );
+
+      if (!batchResult || !Array.isArray(batchResult.results) || batchResult.results.length !== texts.length) {
+        throw new Error('OpenAI batch translation returned an incomplete result set');
+      }
+
+      this.recordTokenUsage(batchResult.metadata);
+      return batchResult.results.map((aiResult, index) => this.adaptAIResult(
+        aiResult,
+        texts[index],
+        sourceLang,
+        targetLang
+      ));
+    } catch (error) {
+      console.error('[OpenAI Adapter] Batch translation failed:', error);
+      throw new Error(`OpenAI batch translation failed: ${error.message}`);
+    }
+  }
+
+  adaptAIResult(aiResult, text, sourceLang, targetLang) {
+    const result = {
+      originalText: text,
+      translatedText: aiResult.translatedText || aiResult.translation || '',
+      sourceLang: sourceLang === 'auto' ? (aiResult.sourceLang || 'auto') : sourceLang,
+      targetLang,
+      phonetics: aiResult.phonetics || [],
+      definitions: aiResult.definitions || [],
+      examples: aiResult.examples || [],
+      provider: 'openai',
+      providerDisplayName: this.providerName,
+      metadata: aiResult.metadata || {},
+      timestamp: Date.now()
+    };
+
+    result.annotationText = this.buildAnnotationText(result);
+    return result;
+  }
+
+  recordTokenUsage(metadata = {}) {
+    if (typeof tokenStatsService === 'undefined') {
+      return;
+    }
+
+    const { promptTokens, completionTokens, tokensUsed, cost } = metadata;
+    if (!promptTokens && !completionTokens && !tokensUsed) {
+      return;
+    }
+
+    tokenStatsService.recordUsage(this.providerName, {
+      promptTokens: promptTokens || 0,
+      completionTokens: completionTokens || 0,
+      totalTokens: tokensUsed || ((promptTokens || 0) + (completionTokens || 0)),
+      cost: cost || 0
+    }).catch(error => {
+      console.warn('[OpenAI Adapter] Failed to record token usage:', error);
+    });
   }
 
   /**
@@ -1671,8 +1788,10 @@ class OpenAITranslateProvider extends TranslationProvider {
     if (this.showDefinitionsInAnnotation && result.definitions && result.definitions.length > 0) {
       const definitionsToShow = result.definitions.slice(0, 2);
       const definitionTexts = definitionsToShow.map(def => {
-        if (def.meanings && def.meanings.length > 0) {
-          return `[${def.pos || ''}] ${def.meanings[0]}`;
+        const text = def.meanings?.[0] || def.text;
+        if (text) {
+          const partOfSpeech = def.pos || def.partOfSpeech || '';
+          return partOfSpeech ? `[${partOfSpeech}] ${text}` : text;
         }
         return null;
       }).filter(Boolean);
@@ -1783,76 +1902,22 @@ class TranslationService {
    * @returns {Promise<TranslationResult>}
    */
   async translate(text, targetLang, sourceLang = 'auto', options = {}) {
-    const cacheKey = `${text}:${sourceLang}:${targetLang}:${this.activeProvider}`;
-    
-    // 检查缓存（仅在缓存启用且未指定 noCache 时）
-    if (!options.noCache && this.maxCacheSize > 0 && this.cache.has(cacheKey)) {
-      logger.log('[TranslationService] Using cached result');
-      return this.cache.get(cacheKey);
-    }
-
     const provider = this.getActiveProvider();
+    const cacheKey = this.createCacheKey(text, targetLang, sourceLang, options, provider);
+    const cachedResult = this.getCachedResult(cacheKey, options);
 
-    // Timeout and retry logic for provider.translate()
-    const maxRetries = 2;
-    let lastError;
-    let result;
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      let timeoutId;
-      try {
-        const controller = new AbortController();
-        timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-        logger.log('[TranslationService] Calling provider.translate with options:', options);
-        result = await provider.translate(text, targetLang, sourceLang, { ...options, signal: controller.signal });
-        clearTimeout(timeoutId);
-        break; // Success, exit retry loop
-      } catch (error) {
-        clearTimeout(timeoutId);
-        lastError = error;
-
-        // Don't retry on 4xx errors (client errors)
-        if (error.message?.includes('4') && error.message?.includes('error')) {
-          throw error;
-        }
-        // On timeout (AbortError), retry if attempts remain
-        if (error.name === 'AbortError' && attempt < maxRetries) {
-          console.warn(`[TranslationService] Attempt ${attempt + 1} timed out, retrying...`);
-          continue;
-        }
-        // For network errors, retry if attempts remain
-        if (attempt < maxRetries && (error.message?.includes('fetch') || error.message?.includes('network') || error.name === 'TypeError')) {
-          console.warn(`[TranslationService] Attempt ${attempt + 1} failed, retrying...`);
-          continue;
-        }
-        // No more retries or non-retryable error
-        console.error('[TranslationService] Translation failed:', error);
-        throw error;
-      }
-    }
-
-    // If all retries exhausted without breaking out of the loop
-    if (!result) {
-      console.error('[TranslationService] Translation failed after all retries:', lastError);
-      throw lastError;
+    if (cachedResult) {
+      logger.log('[TranslationService] Using cached result');
+      this.normalizeTranslationResult(cachedResult, text, targetLang, sourceLang);
+      cachedResult.annotationText = this.generateAnnotationText(cachedResult);
+      return cachedResult;
     }
 
     try {
-      // 通用音标补充：如果没有音标且启用了补充功能，尝试从 FreeDictionary 获取
-      if (result.phonetics.length === 0 && this.enablePhoneticFallback) {
-        logger.log('[TranslationService] No phonetics found, trying FreeDictionary supplement...');
-        await this.supplementPhoneticsFromFreeDictionary(result, text);
-      }
+      logger.log('[TranslationService] Calling provider.translate with options:', options);
+      const result = await this.translateWithProvider(provider, text, targetLang, sourceLang, options);
 
-      // 生成或更新 annotationText（在补充音标后）
-      if (!result.annotationText || result.phonetics.length > 0) {
-        result.annotationText = this.generateAnnotationText(result);
-        logger.log('[TranslationService] ✓ Generated annotation text:', result.annotationText);
-      }
-
-      // 缓存结果（仅在缓存启用时）
-      if (this.maxCacheSize > 0) {
+      if (!options.noCache && this.maxCacheSize > 0) {
         this.addToCache(cacheKey, result);
       }
 
@@ -1861,6 +1926,328 @@ class TranslationService {
       console.error('[TranslationService] Post-translation processing failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * 批量翻译，返回与输入顺序一致的独立 outcome。
+   * 单个词失败不会使整个批次 reject。
+   * @returns {Promise<Array<{text: string, result?: TranslationResult, error?: Error, cached: boolean}>>}
+   */
+  async translateBatch(texts, targetLang, sourceLang = 'auto', options = {}) {
+    if (!Array.isArray(texts)) {
+      throw new TypeError('translateBatch() expects an array of texts');
+    }
+    if (texts.length === 0) {
+      return [];
+    }
+
+    const provider = this.getActiveProvider();
+    const outcomes = new Array(texts.length);
+    const pendingByCacheKey = new Map();
+
+    const notifyProgress = (outcome, index) => {
+      if (typeof options.onProgress !== 'function') {
+        return;
+      }
+      try {
+        options.onProgress(outcome, index);
+      } catch (error) {
+        console.warn('[TranslationService] Batch progress callback failed:', error);
+      }
+    };
+
+    texts.forEach((text, index) => {
+      if (typeof text !== 'string' || !text.trim()) {
+        const outcome = {
+          text,
+          error: new TypeError(`Invalid translation text at index ${index}`),
+          cached: false
+        };
+        outcomes[index] = outcome;
+        notifyProgress(outcome, index);
+        return;
+      }
+
+      const cacheKey = this.createCacheKey(text, targetLang, sourceLang, options, provider);
+      const cachedResult = this.getCachedResult(cacheKey, options);
+      if (cachedResult) {
+        this.normalizeTranslationResult(cachedResult, text, targetLang, sourceLang);
+        cachedResult.annotationText = this.generateAnnotationText(cachedResult);
+        const outcome = { text, result: cachedResult, cached: true };
+        outcomes[index] = outcome;
+        notifyProgress(outcome, index);
+        return;
+      }
+
+      const existing = pendingByCacheKey.get(cacheKey);
+      if (existing) {
+        existing.indexes.push(index);
+      } else {
+        pendingByCacheKey.set(cacheKey, { text, cacheKey, indexes: [index] });
+      }
+    });
+
+    const pending = Array.from(pendingByCacheKey.values());
+    if (pending.length === 0) {
+      return outcomes;
+    }
+
+    const completeSuccess = (entry, result) => {
+      if (!options.noCache && this.maxCacheSize > 0) {
+        this.addToCache(entry.cacheKey, result);
+      }
+      for (const index of entry.indexes) {
+        const outcome = { text: texts[index], result, cached: false };
+        outcomes[index] = outcome;
+        notifyProgress(outcome, index);
+      }
+    };
+
+    const completeError = (entry, error) => {
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      for (const index of entry.indexes) {
+        const outcome = { text: texts[index], error: normalizedError, cached: false };
+        outcomes[index] = outcome;
+        notifyProgress(outcome, index);
+      }
+    };
+
+    const translateIndividually = async entry => {
+      try {
+        this.throwIfAborted(options.signal);
+        const result = await this.translateWithProvider(
+          provider,
+          entry.text,
+          targetLang,
+          sourceLang,
+          options
+        );
+        completeSuccess(entry, result);
+      } catch (error) {
+        completeError(entry, error);
+      }
+    };
+
+    const supportsBatch = provider.supportsBatchTranslation?.() === true;
+    const batchSize = supportsBatch
+      ? Math.max(1, Math.floor(provider.getBatchSize?.(options) || 1))
+      : 1;
+
+    if (!supportsBatch || batchSize < 2 || pending.length === 1) {
+      await this.runWithConcurrency(
+        pending,
+        this.normalizeConcurrency(options.individualConcurrency, 4),
+        translateIndividually
+      );
+      return outcomes;
+    }
+
+    const chunks = [];
+    for (let index = 0; index < pending.length; index += batchSize) {
+      chunks.push(pending.slice(index, index + batchSize));
+    }
+
+    await this.runWithConcurrency(
+      chunks,
+      this.normalizeConcurrency(options.batchConcurrency, 2),
+      async chunk => {
+        if (chunk.length === 1) {
+          await translateIndividually(chunk[0]);
+          return;
+        }
+
+        try {
+          this.throwIfAborted(options.signal);
+          const providerOptions = this.getProviderOptions(options);
+          const batchResults = await provider.translateBatch(
+            chunk.map(entry => entry.text),
+            targetLang,
+            sourceLang,
+            providerOptions
+          );
+          this.throwIfAborted(options.signal);
+
+          if (!Array.isArray(batchResults) || batchResults.length !== chunk.length) {
+            throw new Error('Provider returned an incomplete batch result set');
+          }
+
+          const resultEntries = chunk.map((entry, index) => ({
+            entry,
+            result: batchResults[index]
+          }));
+          await this.runWithConcurrency(resultEntries, 2, async item => {
+            try {
+              const result = await this.finalizeTranslationResult(
+                item.result,
+                item.entry.text,
+                targetLang,
+                sourceLang,
+                options
+              );
+              completeSuccess(item.entry, result);
+            } catch (error) {
+              completeError(item.entry, error);
+            }
+          });
+        } catch (error) {
+          console.warn('[TranslationService] Batch request failed; falling back to individual requests:', error);
+          await this.runWithConcurrency(chunk, 2, translateIndividually);
+        }
+      }
+    );
+
+    return outcomes;
+  }
+
+  async translateWithProvider(provider, text, targetLang, sourceLang, options) {
+    const maxRetries = 2;
+    let lastError;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      this.throwIfAborted(options.signal);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const result = await provider.translate(
+          text,
+          targetLang,
+          sourceLang,
+          { ...this.getProviderOptions(options), signal: controller.signal }
+        );
+        clearTimeout(timeoutId);
+        this.throwIfAborted(options.signal);
+        return this.finalizeTranslationResult(result, text, targetLang, sourceLang, options);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        lastError = error;
+
+        if (options.signal?.aborted) {
+          this.throwIfAborted(options.signal);
+        }
+        if (error.message?.includes('4') && error.message?.includes('error')) {
+          throw error;
+        }
+        if (error.name === 'AbortError' && attempt < maxRetries) {
+          console.warn(`[TranslationService] Attempt ${attempt + 1} timed out, retrying...`);
+          continue;
+        }
+        if (attempt < maxRetries && (
+          error.message?.includes('fetch') ||
+          error.message?.includes('network') ||
+          error.name === 'TypeError'
+        )) {
+          console.warn(`[TranslationService] Attempt ${attempt + 1} failed, retrying...`);
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    throw lastError;
+  }
+
+  async finalizeTranslationResult(result, text, targetLang, sourceLang, options = {}) {
+    this.normalizeTranslationResult(result, text, targetLang, sourceLang);
+
+    if (options.includePhonetic !== false && result.phonetics.length === 0 && this.enablePhoneticFallback) {
+      logger.log('[TranslationService] No phonetics found, trying FreeDictionary supplement...');
+      await this.supplementPhoneticsFromFreeDictionary(result, text);
+    }
+
+    result.annotationText = this.generateAnnotationText(result);
+    logger.log('[TranslationService] ✓ Generated annotation text:', result.annotationText);
+    return result;
+  }
+
+  normalizeTranslationResult(result, text, targetLang, sourceLang) {
+    if (!result || typeof result !== 'object') {
+      throw new Error('Provider returned an invalid translation result');
+    }
+    if (typeof result.translatedText !== 'string') {
+      result.translatedText = result.translation || '';
+    }
+    result.originalText = result.originalText || text;
+    result.sourceLang = result.sourceLang || sourceLang;
+    result.targetLang = result.targetLang || targetLang;
+    result.phonetics = Array.isArray(result.phonetics) ? result.phonetics : [];
+    result.definitions = Array.isArray(result.definitions) ? result.definitions : [];
+    result.examples = Array.isArray(result.examples) ? result.examples : [];
+    result.metadata = result.metadata && typeof result.metadata === 'object' ? result.metadata : {};
+    return result;
+  }
+
+  createCacheKey(text, targetLang, sourceLang, options = {}, provider = this.getActiveProvider()) {
+    const providerIdentity = provider.getCacheIdentity?.() || this.activeProvider;
+    const context = provider.getCacheContext?.(options) || '';
+    const outputVariant = {
+      includePhonetic: options.includePhonetic !== false,
+      includeDefinitions: options.includeDefinitions !== false
+    };
+    return JSON.stringify([
+      this.activeProvider,
+      providerIdentity,
+      sourceLang,
+      targetLang,
+      text,
+      context,
+      outputVariant
+    ]);
+  }
+
+  getCachedResult(cacheKey, options = {}) {
+    if (options.noCache || this.maxCacheSize <= 0 || !this.cache.has(cacheKey)) {
+      return null;
+    }
+
+    const result = this.cache.get(cacheKey);
+    // 命中时提升到 Map 尾部，使淘汰策略成为真正的 LRU。
+    this.cache.delete(cacheKey);
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  getProviderOptions(options = {}) {
+    const {
+      onProgress,
+      signal,
+      batchConcurrency,
+      individualConcurrency,
+      ...providerOptions
+    } = options;
+    return providerOptions;
+  }
+
+  throwIfAborted(signal) {
+    if (signal?.aborted) {
+      const error = new Error('Translation aborted');
+      error.name = 'AbortError';
+      throw error;
+    }
+  }
+
+  normalizeConcurrency(value, fallback) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      return fallback;
+    }
+    return Math.min(fallback, Math.floor(parsed));
+  }
+
+  async runWithConcurrency(items, concurrency, worker) {
+    if (items.length === 0) {
+      return;
+    }
+
+    let cursor = 0;
+    const workerCount = Math.min(concurrency, items.length);
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (cursor < items.length) {
+        const index = cursor++;
+        await worker(items[index], index);
+      }
+    });
+    await Promise.all(workers);
   }
 
   /**
@@ -1934,9 +2321,10 @@ class TranslationService {
       // 选择前几个释义（避免过长）
       const definitionsToShow = result.definitions.slice(0, 2); // 最多显示2个词性的释义
       const definitionTexts = definitionsToShow.map(def => {
-        if (def.meanings && def.meanings.length > 0) {
-          // 只取每个词性的第一个释义
-          return `[${def.pos || ''}] ${def.meanings[0]}`;
+        const text = def.meanings?.[0] || def.text;
+        if (text) {
+          const partOfSpeech = def.pos || def.partOfSpeech || '';
+          return partOfSpeech ? `[${partOfSpeech}] ${text}` : text;
         }
         return null;
       }).filter(Boolean);

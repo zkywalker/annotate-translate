@@ -60,6 +60,69 @@ class OpenAIProvider extends BaseAIProvider {
   }
 
   /**
+   * 在一个 LLM 请求中翻译多个相互独立的词条。
+   * @param {Array<{id: number|string, text: string, context?: string}>} items
+   * @returns {Promise<{results: AITranslationResult[], metadata: Object}>}
+   */
+  async translateBatch(items, sourceLang, targetLang, options = {}) {
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new Error('Batch translation requires at least one item');
+    }
+
+    const normalizedItems = items.map((item, index) => {
+      if (!item || typeof item.text !== 'string' || !item.text.trim()) {
+        throw new Error(`Invalid batch translation item at index ${index}`);
+      }
+      return {
+        id: item.id ?? index,
+        text: item.text,
+        context: this.useContext ? (item.context || '') : ''
+      };
+    });
+
+    console.log(`[OpenAI Provider] Translating batch of ${normalizedItems.length} items`);
+
+    try {
+      const prompts = PromptTemplates.buildBatchPrompt({
+        items: normalizedItems,
+        sourceLang,
+        targetLang,
+        includePhonetic: options.includePhonetic !== false,
+        includeDefinitions: options.includeDefinitions !== false
+      });
+      const response = await this.callAPI(prompts);
+      const rawResponse = response.choices[0].message.content.trim();
+      const parsedItems = PromptTemplates.parseBatchJsonResponse(rawResponse, normalizedItems);
+
+      if (!parsedItems) {
+        throw new Error('Invalid or incomplete batch translation response');
+      }
+
+      const metadata = {
+        tokensUsed: response.usage?.total_tokens || 0,
+        cost: this.calculateCost(response.usage?.total_tokens || 0),
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        promptFormat: 'batchJsonFormat',
+        batchSize: normalizedItems.length
+      };
+
+      return {
+        results: parsedItems.map((parsed, index) => this.createStructuredResult(
+          parsed,
+          normalizedItems[index].text,
+          sourceLang,
+          targetLang,
+          { batch: true, batchSize: normalizedItems.length }
+        )),
+        metadata
+      };
+    } catch (error) {
+      throw this.handleAPIError(error);
+    }
+  }
+
+  /**
    * 通过 background script 发送请求（绕过 CORS）
    * @param {string} url - API URL
    * @param {Object} body - 请求体
@@ -126,39 +189,41 @@ class OpenAIProvider extends BaseAIProvider {
   parseJsonResponse(rawResponse, originalText, sourceLang, targetLang) {
     const parsed = PromptTemplates.parseJsonResponse(rawResponse);
     if (parsed) {
-      // 转换音标格式：string → PhoneticInfo[]
-      const phonetics = [];
-      if (parsed.phonetic && parsed.phonetic.trim()) {
-        phonetics.push({
-          text: parsed.phonetic,
-          type: this.detectPhoneticType(parsed.phonetic, sourceLang)
-        });
-      }
-
-      // 转换释义格式：string[] → Definition[]
-      const definitions = [];
-      if (parsed.definitions && Array.isArray(parsed.definitions)) {
-        parsed.definitions.forEach((def, index) => {
-          definitions.push({
-            partOfSpeech: '', // AI 返回的简化格式没有词性
-            text: def
-          });
-        });
-      }
-
-      return {
-        translatedText: parsed.translation,
-        originalText, sourceLang, targetLang,
-        provider: this.providerName,
-        model: this.model,
-        timestamp: Date.now(),
-        phonetics: phonetics,
-        definitions: definitions,
-        metadata: {}
-      };
+      return this.createStructuredResult(parsed, originalText, sourceLang, targetLang);
     }
     console.warn('[OpenAI Provider] JSON parse failed, using simple format. Raw response:', rawResponse);
     return this.parseSimpleResponse(rawResponse, originalText, sourceLang, targetLang);
+  }
+
+  createStructuredResult(parsed, originalText, sourceLang, targetLang, metadata = {}) {
+    const phonetics = [];
+    if (parsed.phonetic && parsed.phonetic.trim()) {
+      phonetics.push({
+        text: parsed.phonetic,
+        type: this.detectPhoneticType(parsed.phonetic, sourceLang)
+      });
+    }
+
+    const definitions = Array.isArray(parsed.definitions)
+      ? parsed.definitions.map(definition => ({
+          partOfSpeech: '',
+          text: definition
+        }))
+      : [];
+
+    return {
+      translatedText: parsed.translation,
+      originalText,
+      sourceLang,
+      targetLang,
+      provider: this.providerName,
+      model: this.model,
+      timestamp: Date.now(),
+      phonetics,
+      definitions,
+      examples: [],
+      metadata
+    };
   }
 
   /**
@@ -186,6 +251,9 @@ class OpenAIProvider extends BaseAIProvider {
       provider: this.providerName,
       model: this.model,
       timestamp: Date.now(),
+      phonetics: [],
+      definitions: [],
+      examples: [],
       metadata: {}
     };
   }

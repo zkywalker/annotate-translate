@@ -81,7 +81,8 @@ class AnnotationScanner {
           fetchTranslation,
           fetchPhonetic,
           sourceLang,
-          targetLang
+          targetLang,
+          vocabularyConfig: options.vocabularyConfig
         });
       }
 
@@ -215,7 +216,7 @@ class AnnotationScanner {
     const total = annotations.length;
     let completed = 0;
     let errorCount = 0;
-    const errors = []; // 收集错误信息
+    const errors = [];
 
     // 获取翻译提供者信息
     const providerName = this.translationService?.activeProvider || 'Unknown';
@@ -234,68 +235,79 @@ class AnnotationScanner {
     // 创建进度显示面板
     const progressPanel = this.createProgressPanel(total, vocabularyConfig, providerName, providerDisplayName);
 
-    // Fixed: P1-1 — batch concurrent requests (max 5 per batch) to avoid rate limiting
-    const batchSize = 5;
-    for (let i = 0; i < annotations.length; i += batchSize) {
-      if (this.abortController?.signal.aborted) break;
-      const batch = annotations.slice(i, i + batchSize);
-      await Promise.all(batch.map(async (annotation) => {
+    for (const annotation of annotations) {
+      annotation.metadata = this.vocabularyService.getMetadata(annotation.word);
+    }
+
+    if ((fetchTranslation || fetchPhonetic) && this.translationService) {
       try {
-        // 检查是否被中断
-        if (this.abortController?.signal.aborted) {
-          throw new Error('Translation aborted');
-        }
+        await this.translationService.translateBatch(
+          annotations.map(annotation => annotation.word),
+          targetLang,
+          sourceLang,
+          {
+            signal: this.abortController?.signal,
+            includePhonetic: fetchPhonetic,
+            includeDefinitions: true,
+            onProgress: (outcome, index) => {
+              const annotation = annotations[index];
+              completed++;
 
-        // 获取词库元数据
-        const metadata = this.vocabularyService.getMetadata(annotation.word);
+              if (outcome.result) {
+                const translation = outcome.result;
+                const phonetic = translation.phonetics?.[0]?.text || '';
+                const annotationParts = [];
+                if (fetchPhonetic && phonetic) {
+                  annotationParts.push(phonetic);
+                }
+                if (fetchTranslation && translation.translatedText) {
+                  annotationParts.push(translation.translatedText);
+                }
 
-        // 获取翻译
-        if (fetchTranslation && this.translationService) {
-          // 再次检查是否被中断
-          if (this.abortController?.signal.aborted) {
-            throw new Error('Translation aborted');
+                annotation.fullResult = {
+                  ...translation,
+                  annotationText: annotationParts.join(' ') || translation.annotationText
+                };
+                annotation.translation = fetchTranslation ? translation.translatedText : '';
+                annotation.phonetic = fetchPhonetic ? phonetic : '';
+                annotation.definition = translation.definitions?.[0]?.text || '';
+
+                logger.log(`[AnnotationScanner] Translation result for "${annotation.word}":`, {
+                  translatedText: annotation.translation,
+                  phonetic: annotation.phonetic,
+                  cached: outcome.cached
+                });
+              } else {
+                errorCount++;
+                errors.push({ word: annotation.word, error: outcome.error.message });
+                console.error(`[AnnotationScanner] Failed to enrich "${annotation.word}":`, outcome.error);
+              }
+
+              this.updateProgress(progressPanel, completed, total, annotation.word, errorCount);
+            }
           }
-
-          logger.log(`[AnnotationScanner] Fetching translation for "${annotation.word}" (${sourceLang} → ${targetLang})`);
-
-          const translation = await this.translationService.translate(
-            annotation.word,
-            targetLang,  // 第2个参数：目标语言
-            sourceLang   // 第3个参数：源语言
-          );
-
-          logger.log(`[AnnotationScanner] Translation result for "${annotation.word}":`, {
-            translatedText: translation.translatedText,
-            phonetic: translation.phonetic,
-            hasDefinition: !!translation.definition
-          });
-
-          // 保存完整的翻译结果，用于点击时显示详细面板
-          annotation.fullResult = translation;
-          annotation.translation = translation.translatedText;
-          annotation.phonetic = translation.phonetic || '';
-          annotation.definition = translation.definition || '';
-        } else {
-          console.warn(`[AnnotationScanner] Skipping translation for "${annotation.word}":`, {
-            fetchTranslation,
-            hasTranslationService: !!this.translationService
-          });
-        }
-
-        annotation.metadata = metadata;
-
-        // 更新进度
-        completed++;
-        this.updateProgress(progressPanel, completed, total, annotation.word, errorCount);
-
+        );
       } catch (error) {
-        console.error(`[AnnotationScanner] Failed to enrich "${annotation.word}":`, error);
-        errorCount++;
-        errors.push({ word: annotation.word, error: error.message });
+        console.error('[AnnotationScanner] Batch enrichment failed:', error);
+        for (const annotation of annotations) {
+          if (!annotation.fullResult) {
+            errorCount++;
+            completed++;
+            errors.push({ word: annotation.word, error: error.message });
+            this.updateProgress(progressPanel, completed, total, annotation.word, errorCount);
+          }
+        }
+      }
+    } else {
+      console.warn('[AnnotationScanner] Translation enrichment skipped:', {
+        fetchTranslation,
+        fetchPhonetic,
+        hasTranslationService: !!this.translationService
+      });
+      for (const annotation of annotations) {
         completed++;
         this.updateProgress(progressPanel, completed, total, annotation.word, errorCount);
       }
-    }));
     }
 
     logger.log(`[AnnotationScanner] Enrichment complete. Success: ${total - errorCount}, Errors: ${errorCount}`);

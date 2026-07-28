@@ -1,6 +1,6 @@
 ---
 module: translation-service
-last-updated: 2026-02-19
+last-updated: 2026-07-28
 related-modules:
   - docs/modules/content.md
   - docs/modules/ai-translation.md
@@ -15,7 +15,7 @@ Living documentation for the translation-service module.
 # Translation Service
 
 ::: tip TL;DR
-Core abstraction layer that manages multiple translation providers (Google, Youdao, DeepL, OpenAI, FreeDictionary) behind a unified interface. Implements LRU caching, automatic phonetic fallback via FreeDictionary for single English words, and configurable annotation text generation. Exposed as a global singleton `translationService` with Google Translate as the default active provider.
+Core abstraction layer that manages multiple translation providers (Google, Youdao, DeepL, OpenAI, FreeDictionary) behind a unified interface. Implements context-safe LRU caching, structured provider batching with bounded-concurrency fallback, automatic phonetic fallback via FreeDictionary for single English words, and configurable annotation text generation. Exposed as a global singleton `translationService` with Google Translate as the default active provider.
 :::
 
 ## 代码映射
@@ -80,6 +80,7 @@ classDiagram
         +cache: Map
         +maxCacheSize: number
         +translate(text, targetLang, sourceLang, options)
+        +translateBatch(texts, targetLang, sourceLang, options)
         +registerProvider(name, provider)
         +setActiveProvider(name)
         -supplementPhoneticsFromFreeDictionary(result, text)
@@ -103,6 +104,10 @@ classDiagram
 ```js
 constructor(name: string, config?: Object)
 async translate(text: string, targetLang: string, sourceLang?: string): Promise<TranslationResult>
+supportsBatchTranslation(): boolean
+getBatchSize(options?: Object): number
+getCacheIdentity(): string
+getCacheContext(options?: Object): string
 async detectLanguage(text: string): Promise<string>
 async getSupportedLanguages(): Promise<Array<{code, name}>>
 ```
@@ -116,6 +121,7 @@ registerProvider(name: string, provider: TranslationProvider): void
 setActiveProvider(name: string): void
 getActiveProvider(): TranslationProvider
 async translate(text: string, targetLang: string, sourceLang?: string, options?: Object): Promise<TranslationResult>
+async translateBatch(texts: string[], targetLang: string, sourceLang?: string, options?: Object): Promise<BatchOutcome[]>
 generateAnnotationText(result: TranslationResult): string
 enableCache(size?: number): void   // clamps to 10-1000
 disableCache(): void
@@ -132,12 +138,23 @@ clearCache(): void
 
 ## 业务逻辑
 
+### 批量调度
+
+- `translateBatch()` 先逐词查询缓存，并合并同一批中的重复 key。
+- 支持结构化批量的 provider 按其 `getBatchSize()` 分块，默认最多并发 2 个批次。
+- OpenAI 默认 JSON 模式每批最多 8 词，并根据 `maxTokens` 自动降低批大小。
+- 自定义 OpenAI prompt 启用时退回单条请求，避免绕过用户模板语义。
+- 不支持批量的 provider 使用最多 4 个单条请求并发。
+- 批量响应格式错误或结果不完整时，该批次以最多 2 个并发回退到单条翻译。
+- 返回值与输入顺序一致，每项为 `{ text, result?, error?, cached }`，允许部分成功。
+
 ### 缓存策略
 
-- **类型**: FIFO 淘汰（基于 `Map` 插入顺序），接近 LRU 行为
-- **Key 格式**: `${text}:${sourceLang}:${targetLang}:${activeProvider}`
+- **类型**: LRU；命中时将条目提升到 `Map` 尾部
+- **Key 内容**: active provider、非敏感 provider 配置标识、源/目标语言、文本、有效上下文和输出字段选项
 - **默认容量**: 100 条，可通过 `enableCache(size)` 调整（10-1000）
-- **绕过缓存**: 传入 `options.noCache = true`
+- **上下文规则**: 普通 provider 忽略 context；启用 `useContext` 的 OpenAI provider 将 context 纳入 key
+- **绕过缓存**: `options.noCache = true` 同时跳过读取和写入
 - **切换 Provider**: Provider 名称编入 cache key，因此切换 Provider 后旧缓存自然不命中
 
 ### 音标补充链
@@ -168,13 +185,14 @@ Youdao 和 DeepL 的请求通过 `chrome.runtime.sendMessage` 发往 background 
 | 音标补充由 `TranslationService` 统一处理，而非各 Provider 内部 | 避免重复逻辑；各 Provider 注释明确标注 "移除提供者级别的音标补充" |
 | `FreeDictionaryProvider` 不实现 `translate()` | 仅用于音标查询，调用 `translate()` 直接抛异常 |
 | `OpenAITranslateProvider` 使用适配器模式包装 `OpenAIProvider` | 解耦 AI SDK 与 TranslationProvider 接口，支持延迟初始化 |
+| 批量能力由 Provider 声明，调度和回退由 Service 负责 | 保持 provider API 差异，同时统一并发、缓存和错误语义 |
+| 缓存保留在 `TranslationService` | 所有 provider 共享 LRU、语言、上下文和输出变体规则，避免各自实现后出现语义不一致 |
 | DeepL 根据 key 后缀 `:fx` 自动检测免费/付费 API | 减少用户配置错误 |
-| Cache key 包含 provider 名称 | 不同 Provider 对同一文本可能返回不同结果 |
+| Cache key 包含 provider 配置和有效上下文 | 不同模型或上下文对同一文本可能返回不同结果；无上下文词条仍可稳定复用 |
 | 全局 singleton `translationService` | 整个扩展共享一个实例，简化状态管理 |
 
 ## 已知限制
 
-- 缓存为 FIFO 淘汰，非严格 LRU（不会在命中时提升优先级）
 - FreeDictionary 补充仅支持纯英文单词（不支持短语或含连字符单词）
 - Youdao 翻译 API 可能不返回音标（只有词典 API 才有），需依赖 FreeDictionary 补充
 - DeepL 不提供音标、词义、例句，完全依赖后处理补充
@@ -185,6 +203,7 @@ Youdao 和 DeepL 的请求通过 `chrome.runtime.sendMessage` 发往 background 
 
 | 提交 | 说明 |
 |------|------|
+| 2026-07-28 | add structured vocabulary batching, bounded fallback, and context-safe LRU caching |
 | `7fa0016` | feat: add token usage statistics for AI providers |
 | `9e03beb` | feat: add AI provider management, support multiple OpenAI-compatible services |
 | `d55ac90` | feat: add annotation settings (show translation/definitions toggles) |
