@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { createHash } from 'node:crypto';
+import { createHash, createPublicKey } from 'node:crypto';
 import {
   access,
   cp,
@@ -21,6 +21,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
 const RUNTIME_ENTRIES = ['manifest.json', 'src', 'assets', '_locales'];
 const FIXED_MTIME = new Date('2000-01-01T00:00:00.000Z');
+const PREVIEW_PUBLIC_KEY = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsAScile65Z5oy/jFTAKqxaigK9ax6K13ZWFaBb1jdpqmwZ/0v4jsDbij8Xd9iiWFFaLtuOgnUmQn4d+aBaeQyiw80XBlFarTLV6LiJlJbbcOttztwi4RzJBQZ1m03+sSw1jf+zTPXgjoIARie1FxnKjkUvVkhww6D563J+e1A6BPhHLAMQZhLFTtjpxT6Qq9VHftevjc2ZDn+VsI2c+YqYD9P/53CPY/kPmvzzSRff+PsUDRZFl0/tFhT3dNCevsvgrC1vs16dfRagwFF3qb32aUaYFGP+rf4eeBIvmxD1dEMVunnla/5z48wIpkl0LMWNXJKyOokiK1AjWwYiQFgQIDAQAB';
+const EXPECTED_EXTENSION_IDS = Object.freeze({
+  release: 'pbipknglenfdagpbfcmdjlibecjfjkhl',
+  preview: 'pclalahcmhedjdigfpklahhmeaikpogd'
+});
 
 function parseArgs(argv) {
   const args = { channel: 'release', commit: 'local', verifyOnly: false };
@@ -77,6 +82,42 @@ function collectManifestPaths(manifest) {
   return [...paths].sort();
 }
 
+function extensionIdFromKey(key) {
+  if (typeof key !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(key)) {
+    throw new Error('manifest.json key must be a Base64-encoded SPKI public key');
+  }
+
+  const publicKeyDer = Buffer.from(key, 'base64');
+  if (publicKeyDer.toString('base64') !== key) {
+    throw new Error('manifest.json key is not canonical Base64');
+  }
+
+  let publicKey;
+  try {
+    publicKey = createPublicKey({ key: publicKeyDer, format: 'der', type: 'spki' });
+  } catch {
+    throw new Error('manifest.json key is not a valid SPKI public key');
+  }
+  if (publicKey.asymmetricKeyType !== 'rsa') {
+    throw new Error('manifest.json key must contain an RSA public key');
+  }
+
+  const idHex = createHash('sha256').update(publicKeyDer).digest('hex').slice(0, 32);
+  return [...idHex]
+    .map((character) => String.fromCharCode('a'.charCodeAt(0) + Number.parseInt(character, 16)))
+    .join('');
+}
+
+function validateExtensionId(key, channel) {
+  const extensionId = extensionIdFromKey(key);
+  if (extensionId !== EXPECTED_EXTENSION_IDS[channel]) {
+    throw new Error(
+      `${channel} extension ID changed from ${EXPECTED_EXTENSION_IDS[channel]} to ${extensionId}`
+    );
+  }
+  return extensionId;
+}
+
 async function validateExtension(extensionRoot) {
   const manifestPath = path.join(extensionRoot, 'manifest.json');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
@@ -87,6 +128,7 @@ async function validateExtension(extensionRoot) {
   if (!/^\d+\.\d+\.\d+(?:\.\d+)?$/.test(manifest.version)) {
     throw new Error(`Invalid Chrome extension version: ${manifest.version}`);
   }
+  extensionIdFromKey(manifest.key);
 
   const missing = [];
   for (const relativePath of collectManifestPaths(manifest)) {
@@ -125,6 +167,7 @@ async function validateExtension(extensionRoot) {
 
 async function configurePreview(extensionRoot, manifest, commit) {
   const shortCommit = commit === 'local' ? 'local' : commit.slice(0, 7);
+  manifest.key = PREVIEW_PUBLIC_KEY;
   manifest.version_name = `${manifest.version}-preview.${shortCommit}`;
   await writeFile(
     path.join(extensionRoot, 'manifest.json'),
@@ -196,8 +239,9 @@ function createZip(stageDir, archivePath, files) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const sourceManifest = await validateExtension(ROOT);
+  const releaseExtensionId = validateExtensionId(sourceManifest.key, 'release');
   if (args.verifyOnly) {
-    console.log(`Validated manifest v${sourceManifest.version} and all runtime file references.`);
+    console.log(`Validated manifest v${sourceManifest.version} (${releaseExtensionId}) and all runtime file references.`);
     return;
   }
 
@@ -206,7 +250,10 @@ async function main() {
     ? `-preview-${args.commit === 'local' ? 'local' : args.commit.slice(0, 7)}`
     : '';
   const packageName = `annotate-translate-${sourceManifest.version}${suffix}`;
-  const stageDir = path.join(DIST, packageName);
+  const stageName = args.channel === 'preview'
+    ? 'annotate-translate-preview'
+    : 'annotate-translate';
+  const stageDir = path.join(DIST, stageName);
   const archivePath = path.join(DIST, `${packageName}.zip`);
   const checksumPath = `${archivePath}.sha256`;
 
@@ -224,7 +271,8 @@ async function main() {
     await configurePreview(stageDir, stagedManifest, args.commit);
   }
 
-  await validateExtension(stageDir);
+  const builtManifest = await validateExtension(stageDir);
+  const builtExtensionId = validateExtensionId(builtManifest.key, args.channel);
   await normalizeTimestamps(stageDir);
   const files = await listFiles(stageDir);
   createZip(stageDir, archivePath, files);
@@ -235,6 +283,8 @@ async function main() {
 
   const archiveSize = (await stat(archivePath)).size;
   console.log(`Built ${path.relative(ROOT, archivePath)} (${archiveSize} bytes)`);
+  console.log(`Load unpacked from ${path.relative(ROOT, stageDir)}`);
+  console.log(`Extension ID ${builtExtensionId} (${args.channel})`);
   console.log(`SHA-256 ${checksum}`);
 }
 

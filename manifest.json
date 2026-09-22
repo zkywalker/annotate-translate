@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqpH+MpyXQjrF0tEftixJV8Mj8EsbS8N+SxVp/AL8/O4dW4dut/EF+8y+oIHx6SyyqPYJDnHExHWkq549lBNB5sJwmWm1mY8j7YgErI2lpVVGcTOJ3p2vcmDDR1dgzqhPfxjIL6CLYSCZBpCF7aP+wwWIeGnERvwLxQDFCYBKow1v70i3muor0LMtXqx9jQiNncLj1jLUj9LTuzBllWV8mR7eKNXJUcoNLYO2RU/FVior77qJ5h1a4/BTXkevsZ4MHr1J+HwWIURJ4uBgvrC1ZvK6GcxBVjzDi8yDWd80WXvJq8rxkPloslMKFaivmnRaZX6JjuOXW4jo6NIxHaefvwIDAQAB",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": [

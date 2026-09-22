@@ -88,9 +88,11 @@ npm run build:preview -- --commit "$(git rev-parse HEAD)"
 npm run check:package
 ```
 
-构建脚本仅复制 `manifest.json`、`src/`、`assets/` 和 `_locales/`，避免把测试、文档、Git 文件或本地配置带入安装包。输出在 `dist/`：目录可用于本地“加载已解压的扩展程序”，zip 用于分发。
+构建脚本仅复制 `manifest.json`、`src/`、`assets/` 和 `_locales/`，避免把测试、文档、Git 文件或本地配置带入安装包。正式包固定输出到 `dist/annotate-translate/`，preview 固定输出到 `dist/annotate-translate-preview/`；目录可用于本地“加载已解压的扩展程序”，带版本号的 zip 用于分发。
 
-GitHub Actions 在分支 push、Pull Request 和手动触发时保留 14 天的构建产物。`v<manifest version>` 标签（例如 `v0.1.0`）会生成正式包并发布到 GitHub Releases；标签版本不匹配时流水线会失败，防止发错版本。
+正式包和 preview 包分别使用稳定且不同的扩展 ID，所以各自的新构建可以覆盖旧构建，两个渠道也可以同时安装。更新已加载的包时，应覆盖原解压目录中的文件，再到 `chrome://extensions/` 点击刷新；zip 文件名变化不会改变扩展 ID。`v0.1.1` 首次引入固定 ID，从 `v0.1.0` 升级时可能需要一次性移除旧扩展并重新加载。
+
+GitHub Actions 在分支 push、Pull Request 和手动触发时保留 14 天的构建产物。`v<manifest version>` 标签（例如 `v0.1.1`）会生成正式包并发布到 GitHub Releases；标签版本不匹配时流水线会失败，防止发错版本。
 
 ### 代码修改
 

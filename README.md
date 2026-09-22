@@ -28,11 +28,11 @@
 ### 从 Release 安装
 
 1. 在 [GitHub Releases](https://github.com/zkywalker/annotate-translate/releases) 下载最新的 `annotate-translate-<version>.zip`
-2. 解压 zip
+2. 始终解压并覆盖到同一个本地目录
 3. 打开 Chrome 的 `chrome://extensions/`，开启“开发者模式”
-4. 点击“加载已解压的扩展程序”，选择解压后的目录
+4. 首次安装时点击“加载已解压的扩展程序”并选择该目录；后续覆盖文件后点击扩展卡片上的刷新按钮
 
-> Chrome 不能直接加载 zip，需要先解压。Release 同时提供 `.sha256` 文件用于校验下载内容。
+> Chrome 不能直接加载 zip，需要先解压。Release 同时提供 `.sha256` 文件用于校验下载内容。`v0.1.1` 首次引入固定扩展 ID，从 `v0.1.0` 升级时可能需要移除旧扩展并重新加载一次；此后的正式版本可以稳定覆盖升级。
 
 ### 从源码安装
 
@@ -61,9 +61,11 @@ npm run build:release
 npm run build:preview -- --commit "$(git rev-parse HEAD)"
 ```
 
-产物位于 `dist/`，其中的同名目录可直接通过“加载已解压的扩展程序”使用，zip 可作为 GitHub Actions 构建产物分发。
+产物位于 `dist/`。正式包固定输出到 `dist/annotate-translate/`，preview 固定输出到 `dist/annotate-translate-preview/`，可直接通过“加载已解压的扩展程序”使用；带版本号的 zip 用于 GitHub Actions 分发。
 
-GitHub Actions 会为每次分支 push 和 Pull Request 构建 preview 包，也支持手动选择 preview/release。推送与 `manifest.json` 版本一致的标签（例如 `v0.1.0`）时，会自动创建 GitHub Release 并上传正式 zip 与 SHA-256 校验文件。
+正式包和 preview 包分别使用稳定且不同的扩展 ID：正式版本之间可以覆盖升级，preview 版本之间也可以覆盖升级，两者还可以同时安装。zip 文件名中的版本或提交号只用于辨识产物，不决定扩展身份。
+
+GitHub Actions 会为每次分支 push 和 Pull Request 构建 preview 包，也支持手动选择 preview/release。推送与 `manifest.json` 版本一致的标签（例如 `v0.1.1`）时，会自动创建 GitHub Release 并上传正式 zip 与 SHA-256 校验文件。
 
 ## 许可证
 
