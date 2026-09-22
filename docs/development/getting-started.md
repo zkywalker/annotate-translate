@@ -12,7 +12,8 @@
 
 ### 可选
 
-- **Node.js** - 仅用于运行脚本处理 ECDICT 数据（如需要）
+- **Node.js 20+** - 用于构建发布包和运行 ECDICT 数据脚本
+- **zip 命令** - 用于生成扩展安装包（GitHub Actions、macOS 和多数 Linux 环境已提供）
 - **Chrome DevTools** - 熟悉基本调试方法
 
 ### 技能要求
@@ -73,6 +74,23 @@ annotate-translate/
 4. 查看翻译卡片是否正常显示
 
 ## 开发工作流
+
+### 构建可分发包
+
+```bash
+# 正式发布包
+npm run build:release
+
+# 带 Preview 标识和调试日志的验证包
+npm run build:preview -- --commit "$(git rev-parse HEAD)"
+
+# 只校验 manifest 及其运行时文件引用
+npm run check:package
+```
+
+构建脚本仅复制 `manifest.json`、`src/`、`assets/` 和 `_locales/`，避免把测试、文档、Git 文件或本地配置带入安装包。输出在 `dist/`：目录可用于本地“加载已解压的扩展程序”，zip 用于分发。
+
+GitHub Actions 在分支 push、Pull Request 和手动触发时保留 14 天的构建产物。`v<manifest version>` 标签（例如 `v0.1.0`）会生成正式包并发布到 GitHub Releases；标签版本不匹配时流水线会失败，防止发错版本。
 
 ### 代码修改
 

@@ -33,6 +33,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+        "src/utils/build-info.js",
         "src/utils/logger.js",
         "src/utils/constants.js",
         "src/utils/html-sanitizer.js",

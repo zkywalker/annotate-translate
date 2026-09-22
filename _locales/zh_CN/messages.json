@@ -12,6 +12,10 @@
     "message": "设置",
     "description": "Settings title"
   },
+  "skipToSettings": {
+    "message": "跳转到设置内容",
+    "description": "Accessibility link to skip navigation"
+  },
   "configureExtension": {
     "message": "配置您的标注翻译扩展",
     "description": "Settings subtitle"
@@ -2177,4 +2181,3 @@
     "description": "Mastered word status"
   }
 }
-

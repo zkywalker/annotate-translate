@@ -133,6 +133,7 @@ async function initializeLanguage() {
  * - data-i18n: 设置元素的 textContent
  * - data-i18n-placeholder: 设置元素的 placeholder
  * - data-i18n-title: 设置元素的 title
+ * - data-i18n-aria-label: 设置元素的 aria-label
  * - data-i18n-value: 设置元素的 value
  * - data-i18n-html: 设置元素的 innerHTML（谨慎使用）
  * 
@@ -173,6 +174,14 @@ function localizeHtmlPage() {
     const key = element.getAttribute('data-i18n-title');
     if (key) {
       element.title = i18n(key);
+    }
+  });
+
+  // 本地化无障碍标签
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+    const key = element.getAttribute('data-i18n-aria-label');
+    if (key) {
+      element.setAttribute('aria-label', i18n(key));
     }
   });
 
@@ -393,4 +402,3 @@ if (typeof window !== 'undefined') {
   window.createLocalizedSelectOptions = createLocalizedSelectOptions;
   window.formatMessage = formatMessage;
 }
-

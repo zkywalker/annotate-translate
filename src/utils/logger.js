@@ -4,7 +4,7 @@
  * console.warn and console.error always output.
  */
 const logger = {
-  _enabled: false,
+  _enabled: globalThis.ANNOTATE_TRANSLATE_BUILD?.debug === true,
 
   enable() { this._enabled = true; },
   disable() { this._enabled = false; },

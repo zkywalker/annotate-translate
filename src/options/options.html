@@ -10,12 +10,15 @@
   <link rel="stylesheet" href="../styles/wordbook.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content" data-i18n="skipToSettings">Skip to settings</a>
   <!-- 顶部标题栏 -->
   <header class="header">
     <div class="header-content">
       <h1 class="header-title">
-        <i data-lucide="settings" class="header-icon" width="24" height="24"></i>
-        <span data-i18n="settings">设置</span>
+        <img class="header-logo" src="../../assets/icons/icon32.png" width="32" height="32" alt="">
+        <span class="header-brand" data-i18n="extName">Annotate Translate</span>
+        <span class="header-separator" aria-hidden="true">/</span>
+        <span class="header-context" data-i18n="settings">设置</span>
       </h1>
     </div>
   </header>
@@ -23,7 +26,7 @@
   <!-- 主容器 -->
   <div class="container">
     <!-- 左侧导航 -->
-    <nav class="sidebar">
+    <nav class="sidebar" data-i18n-aria-label="settings" aria-label="Settings sections">
       <a href="#general" class="nav-item active" data-page="general">
         <i data-lucide="settings" class="nav-icon" width="20" height="20"></i>
         <span data-i18n="generalSettings">通用设置</span>
@@ -89,7 +92,7 @@
     </nav>
 
     <!-- 右侧内容区 -->
-    <main class="content">
+    <main class="content" id="main-content" tabindex="-1">
       <!-- 通用设置页面 -->
       <div id="page-general" class="page active">
         <h2 class="page-title" data-i18n="generalSettings">通用设置</h2>
@@ -1160,7 +1163,7 @@
   </div>
 
   <!-- 浮动保存提示 -->
-  <div id="saveIndicator" class="save-indicator">
+  <div id="saveIndicator" class="save-indicator" role="status" aria-live="polite">
     <i data-lucide="check-circle" width="16" height="16"></i>
     <span data-i18n="settingsSaved">设置已保存</span>
   </div>

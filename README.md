@@ -25,6 +25,17 @@
 
 ## 安装
 
+### 从 Release 安装
+
+1. 在 [GitHub Releases](https://github.com/zkywalker/annotate-translate/releases) 下载最新的 `annotate-translate-<version>.zip`
+2. 解压 zip
+3. 打开 Chrome 的 `chrome://extensions/`，开启“开发者模式”
+4. 点击“加载已解压的扩展程序”，选择解压后的目录
+
+> Chrome 不能直接加载 zip，需要先解压。Release 同时提供 `.sha256` 文件用于校验下载内容。
+
+### 从源码安装
+
 1. 克隆仓库
    ```bash
    git clone https://github.com/zkywalker/annotate-translate.git
@@ -37,6 +48,22 @@
 ## 开发
 
 详见 [开发文档](docs/development/getting-started.md)
+
+### 构建包
+
+项目不需要安装 npm 依赖，要求 Node.js 20+ 和系统 `zip` 命令：
+
+```bash
+# 正式包：正式名称、关闭 logger 调试输出
+npm run build:release
+
+# 预览包：名称带 [Preview]、包含提交标识、打开 logger 调试输出
+npm run build:preview -- --commit "$(git rev-parse HEAD)"
+```
+
+产物位于 `dist/`，其中的同名目录可直接通过“加载已解压的扩展程序”使用，zip 可作为 GitHub Actions 构建产物分发。
+
+GitHub Actions 会为每次分支 push 和 Pull Request 构建 preview 包，也支持手动选择 preview/release。推送与 `manifest.json` 版本一致的标签（例如 `v0.1.0`）时，会自动创建 GitHub Release 并上传正式 zip 与 SHA-256 校验文件。
 
 ## 许可证
 

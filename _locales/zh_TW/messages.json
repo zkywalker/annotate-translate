@@ -12,6 +12,10 @@
     "message": "設定",
     "description": "Settings title"
   },
+  "skipToSettings": {
+    "message": "跳至設定內容",
+    "description": "Accessibility link to skip navigation"
+  },
   "configureExtension": {
     "message": "配置您的標注翻譯擴充功能",
     "description": "Settings subtitle"
@@ -504,4 +508,3 @@
     "description": "Context menu toggle for double-click annotation"
   }
 }
-

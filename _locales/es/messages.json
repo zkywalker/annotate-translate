@@ -11,6 +11,10 @@
     "message": "Configuración",
     "description": "Settings title"
   },
+  "skipToSettings": {
+    "message": "Ir a la configuración",
+    "description": "Accessibility link to skip navigation"
+  },
   "featureToggles": {
     "message": "Interruptores de funciones",
     "description": "Feature toggles section title"
@@ -125,4 +129,3 @@
     "description": "Context menu toggle for double-click annotation"
   }
 }
-

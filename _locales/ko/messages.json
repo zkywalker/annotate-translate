@@ -11,6 +11,10 @@
     "message": "설정",
     "description": "Settings title"
   },
+  "skipToSettings": {
+    "message": "설정으로 건너뛰기",
+    "description": "Accessibility link to skip navigation"
+  },
   "configureExtension": {
     "message": "주석 번역 확장 프로그램 구성",
     "description": "Settings subtitle"
@@ -173,4 +177,3 @@
     "description": "Context menu toggle for double-click annotation"
   }
 }
-

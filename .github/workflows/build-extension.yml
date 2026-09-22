@@ -1,0 +1,123 @@
+name: Build Chrome Extension
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Package channel
+        required: true
+        type: choice
+        default: preview
+        options:
+          - preview
+          - release
+
+concurrency:
+  group: extension-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and validate extension
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{ steps.metadata.outputs.artifact_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Select package channel
+        id: channel
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_CHANNEL: ${{ inputs.channel }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          if [[ "$REF_TYPE" == "tag" || ( "$EVENT_NAME" == "workflow_dispatch" && "$INPUT_CHANNEL" == "release" ) ]]; then
+            echo "value=release" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=preview" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify release tag matches manifest version
+        if: github.ref_type == 'tag'
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          MANIFEST_VERSION="$(node -p "require('./manifest.json').version")"
+          if [[ "$RELEASE_TAG" != "v$MANIFEST_VERSION" ]]; then
+            echo "Tag $RELEASE_TAG does not match manifest version v$MANIFEST_VERSION" >&2
+            exit 1
+          fi
+
+      - name: Build package
+        env:
+          BUILD_CHANNEL: ${{ steps.channel.outputs.value }}
+          BUILD_COMMIT: ${{ github.sha }}
+        run: node scripts/build-extension.mjs --channel "$BUILD_CHANNEL" --commit "$BUILD_COMMIT"
+
+      - name: Verify zip and collect metadata
+        id: metadata
+        shell: bash
+        env:
+          BUILD_CHANNEL: ${{ steps.channel.outputs.value }}
+        run: |
+          ARCHIVE="$(find dist -maxdepth 1 -type f -name '*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -t "$ARCHIVE"
+          ARCHIVE_NAME="$(basename "$ARCHIVE")"
+          (cd dist && sha256sum --check "$ARCHIVE_NAME.sha256")
+          echo "artifact_name=annotate-translate-$BUILD_CHANNEL-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact_name }}
+          path: |
+            dist/*.zip
+            dist/*.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub Release
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: release-assets
+
+      - name: Create or update GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" release-assets/* --clobber --repo "$REPOSITORY"
+          else
+            gh release create "$RELEASE_TAG" release-assets/* --generate-notes --repo "$REPOSITORY"
+          fi

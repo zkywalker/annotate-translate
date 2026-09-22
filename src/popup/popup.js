@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Initialize language and localize the page
   await initializeLanguage();
   localizeHtmlPage();
+  initializeActionIcons();
   
   // Populate language select with localized options
   populateLanguageSelect();
@@ -25,6 +26,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Open settings page button
   document.getElementById('open-settings').addEventListener('click', openSettingsPage);
+
+  // Icons added by localized markup need a final render after initialization.
+  if (globalThis.lucide) lucide.createIcons();
 });
 
 // Open settings page
@@ -238,4 +242,19 @@ function clearAnnotations() {
       });
     }
   });
+}
+
+function initializeActionIcons() {
+  const clearButton = document.getElementById('clear-annotations');
+  if (!clearButton || clearButton.querySelector('[data-lucide]')) return;
+
+  const label = clearButton.textContent;
+  clearButton.textContent = '';
+  const icon = document.createElement('i');
+  icon.dataset.lucide = 'trash-2';
+  icon.setAttribute('width', '16');
+  icon.setAttribute('height', '16');
+  const text = document.createElement('span');
+  text.textContent = label;
+  clearButton.append(icon, text);
 }

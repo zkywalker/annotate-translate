@@ -12,6 +12,10 @@
     "message": "Settings",
     "description": "Settings title"
   },
+  "skipToSettings": {
+    "message": "Skip to settings",
+    "description": "Accessibility link to skip navigation"
+  },
   "configureExtension": {
     "message": "Configure your Annotate Translate extension",
     "description": "Settings subtitle"
@@ -2177,4 +2181,3 @@
     "description": "Mastered word status"
   }
 }
-

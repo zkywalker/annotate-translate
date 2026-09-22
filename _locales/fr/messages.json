@@ -11,6 +11,10 @@
     "message": "Paramètres",
     "description": "Settings title"
   },
+  "skipToSettings": {
+    "message": "Aller aux paramètres",
+    "description": "Accessibility link to skip navigation"
+  },
   "featureToggles": {
     "message": "Interrupteurs de fonctionnalités",
     "description": "Feature toggles section title"
@@ -125,4 +129,3 @@
     "description": "Context menu toggle for double-click annotation"
   }
 }
-

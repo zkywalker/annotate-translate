@@ -130,6 +130,7 @@ async function init() {
   // 初始化语言和国际化（基于已加载的设置）
   await initializeLanguage();
   localizeHtmlPage();
+  enhanceControlLabels();
   
   // 填充语言选项（必须在本地化之后）
   populateLanguageOptions();
@@ -147,6 +148,24 @@ async function init() {
   updateCacheUsage();
 
   console.log('[Options] Initialization complete');
+}
+
+/**
+ * Connect visible setting labels to their form controls for keyboard and screen reader users.
+ */
+function enhanceControlLabels() {
+  document.querySelectorAll('.setting-row').forEach((row, index) => {
+    const label = row.querySelector('.setting-label');
+    if (!label) return;
+
+    const labelId = label.id || `setting-label-${index}`;
+    label.id = labelId;
+    row.querySelectorAll('input, select, textarea').forEach(control => {
+      if (!control.hasAttribute('aria-label') && !control.hasAttribute('aria-labelledby')) {
+        control.setAttribute('aria-labelledby', labelId);
+      }
+    });
+  });
 }
 
 /**
@@ -2383,4 +2402,3 @@ window.addEventListener('hashchange', () => {
     WordbookModule.init();
   }
 });
-

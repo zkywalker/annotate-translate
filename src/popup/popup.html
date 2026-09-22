@@ -9,26 +9,32 @@
     <script src="../lib/lucide.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 data-i18n="extName">Annotate Translate</h1>
-            <button id="open-settings" class="settings-icon-button" data-i18n-title="openSettings" aria-label="Open Settings">
+    <main class="container">
+        <header class="header">
+            <div class="brand">
+                <img class="brand-icon" src="../../assets/icons/icon32.png" width="32" height="32" alt="">
+                <div class="brand-copy">
+                    <h1 data-i18n="extName">Annotate Translate</h1>
+                    <span data-i18n="settings">Settings</span>
+                </div>
+            </div>
+            <button id="open-settings" class="settings-icon-button" data-i18n-title="openSettings" data-i18n-aria-label="openSettings" aria-label="Open Settings">
                 <i data-lucide="settings" width="20" height="20"></i>
             </button>
-        </div>
+        </header>
         <div class="settings">
             <h2 data-i18n="settings">Settings</h2>
             <div class="setting-item switch-item">
                 <span data-i18n="enableTranslation">Enable Translation</span>
                 <label class="switch">
-                    <input type="checkbox" id="enable-translate" checked aria-label="Enable Translation">
+                    <input type="checkbox" id="enable-translate" checked data-i18n-aria-label="enableTranslation" aria-label="Enable Translation">
                     <span class="slider"></span>
                 </label>
             </div>
             <div class="setting-item switch-item">
                 <span data-i18n="enableAnnotation">Enable Annotation</span>
                 <label class="switch">
-                    <input type="checkbox" id="enable-annotate" checked aria-label="Enable Annotation">
+                    <input type="checkbox" id="enable-annotate" checked data-i18n-aria-label="enableAnnotation" aria-label="Enable Annotation">
                     <span class="slider"></span>
                 </label>
             </div>
@@ -51,8 +57,8 @@
         <div class="actions">
             <button id="clear-annotations" data-i18n="clearAllAnnotations">Clear All Annotations</button>
         </div>
-        <div id="status" class="status"></div>
-    </div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+    </main>
     <script src="../utils/i18n-helper.js"></script>
     <script src="popup.js"></script>
     <!-- Initialize Lucide Icons -->
