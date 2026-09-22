@@ -6,9 +6,15 @@
 class OpenAIProvider extends BaseAIProvider {
   constructor(config) {
     super(config);
+    if (!config.model?.trim()) {
+      throw new Error('Model is required');
+    }
+    if (!config.baseURL?.trim()) {
+      throw new Error('Base URL is required');
+    }
     this.providerName = 'openai';
-    this.apiEndpoint = `${config.baseURL || 'https://api.openai.com/v1'}/chat/completions`;
-    this.model = config.model || 'gpt-3.5-turbo';
+    this.apiEndpoint = `${config.baseURL.replace(/\/+$/, '')}/chat/completions`;
+    this.model = config.model;
     this.temperature = config.temperature !== undefined ? config.temperature : 0.3;
     this.maxTokens = config.maxTokens || 1000;
     this.promptFormat = config.promptFormat || 'jsonFormat';
@@ -296,7 +302,7 @@ class OpenAIProvider extends BaseAIProvider {
       'gpt-4o': 0.005,
       'gpt-4o-mini': 0.00015
     };
-    return (tokens / 1000) * (pricing[this.model] || pricing['gpt-3.5-turbo']);
+    return (tokens / 1000) * (pricing[this.model] ?? 0);
   }
 
   getProviderInfo() {
@@ -318,7 +324,7 @@ class OpenAIProvider extends BaseAIProvider {
       'gpt-4o': { input: 0.005, output: 0.015 },
       'gpt-4o-mini': { input: 0.00015, output: 0.0006 }
     };
-    return pricing[this.model] || pricing['gpt-3.5-turbo'];
+    return pricing[this.model] || null;
   }
 }
 

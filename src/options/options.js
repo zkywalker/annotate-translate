@@ -415,6 +415,7 @@ function collectSettingsFromUI() {
       autoCloseDelay: parseInt(elements.autoCloseDelay?.value, 10) ?? settings.translationCard?.autoCloseDelay ?? 10
     },
     providers: {
+      ...(settings.providers ?? {}),
       current: elements.currentProvider?.value ?? settings.providers?.current ?? 'google',
       google: settings.providers?.google ?? { enabled: true },
       youdao: {
@@ -431,8 +432,8 @@ function collectSettingsFromUI() {
         ...(settings.providers?.openai ?? {
           enabled: false,
           apiKey: '',
-          model: 'gpt-3.5-turbo',
-          baseUrl: 'https://api.openai.com/v1',
+          model: '',
+          baseUrl: '',
           temperature: 0.3,
           maxTokens: 500,
           timeout: 30,
@@ -442,8 +443,8 @@ function collectSettingsFromUI() {
           customTemplates: null
         }),
         apiKey: elements.openaiApiKey?.value ?? settings.providers?.openai?.apiKey ?? '',
-        model: elements.openaiModel?.value ?? settings.providers?.openai?.model ?? 'gpt-3.5-turbo',
-        baseUrl: elements.openaiBaseUrl?.value ?? settings.providers?.openai?.baseUrl ?? 'https://api.openai.com/v1',
+        model: elements.openaiModel?.value ?? settings.providers?.openai?.model ?? '',
+        baseUrl: elements.openaiBaseUrl?.value ?? settings.providers?.openai?.baseUrl ?? '',
         temperature: parseFloat(elements.openaiTemperature?.value) ?? settings.providers?.openai?.temperature ?? 0.3,
         maxTokens: parseInt(elements.openaiMaxTokens?.value, 10) ?? settings.providers?.openai?.maxTokens ?? 500,
         timeout: parseInt(elements.openaiTimeout?.value, 10) ?? settings.providers?.openai?.timeout ?? 30,
@@ -678,11 +679,21 @@ function validateProviderConfig(provider) {
       return { valid: true };
       
     case 'openai':
-      const openaiConfig = config.providers.openai;
-      if (!openaiConfig.apiKey || !openaiConfig.apiKey.trim()) {
+      const selectedAIProvider = config.providers.aiProviders?.find(
+        item => item.id === config.providers.currentAIProvider
+      );
+      if (!selectedAIProvider) {
         return { 
           valid: false, 
-          message: '请先配置 AI 翻译的 API Key' 
+          message: '请先添加并选择一个 AI 提供商'
+        };
+      }
+      if (!selectedAIProvider.apiKey?.trim()
+        || !selectedAIProvider.model?.trim()
+        || !selectedAIProvider.baseUrl?.trim()) {
+        return {
+          valid: false,
+          message: '当前 AI 提供商配置不完整'
         };
       }
       return { valid: true };

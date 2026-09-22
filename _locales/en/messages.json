@@ -1558,7 +1558,7 @@
     "description": "Provider name label"
   },
   "providerNamePlaceholder": {
-    "message": "e.g., OpenAI, Azure OpenAI, Local Ollama",
+    "message": "Enter a custom name",
     "description": "Provider name placeholder"
   },
   "providerNameDesc": {

@@ -134,6 +134,7 @@ test('OpenAI provider sends one request and maps a structured batch response', a
   const provider = new OpenAIProvider({
     apiKey: 'test-key',
     model: 'test-model',
+    baseURL: 'https://example.com/v1',
     maxTokens: 500
   });
   let requestCount = 0;
@@ -159,6 +160,17 @@ test('OpenAI provider sends one request and maps a structured batch response', a
   assert.equal(requestCount, 1);
   assert.deepEqual(batch.results.map(result => result.translatedText), ['银行', '当前的']);
   assert.equal(batch.metadata.tokensUsed, 140);
+});
+
+test('OpenAI provider rejects missing model and base URL', () => {
+  assert.throws(
+    () => new OpenAIProvider({ apiKey: 'test-key', baseURL: 'https://example.com/v1' }),
+    /Model is required/
+  );
+  assert.throws(
+    () => new OpenAIProvider({ apiKey: 'test-key', model: 'test-model' }),
+    /Base URL is required/
+  );
 });
 
 test('translation service chunks batch providers and caches each word', async () => {

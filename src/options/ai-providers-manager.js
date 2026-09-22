@@ -29,33 +29,50 @@ class AIProvidersManager {
 
   async loadSettings() {
     return new Promise((resolve) => {
-      chrome.storage.sync.get(null, (settings) => {
-        this.providers = settings.providers?.aiProviders || [];
-        this.currentProviderId = settings.providers?.currentAIProvider || null;
+      chrome.storage.sync.get(null, (storedSettings) => {
+        const storedProviders = Array.isArray(storedSettings.providers?.aiProviders)
+          ? storedSettings.providers.aiProviders
+          : [];
 
-        // 如果没有提供商，添加一个默认的
-        if (this.providers.length === 0) {
-          this.providers = [{
-            id: 'openai-default',
-            name: 'OpenAI',
-            enabled: true,
-            apiKey: '',
-            model: 'gpt-3.5-turbo',
-            baseUrl: 'https://api.openai.com/v1',
-            temperature: 0.3,
-            maxTokens: 500,
-            timeout: 30,
-            promptFormat: 'jsonFormat',
-            useContext: true,
-            customTemplates: null,
-            connectionStatus: null,
-            createdAt: Date.now(),
-            updatedAt: Date.now()
-          }];
-          this.currentProviderId = 'openai-default';
+        // v0.1.1 及更早版本可能保存过这条自动生成的空配置。
+        this.providers = storedProviders.filter(provider => !(
+          provider?.id === 'openai-default' && !provider.apiKey?.trim()
+        ));
+        const storedCurrentId = storedSettings.providers?.currentAIProvider || null;
+        this.currentProviderId = this.providers.some(provider => provider.id === storedCurrentId)
+          ? storedCurrentId
+          : (this.providers[0]?.id ?? null);
+
+        const providers = {
+          ...(storedSettings.providers || {}),
+          aiProviders: this.providers,
+          currentAIProvider: this.currentProviderId
+        };
+        const legacyOpenAI = providers.openai;
+        const hasUnusedLegacyDefaults = !legacyOpenAI?.apiKey?.trim()
+          && Boolean(legacyOpenAI?.model || legacyOpenAI?.baseUrl);
+        if (hasUnusedLegacyDefaults) {
+          providers.openai = { ...legacyOpenAI, model: '', baseUrl: '' };
+        }
+        if (this.providers.length === 0 && providers.current === 'openai') {
+          providers.current = 'google';
         }
 
-        resolve();
+        const needsCleanup = this.providers.length !== storedProviders.length
+          || this.currentProviderId !== storedCurrentId;
+        const settingsChanged = needsCleanup
+          || hasUnusedLegacyDefaults
+          || providers.current !== storedSettings.providers?.current;
+
+        if (typeof settings !== 'undefined' && settings?.providers) {
+          settings.providers = providers;
+        }
+        if (!settingsChanged) {
+          resolve();
+          return;
+        }
+
+        chrome.storage.sync.set({ providers }, resolve);
       });
     });
   }
@@ -69,11 +86,28 @@ class AIProvidersManager {
         // 更新 AI 提供商相关的配置
         providers.aiProviders = this.providers;
         providers.currentAIProvider = this.currentProviderId;
+        if (this.providers.length === 0 && providers.current === 'openai') {
+          providers.current = 'google';
+        }
 
         // 保存更新后的配置
         chrome.storage.sync.set({ providers }, () => {
+          if (typeof settings !== 'undefined' && settings?.providers) {
+            settings.providers.aiProviders = this.providers;
+            settings.providers.currentAIProvider = this.currentProviderId;
+            settings.providers.current = providers.current;
+          }
+          const providerSelect = document.getElementById('currentProvider');
+          if (providerSelect) providerSelect.value = providers.current;
+          if (typeof updateSetProviderButtons === 'function') {
+            updateSetProviderButtons(providers.current);
+          }
+          if (typeof updateQuickProviderConfig === 'function') {
+            updateQuickProviderConfig();
+          }
+
           console.log('[AI Providers] Settings saved', {
-            aiProviders: this.providers,
+            providerCount: this.providers.length,
             currentAIProvider: this.currentProviderId
           });
 
@@ -264,9 +298,9 @@ class AIProvidersManager {
               <i data-lucide="zap" width="14" height="14"></i>
               <span>测试</span>
             </button>
-            ${this.providers.length > 1 ? `<button class="btn btn-sm btn-danger" data-action="delete" data-provider-id="${provider.id}">
+            <button class="btn btn-sm btn-danger" data-action="delete" data-provider-id="${provider.id}">
               <i data-lucide="trash-2" width="14" height="14"></i>
-            </button>` : ''}
+            </button>
           </div>
         </div>
 
@@ -368,20 +402,20 @@ class AIProvidersManager {
       document.getElementById('aiProviderId').value = provider.id;
       document.getElementById('aiProviderName').value = provider.name;
       document.getElementById('aiProviderApiKey').value = provider.apiKey;
-      document.getElementById('aiProviderModel').value = provider.model;
-      document.getElementById('aiProviderBaseUrl').value = provider.baseUrl;
-      document.getElementById('aiProviderTemperature').value = provider.temperature;
-      document.getElementById('aiProviderMaxTokens').value = provider.maxTokens;
-      document.getElementById('aiProviderTimeout').value = provider.timeout;
-      document.getElementById('aiProviderPromptFormat').value = provider.promptFormat;
-      document.getElementById('aiProviderUseContext').checked = provider.useContext;
+      document.getElementById('aiProviderModel').value = provider.model || '';
+      document.getElementById('aiProviderBaseUrl').value = provider.baseUrl || '';
+      document.getElementById('aiProviderTemperature').value = provider.temperature ?? 0.3;
+      document.getElementById('aiProviderMaxTokens').value = provider.maxTokens ?? 500;
+      document.getElementById('aiProviderTimeout').value = provider.timeout ?? 30;
+      document.getElementById('aiProviderPromptFormat').value = provider.promptFormat || 'jsonFormat';
+      document.getElementById('aiProviderUseContext').checked = provider.useContext ?? true;
     } else {
       // 清空表单
       document.getElementById('aiProviderId').value = '';
       document.getElementById('aiProviderName').value = '';
       document.getElementById('aiProviderApiKey').value = '';
-      document.getElementById('aiProviderModel').value = 'gpt-3.5-turbo';
-      document.getElementById('aiProviderBaseUrl').value = 'https://api.openai.com/v1';
+      document.getElementById('aiProviderModel').value = '';
+      document.getElementById('aiProviderBaseUrl').value = '';
       document.getElementById('aiProviderTemperature').value = '0.3';
       document.getElementById('aiProviderMaxTokens').value = '500';
       document.getElementById('aiProviderTimeout').value = '30';
@@ -489,9 +523,9 @@ class AIProvidersManager {
 
     this.providers = this.providers.filter(p => p.id !== providerId);
 
-    // 如果删除的是当前使用的，切换到第一个
-    if (this.currentProviderId === providerId && this.providers.length > 0) {
-      this.currentProviderId = this.providers[0].id;
+    // 如果删除的是当前使用的，切换到剩余的第一个；列表为空时清空选择。
+    if (this.currentProviderId === providerId) {
+      this.currentProviderId = this.providers[0]?.id ?? null;
     }
 
     await this.saveSettings();
@@ -645,6 +679,10 @@ class AIProvidersManager {
       }, 2000);
     }
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = AIProvidersManager;
 }
 
 // 在页面加载时初始化

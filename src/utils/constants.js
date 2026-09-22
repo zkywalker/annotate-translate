@@ -85,16 +85,6 @@ const AUDIO_ERROR_RESET_MS = 2000;
 // ============================================
 
 /**
- * Default OpenAI model
- */
-const DEFAULT_OPENAI_MODEL = 'gpt-3.5-turbo';
-
-/**
- * Default OpenAI base URL
- */
-const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1';
-
-/**
  * Default temperature for AI translation
  */
 const DEFAULT_AI_TEMPERATURE = 0.3;
@@ -335,8 +325,6 @@ if (typeof module !== 'undefined' && module.exports) {
     AUDIO_ERROR_RESET_MS,
 
     // API Configuration
-    DEFAULT_OPENAI_MODEL,
-    DEFAULT_OPENAI_BASE_URL,
     DEFAULT_AI_TEMPERATURE,
     DEFAULT_AI_MAX_TOKENS,
     DEFAULT_API_TIMEOUT_SECONDS,

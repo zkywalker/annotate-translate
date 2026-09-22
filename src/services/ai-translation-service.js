@@ -298,11 +298,9 @@ class AITranslationService {
   static getProviderRequirements(providerName) {
     const requirements = {
       openai: {
-        name: 'OpenAI',
-        requiredFields: ['apiKey'],
-        optionalFields: ['model', 'temperature', 'maxTokens'],
-        defaultModel: 'gpt-3.5-turbo',
-        models: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'],
+        name: 'OpenAI-compatible API',
+        requiredFields: ['apiKey', 'model', 'baseURL'],
+        optionalFields: ['temperature', 'maxTokens'],
         documentation: 'https://platform.openai.com/docs'
       }
     };

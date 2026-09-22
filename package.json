@@ -3,7 +3,7 @@
   "private": true,
   "description": "Build tooling for the Annotate Translate Chrome extension",
   "scripts": {
-    "test": "node test/batch-translation.test.js",
+    "test": "node --test test/*.test.js",
     "build": "node scripts/build-extension.mjs --channel release",
     "build:release": "node scripts/build-extension.mjs --channel release",
     "build:preview": "node scripts/build-extension.mjs --channel preview",

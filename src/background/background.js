@@ -45,7 +45,9 @@ chrome.runtime.onInstalled.addListener((details) => {
         google: { enabled: true },
         youdao: { enabled: false, appKey: '', appSecret: '', connectionStatus: null },
         deepl: { enabled: false, apiKey: '', useFreeApi: true, connectionStatus: null },
-        openai: { enabled: false, apiKey: '', model: 'gpt-3.5-turbo', baseUrl: 'https://api.openai.com/v1', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null }
+        openai: { enabled: false, apiKey: '', model: '', baseUrl: '', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null },
+        aiProviders: [],
+        currentAIProvider: null
       },
       // Fixed: P0-1 — align with content.js which reads from settings.translationCard.*
       translationCard: {

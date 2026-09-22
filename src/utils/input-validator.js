@@ -281,7 +281,7 @@ function validateModelName(modelName) {
   if (typeof modelName !== 'string') {
     return {
       valid: false,
-      sanitized: 'gpt-3.5-turbo',
+      sanitized: '',
       error: 'Model name must be a string'
     };
   }
@@ -291,7 +291,7 @@ function validateModelName(modelName) {
   if (sanitized.length === 0) {
     return {
       valid: false,
-      sanitized: 'gpt-3.5-turbo',
+      sanitized: '',
       error: 'Model name cannot be empty'
     };
   }
@@ -302,7 +302,7 @@ function validateModelName(modelName) {
   if (!modelNameRegex.test(sanitized)) {
     return {
       valid: false,
-      sanitized: 'gpt-3.5-turbo',
+      sanitized: '',
       error: 'Model name contains invalid characters'
     };
   }
@@ -397,7 +397,7 @@ function validateAIProviderConfig(config) {
   sanitized.apiKey = apiKeyValidation.sanitized;
 
   // Validate model name
-  const modelValidation = validateModelName(config.model || 'gpt-3.5-turbo');
+  const modelValidation = validateModelName(config.model || '');
 
   if (!modelValidation.valid) {
     errors.push(modelValidation.error);
@@ -412,6 +412,9 @@ function validateAIProviderConfig(config) {
       errors.push(urlValidation.error);
     }
     sanitized.baseURL = urlValidation.sanitized;
+  } else {
+    errors.push('Base URL cannot be empty');
+    sanitized.baseURL = '';
   }
 
   // Validate temperature

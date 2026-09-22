@@ -1498,8 +1498,8 @@ class OpenAITranslateProvider extends TranslationProvider {
     super('AI翻译', config);
     this.openaiProvider = null;
     this.apiKey = config.apiKey || '';
-    this.model = config.model || 'gpt-3.5-turbo';
-    this.baseURL = config.baseURL || 'https://api.openai.com/v1';
+    this.model = config.model || '';
+    this.baseURL = config.baseURL || '';
     this.temperature = config.temperature !== undefined ? config.temperature : 0.3;
     this.maxTokens = config.maxTokens || 500;
     this.timeout = config.timeout || 30;
@@ -1518,6 +1518,12 @@ class OpenAITranslateProvider extends TranslationProvider {
   initializeProvider() {
     if (!this.apiKey) {
       throw new Error('OpenAI API key is required');
+    }
+    if (!this.model) {
+      throw new Error('AI model is required');
+    }
+    if (!this.baseURL) {
+      throw new Error('AI base URL is required');
     }
 
     if (typeof OpenAIProvider === 'undefined') {

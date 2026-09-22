@@ -103,12 +103,12 @@ const DEFAULT_SETTINGS = {
       connectionStatus: null
     },
 
-    // 保留 openai 作为默认 AI 提供商（向后兼容）
+    // 保留旧配置结构用于向后兼容，不预设具体服务商数据
     openai: {
       enabled: false,
       apiKey: '',
-      model: 'gpt-3.5-turbo',
-      baseUrl: 'https://api.openai.com/v1',
+      model: '',
+      baseUrl: '',
       temperature: 0.3,
       maxTokens: 500,
       timeout: 30,
@@ -119,28 +119,10 @@ const DEFAULT_SETTINGS = {
       customTemplates: null // 自定义模板对象，null表示使用默认模板
     },
 
-    // 新增：AI 提供商列表（支持多个 OpenAI 兼容的服务）
-    aiProviders: [
-      {
-        id: 'openai-default',
-        name: 'OpenAI',
-        enabled: true,
-        apiKey: '',
-        model: 'gpt-3.5-turbo',
-        baseUrl: 'https://api.openai.com/v1',
-        temperature: 0.3,
-        maxTokens: 500,
-        timeout: 30,
-        promptFormat: 'jsonFormat',
-        useContext: true,
-        customTemplates: null,
-        connectionStatus: null,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      }
-    ],
+    // AI 提供商必须由用户按实际服务配置
+    aiProviders: [],
     // 当前选择的 AI 提供商 ID
-    currentAIProvider: 'openai-default'
+    currentAIProvider: null
   },
 
   // 显示与外观 (选择菜单)

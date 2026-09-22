@@ -1558,7 +1558,7 @@
     "description": "Provider name label"
   },
   "providerNamePlaceholder": {
-    "message": "例如：OpenAI、Azure OpenAI、本地 Ollama",
+    "message": "输入自定义名称",
     "description": "Provider name placeholder"
   },
   "providerNameDesc": {

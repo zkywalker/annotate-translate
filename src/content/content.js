@@ -70,7 +70,9 @@ let settings = {
     google: { enabled: true },
     youdao: { enabled: false, appKey: '', appSecret: '', connectionStatus: null },
     deepl: { enabled: false, apiKey: '', useFreeApi: true, connectionStatus: null },
-    openai: { enabled: false, apiKey: '', model: 'gpt-3.5-turbo', baseUrl: 'https://api.openai.com/v1', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null }
+    openai: { enabled: false, apiKey: '', model: '', baseUrl: '', temperature: 0.3, maxTokens: 500, timeout: 30, connectionStatus: null },
+    aiProviders: [],
+    currentAIProvider: null
   },
   display: {
     menu: { buttonSize: 'small' }
@@ -136,8 +138,8 @@ const $ = {
     if (!provider) {
       return {
         apiKey: settings.providers?.openai?.apiKey ?? '',
-        model: settings.providers?.openai?.model ?? 'gpt-3.5-turbo',
-        baseUrl: settings.providers?.openai?.baseUrl ?? 'https://api.openai.com/v1',
+        model: settings.providers?.openai?.model ?? '',
+        baseUrl: settings.providers?.openai?.baseUrl ?? '',
         temperature: settings.providers?.openai?.temperature ?? 0.3,
         maxTokens: settings.providers?.openai?.maxTokens ?? 500,
         timeout: settings.providers?.openai?.timeout ?? 30,
@@ -149,8 +151,8 @@ const $ = {
     return provider;
   },
   get openaiApiKey() { return this.currentAIProvider.apiKey ?? ''; },
-  get openaiModel() { return this.currentAIProvider.model ?? 'gpt-3.5-turbo'; },
-  get openaiBaseUrl() { return this.currentAIProvider.baseUrl ?? 'https://api.openai.com/v1'; },
+  get openaiModel() { return this.currentAIProvider.model ?? ''; },
+  get openaiBaseUrl() { return this.currentAIProvider.baseUrl ?? ''; },
   get openaiTemperature() { return this.currentAIProvider.temperature ?? 0.3; },
   get openaiMaxTokens() { return this.currentAIProvider.maxTokens ?? 500; },
   get openaiTimeout() { return this.currentAIProvider.timeout ?? 30; },
